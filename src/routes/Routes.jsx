@@ -35,7 +35,7 @@ const Routes = createBrowserRouter([
             },
             {
                 path: "dashboard",
-                element: <Dashboard />
+                element: <Home />
             },
             {
                 path: "clientes",
