@@ -1,6 +1,6 @@
 import '@material/web/icon/icon.js';
 
-const Dashboard = () => {
+const Home = () => {
   const today = new Date();
   const day = today.getDate();
   const month = today.toLocaleString('es-ES', { month: 'long' });
@@ -18,7 +18,7 @@ const Dashboard = () => {
 
         <div className='bg-primary text-on-primary content-box-small mb-4'>
           <span className='opacity-08 h5 font-light'>Ingresos</span>
-          <span className='h3 font-bold'>$0,000</span>  
+          <span className='h3 font-bold'>$0,000</span>
         </div>
 
         <div className='content-box-outline-small'>
@@ -111,4 +111,4 @@ const Dashboard = () => {
   )
 }
 
-export default Dashboard
+export default Home;
