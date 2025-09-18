@@ -24,6 +24,21 @@ const Roles = () => {
             roleName: 'Cliente',
             status: 'Activo',
             description: 'Hoaslaslajskajsjdsjc'
+        },
+        {
+            roleName: 'Administrador',
+            status: 'Inactivo',
+            description: 'Hoaslaslajskajsjdsjc'
+        },
+        {
+            roleName: 'Conductor',
+            status: 'Activo',
+            description: 'Hoaslaslajskajsjdsjc'
+        },
+        {
+            roleName: 'Cliente',
+            status: 'Activo',
+            description: 'Hoaslaslajskajsjdsjc'
         }
     ];
 
@@ -82,14 +97,14 @@ const Roles = () => {
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Activos</span>
-                                    <h2 className='h4 text-white font-bold'>3</h2>
+                                    <h2 className='h4 text-white font-bold'>{allRoles.filter(user => user.status === 'Activo').length}</h2>
                                 </div>
                             </div>
 
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Inactivos</span>
-                                    <h2 className='h4 text-white font-bold'>0</h2>
+                                    <h2 className='h4 text-white font-bold'>{allRoles.filter(user => user.status === 'Inactivo').length}</h2>
                                 </div>
                             </div>
                         </div>
@@ -145,9 +160,9 @@ const Roles = () => {
                                             </div>
                                         </div>
                                         <div className='flex gap-2'>
-                                            <md-switch 
-                                                icons 
-                                                show-only-selected-icon 
+                                            <md-switch
+                                                icons
+                                                show-only-selected-icon
                                                 selected={role.status === 'Activo'}
                                             ></md-switch>
                                             <button className='btn btn-secondary btn-lg font-medium flex items-center'>
