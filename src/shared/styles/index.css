@@ -1,0 +1,778 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+@import "tailwindcss";
+
+:root {
+    /* === COLORES PERSONALIZADOS === */
+    --primary: #B4C7ED;
+    --secondary: #1E304F;
+    --background: #131316;
+    --fill: #1B1B1E;
+    --border: #292A2C;
+    --red: #EDB4B4;
+    --text-primary: #e4e2e5;
+    --text-secondary: #8E9098;
+    --text-on-primary: #1E304F;
+    --text-green: #1E4F25;
+    --text-red: #4F1E1E;
+    --green: #B4EDB8;
+    --text-yellow: #4C4F1E;
+    --yellow: #E3EDB4;
+    --text-red: #4F1E1E;
+
+    /* === TIPOGRAFÍA === */
+    --font-family-primary: "DM Sans", sans-serif;
+
+    /* Font Sizes */
+    --text-h1: 60px;
+    /* H1 - 60/71 */
+    --text-h2: 48px;
+    /* H2 - 48/57 */
+    --text-h3: 34px;
+    /* H3 - 34/40 */
+    --text-h4: 24px;
+    /* H4 - 24/32 */
+    --text-h5: 20px;
+    /* H5 - 20/24 */
+    --text-subtitle1: 16px;
+    /* Subtitle 1 - 16/20 */
+    --text-subtitle2: 14px;
+    /* Subtitle 2 - 14/24 */
+    --text-body1: 16px;
+    /* Body 1 - 16/28 */
+    --text-body2: 14px;
+    /* Body 2 - 14/20 */
+    --text-button: 16px;
+    /* Button - 16/16 */
+    --text-caption: 12px;
+    /* Caption - 12/16 */
+    --text-overline: 10px;
+    /* Overline - 10/16 */
+    --text-badge: 8px;
+    /* Badge - 8/Auto */
+
+    /* Font Weights */
+    --font-light: 300;
+    --font-regular: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+
+    --md-sys-color-primary: var(--primary);
+    --md-sys-color-secondary: var(--text-secondary);
+    --md-ref-typeface-brand: "DM Sans";
+    --md-ref-typeface-plain: sans-serif;
+
+    /* Variables para switch */
+    --md-sys-color-on-primary: var(--text-on-primary);
+    --md-sys-color-outline: var(--border);
+    --md-sys-color-surface-container-highest: var(--fill);
+
+    /* Switch activo personalizado */
+    --md-sys-color-primary-container: var(--secondary);
+    /* Fondo del switch activo - azul oscuro */
+    --md-sys-color-on-primary-container: var(--primary);
+    /* Ícono del switch activo - azul claro */
+    --md-sys-color-surface-variant: var(--fill);
+    /* Fondo del switch inactivo */
+    --md-sys-color-on-surface-variant: var(--text-secondary);
+    /* Bolita del switch inactivo */
+}
+
+
+body {
+    font-family: "DM Sans", sans-serif;
+    background-color: var(--background);
+    color: var(--text-primary);
+}
+
+md-icon {
+    --md-icon-font: 'Material Symbols Rounded';
+}
+
+/* === CLASES PERSONALIZADAS === */
+.bg-primary {
+    background-color: var(--primary);
+}
+
+.bg-secondary {
+    background-color: var(--secondary);
+}
+
+.bg-background {
+    background-color: var(--background);
+}
+
+.bg-fill {
+    background-color: var(--fill);
+}
+
+.bg-green {
+    background-color: var(--green);
+}
+
+.border-border {
+    border-color: var(--border);
+}
+
+.text-red {
+    color: var(--red);
+}
+
+.text-yellow {
+    color: var(--text-yellow);
+}
+
+.text-green {
+    color: var(--text-green);
+}
+
+.text-primary {
+    color: var(--text-primary);
+}
+
+.text-secondary {
+    color: var(--text-secondary);
+}
+
+.text-blue {
+    color: var(--primary);
+}
+
+.text-on-primary {
+    color: var(--text-on-primary);
+}
+
+.hover\:text-primary:hover {
+    color: var(--primary);
+}
+
+/* === CLASES DE TIPOGRAFÍA === */
+/* Headings */
+.h1,
+.text-h1 {
+    font-size: var(--text-h1);
+    font-weight: var(--font-bold);
+    font-family: var(--font-family-primary);
+}
+
+.h2,
+.text-h2 {
+    font-size: var(--text-h2);
+    font-weight: var(--font-bold);
+    font-family: var(--font-family-primary);
+}
+
+.h3,
+.text-h3 {
+    font-size: var(--text-h3);
+    font-weight: var(--font-semibold);
+    font-family: var(--font-family-primary);
+}
+
+.h4,
+.text-h4 {
+    font-size: var(--text-h4);
+    font-weight: var(--font-semibold);
+    font-family: var(--font-family-primary);
+}
+
+.h5,
+.text-h5 {
+    font-size: var(--text-h5);
+    font-weight: var(--font-medium);
+    font-family: var(--font-family-primary);
+}
+
+/* Subtitles */
+.subtitle1,
+.text-subtitle1 {
+    font-size: var(--text-subtitle1);
+    font-weight: var(--font-medium);
+    font-family: var(--font-family-primary);
+}
+
+.subtitle2,
+.text-subtitle2 {
+    font-size: var(--text-subtitle2);
+    font-weight: var(--font-medium);
+    font-family: var(--font-family-primary);
+}
+
+/* Body Text */
+.body1,
+.text-body1 {
+    font-size: var(--text-body1);
+    font-weight: var(--font-regular);
+    font-family: var(--font-family-primary);
+}
+
+.body2,
+.text-body2 {
+    font-size: var(--text-body2);
+    font-weight: var(--font-regular);
+    font-family: var(--font-family-primary);
+}
+
+/* Elementos específicos */
+.button,
+.text-button {
+    font-size: var(--text-button);
+    font-weight: var(--font-medium);
+    font-family: var(--font-family-primary);
+}
+
+.caption,
+.text-caption {
+    font-size: var(--text-caption);
+    font-weight: var(--font-regular);
+    font-family: var(--font-family-primary);
+}
+
+.overline,
+.text-overline {
+    font-size: var(--text-overline);
+    font-weight: var(--font-medium);
+    font-family: var(--font-family-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.overline {
+    text-decoration-line: none;
+}
+
+.badge,
+.text-badge {
+    font-size: var(--text-badge);
+    font-weight: var(--font-bold);
+    font-family: var(--font-family-primary);
+}
+
+/* === UTILIDADES DE PESO === */
+.font-light {
+    font-weight: var(--font-light);
+}
+
+.font-regular {
+    font-weight: var(--font-regular);
+}
+
+.font-medium {
+    font-weight: var(--font-medium);
+}
+
+.font-semibold {
+    font-weight: var(--font-semibold);
+}
+
+.font-bold {
+    font-weight: var(--font-bold);
+}
+
+/* === ESTILOS DE BOTONES === */
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: var(--text-on-primary);
+    transition: background-color 0.3s, color 0.125s;
+}
+
+.btn-green {
+    background-color: var(--green);
+    color: var(--text-green);
+    transition: background-color 0.3s, color 0.125s;
+}
+
+.btn-yellow {
+    background-color: var(--yellow);
+    color: var(--text-yellow);
+    transition: background-color 0.3s, color 0.125s;
+}
+
+.btn-red {
+    background-color: var(--red);
+    color: var(--text-red);
+    transition: background-color 0.3s, color 0.125s;
+}
+
+.btn:hover {
+    opacity: 0.8;
+}
+
+.btn-search {
+    background-color: var(--fill);
+    color: var(--text-secondary);
+    transition: background-color 0.3s, color 0.125s;
+    font-family: "DM Sans", sans-serif;
+    --md-filled-button-label-text-color: var(--text-secondary);
+    --md-filled-button-with-icon-icon-color: var(--text-secondary);
+    --md-filled-button-label-text-font: "DM Sans", sans-serif;
+}
+
+.btn-add {
+    background-color: var(--primary);
+    color: var(--text-on-primary);
+    transition: background-color 0.3s, color 0.125s;
+    font-family: "DM Sans", sans-serif;
+    --md-filled-button-container-color: var(--primary);
+    --md-filled-button-label-text-color: var(--text-on-primary);
+    --md-filled-button-label-text-font: "DM Sans", sans-serif;
+}
+
+.btn-search-minimal {
+    background-color: var(--border) !important;
+    color: var(--text-secondary) !important;
+    transition: background-color 0.3s, color 0.125s;
+    font-family: "DM Sans", sans-serif;
+    --md-filled-button-container-color: var(--border);
+    --md-filled-button-label-text-color: var(--text-secondary);
+    --md-filled-button-label-text-font: "DM Sans", sans-serif;
+}
+
+.btn-search-minimal:hover {
+    background-color: var(--border) !important;
+    color: var(--text-secondary) !important;
+    opacity: 1;
+    /* Sobrescribe el opacity: 0.8 de .btn:hover */
+    --md-filled-button-container-color: var(--border) !important;
+    --md-filled-button-label-text-color: var(--text-secondary) !important;
+    --md-filled-button-hover-label-text-color: var(--text-secondary) !important;
+    --md-filled-button-with-icon-hover-icon-color: var(--text-secondary) !important;
+    --md-filled-button-hover-container-color: var(--border) !important;
+}
+
+.btn-search-minimal:active {
+    background-color: var(--border) !important;
+    color: var(--text-secondary) !important;
+    opacity: 1;
+    --md-filled-button-container-color: var(--border) !important;
+    --md-filled-button-label-text-color: var(--text-secondary) !important;
+    --md-filled-button-pressed-label-text-color: var(--text-secondary) !important;
+    --md-filled-button-with-icon-pressed-icon-color: var(--text-secondary) !important;
+    --md-filled-button-pressed-container-color: var(--border) !important;
+}
+
+.btn-search-minimal:focus {
+    background-color: var(--border) !important;
+    color: var(--text-secondary) !important;
+    opacity: 1;
+    outline: none;
+    --md-filled-button-container-color: var(--border) !important;
+    --md-filled-button-label-text-color: var(--text-secondary) !important;
+    --md-filled-button-focus-label-text-color: var(--text-secondary) !important;
+    --md-filled-button-with-icon-focus-icon-color: var(--text-secondary) !important;
+    --md-filled-button-focus-container-color: var(--border) !important;
+}
+
+.btn-search-minimal:focus-visible {
+    background-color: var(--border) !important;
+    color: var(--text-secondary) !important;
+    opacity: 1;
+    outline: none;
+    --md-filled-button-container-color: var(--border) !important;
+    --md-filled-button-label-text-color: var(--text-secondary) !important;
+}
+
+.btn-search-minimal * {
+    color: var(--text-secondary) !important;
+}
+
+.btn-secondary {
+    background-color: var(--border);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--fill);
+    opacity: 0.9;
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-outline:hover {
+    background-color: var(--fill);
+    border-color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: var(--text-caption);
+    border-radius: 16px;
+}
+
+.btn-sm-2 {
+    padding: 5px 15px;
+    font-size: var(--text-caption);
+    border-radius: 10px;
+}
+
+.btn-lg {
+    padding: 5px 16px;
+    font-size: var(--text-subtitle2);
+    border-radius: 12px;
+}
+
+/* === ESTILOS PARA SELECT === */
+.select-filter {
+    background-color: var(--fill);
+    color: var(--text-secondary);
+    border-radius: 100px;
+    padding: 8px 13px;
+    font-family: "DM Sans", sans-serif;
+    font-size: var(--text-button);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+}
+
+.select-filter:hover {
+    background-color: var(--border);
+}
+
+.select-filter:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.select-wrapper md-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--text-secondary);
+    font-size: 16px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.select-wrapper .select-filter {
+    padding-left: 40px;
+}
+
+.input {
+    padding: 9px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+/* === SCROLLBAR HIDE === */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* === MODAL ANIMATIONS === */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        -webkit-backdrop-filter: blur(0px);
+        backdrop-filter: blur(0px);
+    }
+
+    to {
+        opacity: 1;
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes modalFadeOut {
+    from {
+        opacity: 1;
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+    }
+
+    to {
+        opacity: 0;
+        -webkit-backdrop-filter: blur(0px);
+        backdrop-filter: blur(0px);
+    }
+}
+
+@keyframes modalSlideOut {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+}
+
+/* === ANIMACIONES PARA PERFIL DE USUARIO === */
+@keyframes profileEnter {
+    0% {
+        opacity: 0;
+        transform: translateY(25px) scale(0.92);
+        filter: blur(6px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0px);
+    }
+}
+
+@keyframes profileExit {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-25px) scale(0.92);
+        filter: blur(6px);
+    }
+}
+
+.profile-enter {
+    animation: profileEnter 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.profile-exit {
+    animation: profileExit 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+}
+
+/* === ANIMACIONES PARA LISTA DE USUARIOS === */
+@keyframes listEnter {
+    0% {
+        opacity: 0;
+        transform: translateY(-15px) scale(0.96);
+        filter: blur(4px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0px);
+    }
+}
+
+.list-enter {
+    animation: listEnter 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.modal-overlay {
+    animation: modalFadeIn 0.3s ease-out forwards;
+}
+
+.modal-overlay.closing {
+    animation: modalFadeOut 0.25s ease-in forwards;
+}
+
+.modal-content {
+    animation: modalSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-content.closing {
+    animation: modalSlideOut 0.25s ease-in forwards;
+}
+
+/* === MODAL ESPECÍFICO PARA BÚSQUEDA === */
+.search-modal {
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+.search-modal-content {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);
+}
+
+.search-input {
+    background-color: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-family: "DM Sans", sans-serif;
+    font-size: var(--text-body2);
+    transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(180, 199, 237, 0.1);
+}
+
+.search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* === DROPDOWN PARA BÚSQUEDA === */
+.search-dropdown {
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border);
+    animation: dropdownSlideIn 0.2s ease-out forwards;
+}
+
+@keyframes dropdownSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.search-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 20px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid var(--border);
+}
+
+.search-dropdown::after {
+    content: '';
+    position: absolute;
+    top: -7px;
+    right: 20px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid var(--fill);
+}
+
+.content-box-small {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 20px;
+    border-radius: 24px;
+    box-sizing: border-box;
+}
+
+.content-box-outline-small {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 20px;
+    border-radius: 18px;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.content-box-outline-2-small {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+    background: var(--fill);
+}
+
+.content-box-outline-3-small {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 16px;
+    border-radius: 18px;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+    background: var(--fill);
+}
+
+.content-box-outline-3 {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 20px;
+    border-radius: 18px;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+    background: var(--fill);
+}
+
+.content-box-outline-4-small {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 18px;
+    border-radius: 18px;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+    background: var(--fill);
+}
+
+.content-box-outline-4-small:hover {
+    background: var(--border);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.content-box-outline-5-small {
+    display: flex;
+    width: 100%;
+    padding: 10px;
+    border-radius: 30px;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+    background: var(--fill);
+}
+
+.opacity-08 {
+    opacity: 0.8;
+}
+
+.absolute-card {
+    --md-icon-size: 164px;
+    opacity: 0.2;
+    position: absolute;
+    top: -10px;
+    right: 10px;
+}
