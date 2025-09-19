@@ -3,7 +3,7 @@ import '@material/web/button/filled-button.js'
 
 const Finanzas = () => {
     return (
-        <section>
+        <section className='list-enter'>
             <div className='flex justify-between items-center mb-6'>
                 <h1 className="h4 font-medium">Finanzas</h1>
 

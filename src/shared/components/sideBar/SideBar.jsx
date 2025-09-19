@@ -1,6 +1,7 @@
 import Avvvatars from 'avvvatars-react'
 import { Link, useLocation } from 'react-router-dom'
 import { useState } from 'react'
+import { useAuth } from '../../context/AuthContext';
 import '@material/web/icon/icon.js'
 import '@material/web/menu/menu.js'
 import '@material/web/menu/menu-item.js'
@@ -8,17 +9,18 @@ import '@material/web/iconbutton/icon-button.js'
 import './styles/style.css'
 
 const SideBar = () => {
+  const { user } = useAuth();
   const location = useLocation()
   const [isConfigDropdownOpen, setIsConfigDropdownOpen] = useState(false)
 
   const [collapsedSections, setCollapsedSections] = useState(() => {
     const saved = localStorage.getItem('sidebarSections')
     return saved ? JSON.parse(saved) : {
-      0: false, 
-      1: true,  
-      2: true,   
-      3: true, 
-      4: true  
+      0: false,
+      1: true,
+      2: true,
+      3: true,
+      4: true
     }
   })
 
@@ -48,45 +50,79 @@ const SideBar = () => {
     localStorage.setItem('sidebarSections', JSON.stringify(newState))
   }
 
-  const menuSections = [
-    {
-      title: 'Dashboard',
-      items: [
-        { path: '/', label: 'Inicio', icon: 'home' }
-      ]
-    },
-    {
-      title: 'Configuración',
-      items: [
-        { path: '/rol', label: 'Roles', icon: 'admin_panel_settings' },
-        { path: '/usuarios', label: 'Usuarios', icon: 'person' }
-      ]
-    },
-    {
-      title: 'Transporte',
-      items: [
-        { path: '/vehiculos', label: 'Vehículos', icon: 'drive_eta' },
-        { path: '/rutas', label: 'Rutas', icon: 'route' },
-        { path: '/ubicaciones', label: 'Ubicaciones', icon: 'location_on' },
-        { path: '/conductores', label: 'Conductores', icon: 'search_hands_free' },
-        { path: '/encomiendas', label: 'Encomiendas', icon: 'inventory_2' },
-        { path: '/turnos', label: 'Turnos', icon: 'schedule' }
-      ]
-    },
-    {
-      title: 'Ventas',
-      items: [
-        { path: '/clientes', label: 'Clientes', icon: 'people' },
-        { path: '/reservas', label: 'Reservas', icon: 'event_seat' }
-      ]
-    },
-    {
-      title: 'Reportes',
-      items: [
-        { path: '/finanzas', label: 'Finanzas', icon: 'account_balance' }
-      ]
-    }
-  ]
+  const roleMenus = {
+    Administrador: [
+      {
+        title: 'Dashboard',
+        items: [{ path: '/admin/', label: 'Inicio', icon: 'home' }]
+      },
+      {
+        title: 'Configuración',
+        items: [
+          { path: 'admin/rol', label: 'Roles', icon: 'admin_panel_settings' },
+          { path: 'admin/usuarios', label: 'Usuarios', icon: 'person' }
+        ]
+      },
+      {
+        title: 'Transporte',
+        items: [
+          { path: 'admin/vehiculos', label: 'Vehículos', icon: 'drive_eta' },
+          { path: 'admin/rutas', label: 'Rutas', icon: 'route' },
+          { path: 'admin/ubicaciones', label: 'Ubicaciones', icon: 'location_on' },
+          { path: 'admin/conductores', label: 'Conductores', icon: 'search_hands_free' },
+          { path: 'admin/encomiendas', label: 'Encomiendas', icon: 'inventory_2' },
+          { path: 'admin/turnos', label: 'Turnos', icon: 'schedule' }
+        ]
+      },
+      {
+        title: 'Ventas',
+        items: [
+          { path: '/clientes', label: 'Clientes', icon: 'people' },
+          { path: '/reservas', label: 'Reservas', icon: 'event_seat' }
+        ]
+      },
+      {
+        title: 'Reportes',
+        items: [
+          { path: '/finanzas', label: 'Finanzas', icon: 'account_balance' }
+        ]
+      }
+    ],
+
+    Conductor: [
+      {
+        title: 'Dashboard',
+        items: [{ path: '/conductor/', label: 'Inicio', icon: 'home' }]
+      },
+      {
+        title: 'Gestión',
+        items: [
+          { path: '/conductor/mis-viajes', label: 'Mis viajes', icon: 'commute' },
+          { path: '/conductor/calendario', label: 'Calendario', icon: 'calendar_month' },
+          { path: '/conductor/turnos', label: 'Turnos', icon: 'schedule' },
+          { path: '/conductor/reservas', label: 'Reservas', icon: 'event_seat' },
+          { path: '/conductor/historial', label: 'Turnos', icon: 'history' }
+        ]
+      }
+    ],
+
+    Cliente: [
+      {
+        title: 'Dashboard',
+        items: [{ path: '/usuario/', label: 'Inicio', icon: 'home' }]
+      },
+      {
+        title: 'Mis viajes',
+        items: [
+          { path: '/usuario/mis-viajes', label: 'Mis viajes', icon: 'commute' },
+          { path: '/usuario/reservas', label: 'Reservas', icon: 'event_seat' },
+          { path: '/usuario/encomiendas', label: 'Encomiendas', icon: 'inventory_2' },
+          { path: '/usuario/historial', label: 'Historial', icon: 'history' }
+        ]
+      },
+    ]
+  };
+  const menuSections = roleMenus[user?.role] || [];
 
   return (
     <nav className="h-full flex flex-col sidebar">
@@ -109,8 +145,8 @@ const SideBar = () => {
           </md-menu>
         </div>
         <div className='ml-3 flex-1'>
-          <h1 className='text-lg font-semibold text-white'>Hader</h1>
-          <p className='caption text-secondary'>Administrador</p>
+          <h1 className='text-lg font-semibold text-white'>{user?.name || 'Usuario'}</h1>
+          <p className='caption text-secondary'>{user?.role || ''}</p>
         </div>
       </div>
 
