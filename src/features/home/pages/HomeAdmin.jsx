@@ -73,7 +73,7 @@ const HomeAdmin = () => {
 
       <div className='flex-1 max-w-md content-box-outline-small'>
         <div className='mb-4'>
-          <h1 className='h4 font-light text-white'>Resumen semanal</h1>
+          <h1 className='h4 font-light text-primary'>Resumen semanal</h1>
           <p className='text-secondary subtitle2'>
             Esta semana está ligeramente ocupada
           </p>
@@ -83,7 +83,7 @@ const HomeAdmin = () => {
           <div className='content-box-outline-3-small'>
             <div className='flex flex-col'>
               <span className='subtitle2 font-light'>Viajes esta semana</span>
-              <h2 className='h3 text-white font-bold'>24 viajes</h2>
+              <h2 className='h3 text-primary font-bold'>24 viajes</h2>
             </div>
           </div>
 
@@ -91,7 +91,7 @@ const HomeAdmin = () => {
             <div className='flex flex-col gap-2'>
               <div>
                 <span className='subtitle2 font-light'>Semana pasada</span>
-                <h2 className='h3 text-white font-bold'>20 viajes</h2>
+                <h2 className='h3 text-primary font-bold'>20 viajes</h2>
               </div>
               <button className='btn btn-primary btn-lg font-medium self-start'>
                 <md-icon slot="icon" className="text-sm">keyboard_arrow_up</md-icon>

@@ -3,12 +3,18 @@ import '@material/web/button/filled-button.js'
 import '@material/web/switch/switch.js'
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
-import { useState } from 'react';
 import ConductorProfile from './pages/ConductoresProfile';
+import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
+import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
+import { useState } from 'react';
 
 const Conductores = () => {
     const [selectedConductor, setSelectedConductor] = useState(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [conductorToDelete, setConductorToDelete] = useState(null);
+    const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
+    const [conductorToSwitch, setConductorToSwitch] = useState(null);
     const allConductores = [
         {
             nombre: 'Diomedes Diaz',
@@ -70,6 +76,39 @@ const Conductores = () => {
         setSelectedConductor(null);
     };
 
+    const handleDeleteClick = (conductor) => {
+        setConductorToDelete(conductor);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        // Aquí iría la lógica para eliminar el conductor
+        console.log('Eliminando conductor:', conductorToDelete);
+        setIsDeleteModalOpen(false);
+        setConductorToDelete(null);
+    };
+
+    const handleDeleteCancel = () => {
+        setIsDeleteModalOpen(false);
+        setConductorToDelete(null);
+    };
+
+    const handleSwitchClick = (conductor) => {
+        setConductorToSwitch(conductor);
+        setIsSwitchModalOpen(true);
+    };
+
+    const handleSwitchConfirm = () => {
+        console.log('Cambiando estado del conductor:', conductorToSwitch);
+        setIsSwitchModalOpen(false);
+        setConductorToSwitch(null);
+    };
+
+    const handleSwitchCancel = () => {
+        setIsSwitchModalOpen(false);
+        setConductorToSwitch(null);
+    };
+
     const {
         currentPage,
         totalPages,
@@ -106,19 +145,19 @@ const Conductores = () => {
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Totales</span>
-                                    <h2 className='h4 text-white font-bold'>{totalItems}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{totalItems}</h2>
                                 </div>
                             </div>
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Activos</span>
-                                    <h2 className='h4 text-white font-bold'>{allConductores.filter(c => c.estado === 'Activo').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allConductores.filter(c => c.estado === 'Activo').length}</h2>
                                 </div>
                             </div>
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Inactivos</span>
-                                    <h2 className='h4 text-white font-bold'>{allConductores.filter(c => c.estado === 'Inactivo').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allConductores.filter(c => c.estado === 'Inactivo').length}</h2>
                                 </div>
                             </div>
                         </div>
@@ -161,7 +200,11 @@ const Conductores = () => {
 
                         <div className='mt-3'>
                             {currentCondutores.map((conductor, index) => (
-                                <div key={index} className='content-box-outline-4-small cursor-pointer hover:border-primary transition-colors mb-3' onClick={() => handleOpenProfile(conductor)}>
+                                <div
+                                    key={index}
+                                    className={`content-box-outline-4-small cursor-pointer hover:border-primary transition-colors mb-3 ${conductor.estado === 'Inactivo' ? 'opacity-60' : ''}`}
+                                    onClick={() => handleOpenProfile(conductor)}
+                                >
                                     <div className='flex justify-between items-center'>
                                         <div>
                                             <h1 className='h4'>{conductor.nombre}</h1>
@@ -170,8 +213,22 @@ const Conductores = () => {
                                             </div>
                                         </div>
                                         <div className='flex gap-2'>
-                                            <md-switch icons show-only-selected-icon selected={conductor.estado === 'Activo'}></md-switch>
-                                            <button className='btn btn-secondary btn-lg font-medium flex items-center' onClick={e => e.stopPropagation()}>
+                                            <md-switch
+                                                icons
+                                                show-only-selected-icon
+                                                selected={conductor.estado === 'Activo'}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleSwitchClick(conductor);
+                                                }}
+                                            ></md-switch>
+                                            <button
+                                                className='btn btn-secondary btn-lg font-medium flex items-center'
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteClick(conductor);
+                                                }}
+                                            >
                                                 <md-icon className="text-sm">delete</md-icon>
                                             </button>
                                             <button className='btn btn-primary btn-lg font-medium flex items-center' onClick={e => e.stopPropagation()}>
@@ -199,6 +256,23 @@ const Conductores = () => {
                     onClose={handleCloseProfile}
                 />
             )}
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                itemType="conductor"
+                itemName={conductorToDelete?.nombre}
+            />
+
+            <SwitchModal
+                isOpen={isSwitchModalOpen}
+                onClose={handleSwitchCancel}
+                onConfirm={handleSwitchConfirm}
+                itemType="conductor"
+                itemName={conductorToSwitch?.nombre}
+                isCurrentlyActive={conductorToSwitch?.estado === 'Activo'}
+            />
         </section>
     )
 }

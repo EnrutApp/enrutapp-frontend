@@ -4,11 +4,17 @@ import '@material/web/switch/switch.js'
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import RolProfile from './page/RolProfile';
+import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
+import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
 import { useState } from 'react';
 
 const Roles = () => {
     const [selectedRole, setSelectedRole] = useState(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [roleToDelete, setRoleToDelete] = useState(null);
+    const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
+    const [roleToSwitch, setRoleToSwitch] = useState(null);
     const allRoles = [
         {
             roleName: 'Administrador',
@@ -52,6 +58,39 @@ const Roles = () => {
         setSelectedRole(null);
     };
 
+    const handleDeleteClick = (role) => {
+        setRoleToDelete(role);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        // Aquí iría la lógica para eliminar el rol
+        console.log('Eliminando rol:', roleToDelete);
+        setIsDeleteModalOpen(false);
+        setRoleToDelete(null);
+    };
+
+    const handleDeleteCancel = () => {
+        setIsDeleteModalOpen(false);
+        setRoleToDelete(null);
+    };
+
+    const handleSwitchClick = (role) => {
+        setRoleToSwitch(role);
+        setIsSwitchModalOpen(true);
+    };
+
+    const handleSwitchConfirm = () => {
+        console.log('Cambiando estado del rol:', roleToSwitch);
+        setIsSwitchModalOpen(false);
+        setRoleToSwitch(null);
+    };
+
+    const handleSwitchCancel = () => {
+        setIsSwitchModalOpen(false);
+        setRoleToSwitch(null);
+    };
+
     const {
         currentPage,
         totalPages,
@@ -90,21 +129,21 @@ const Roles = () => {
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Totales</span>
-                                    <h2 className='h4 text-white font-bold'>{totalItems}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{totalItems}</h2>
                                 </div>
                             </div>
 
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Activos</span>
-                                    <h2 className='h4 text-white font-bold'>{allRoles.filter(user => user.status === 'Activo').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allRoles.filter(user => user.status === 'Activo').length}</h2>
                                 </div>
                             </div>
 
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Inactivos</span>
-                                    <h2 className='h4 text-white font-bold'>{allRoles.filter(user => user.status === 'Inactivo').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allRoles.filter(user => user.status === 'Inactivo').length}</h2>
                                 </div>
                             </div>
                         </div>
@@ -149,7 +188,11 @@ const Roles = () => {
 
                         <div className='mt-3'>
                             {currentRoles.map((role, index) => (
-                                <div key={index} className={`content-box-outline-4-small ${index > 0 ? 'mt-2' : ''}`} onClick={() => handleOpenProfile(role)}>
+                                <div
+                                    key={index}
+                                    className={`content-box-outline-4-small ${index > 0 ? 'mt-2' : ''} ${role.status === 'Inactivo' ? 'opacity-60' : ''}`}
+                                    onClick={() => handleOpenProfile(role)}
+                                >
                                     <div className='flex justify-between items-center'>
                                         <div>
                                             <h1 className='h4'>{role.roleName}</h1>
@@ -164,8 +207,18 @@ const Roles = () => {
                                                 icons
                                                 show-only-selected-icon
                                                 selected={role.status === 'Activo'}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleSwitchClick(role);
+                                                }}
                                             ></md-switch>
-                                            <button className='btn btn-secondary btn-lg font-medium flex items-center'>
+                                            <button
+                                                className='btn btn-secondary btn-lg font-medium flex items-center'
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteClick(role);
+                                                }}
+                                            >
                                                 <md-icon className="text-sm">delete</md-icon>
                                             </button>
 
@@ -194,6 +247,23 @@ const Roles = () => {
                     onClose={handleCloseProfile}
                 />
             )}
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                itemType="rol"
+                itemName={roleToDelete?.roleName}
+            />
+
+            <SwitchModal
+                isOpen={isSwitchModalOpen}
+                onClose={handleSwitchCancel}
+                onConfirm={handleSwitchConfirm}
+                itemType="rol"
+                itemName={roleToSwitch?.roleName}
+                isCurrentlyActive={roleToSwitch?.status === 'Activo'}
+            />
         </section>
     )
 }

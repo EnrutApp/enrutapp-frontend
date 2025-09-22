@@ -1,15 +1,21 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js'
 import '@material/web/switch/switch.js'
-import { useState } from 'react';
+import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
+import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
-import ClienteProfile from './pages/ClientesProfile';
+import ClienteProfile from './pages/ClienteProfile';
+import { useState } from 'react';
 
 
 const Clientes = () => {
     const [selectedCliente, setSelectedCliente] = useState(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [clienteToDelete, setClienteToDelete] = useState(null);
+    const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
+    const [clienteToSwitch, setClienteToSwitch] = useState(null);
     const allClients = [
         {
             name: 'Lucelly Renteria',
@@ -103,6 +109,38 @@ const Clientes = () => {
         setSelectedCliente(null);
     };
 
+    const handleDeleteClick = (cliente) => {
+        setClienteToDelete(cliente);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        console.log('Eliminando cliente:', clienteToDelete);
+        setIsDeleteModalOpen(false);
+        setClienteToDelete(null);
+    };
+
+    const handleDeleteCancel = () => {
+        setIsDeleteModalOpen(false);
+        setClienteToDelete(null);
+    };
+
+    const handleSwitchClick = (cliente) => {
+        setClienteToSwitch(cliente);
+        setIsSwitchModalOpen(true);
+    };
+
+    const handleSwitchConfirm = () => {
+        console.log('Cambiando estado del cliente:', clienteToSwitch);
+        setIsSwitchModalOpen(false);
+        setClienteToSwitch(null);
+    };
+
+    const handleSwitchCancel = () => {
+        setIsSwitchModalOpen(false);
+        setClienteToSwitch(null);
+    };
+
     return (
         <section>
             {!isProfileOpen ? (
@@ -125,21 +163,21 @@ const Clientes = () => {
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Totales</span>
-                                    <h2 className='h4 text-white font-bold'>{totalItems}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{totalItems}</h2>
                                 </div>
                             </div>
 
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Activos</span>
-                                    <h2 className='h4 text-white font-bold'>{allClients.filter(client => client.status === 'Activo').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allClients.filter(client => client.status === 'Activo').length}</h2>
                                 </div>
                             </div>
 
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Inactivos</span>
-                                    <h2 className='h4 text-white font-bold'>{allClients.filter(client => client.status === 'Inactivo').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allClients.filter(client => client.status === 'Inactivo').length}</h2>
                                 </div>
                             </div>
                         </div>
@@ -186,7 +224,7 @@ const Clientes = () => {
                             {currentClients.map((client, index) => (
                                 <div
                                     key={index}
-                                    className='content-box-outline-4-small cursor-pointer hover:border-primary transition-colors mb-3'
+                                    className={`content-box-outline-4-small cursor-pointer hover:border-primary transition-colors mb-3 ${client.status === 'Inactivo' ? 'opacity-60' : ''}`}
                                     onClick={() => handleOpenProfile(client)}
                                 >
                                     <div className='flex justify-between items-center'>
@@ -204,10 +242,14 @@ const Clientes = () => {
                                                 icons
                                                 show-only-selected-icon
                                                 selected={client.status === 'Activo'}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleSwitchClick(client);
+                                                }}
                                             ></md-switch>
                                             <button
                                                 className='btn btn-secondary btn-lg font-medium flex items-center'
-                                                onClick={(e) => { e.stopPropagation(); }}
+                                                onClick={(e) => { e.stopPropagation(); handleDeleteClick(client); }}
                                             >
                                                 <md-icon className="text-sm">delete</md-icon>
                                             </button>
@@ -240,6 +282,22 @@ const Clientes = () => {
                 />
             )}
 
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                itemType="cliente"
+                itemName={clienteToDelete?.name}
+            />
+
+            <SwitchModal
+                isOpen={isSwitchModalOpen}
+                onClose={handleSwitchCancel}
+                onConfirm={handleSwitchConfirm}
+                itemType="cliente"
+                itemName={clienteToSwitch?.name}
+                isCurrentlyActive={clienteToSwitch?.status === 'Activo'}
+            />
 
         </section>
     )

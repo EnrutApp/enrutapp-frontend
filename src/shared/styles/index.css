@@ -3,7 +3,7 @@
 @import "tailwindcss";
 
 :root {
-    /* === COLORES PERSONALIZADOS === */
+    /* === COLORES PERSONALIZADOS - DARK MODE (por defecto) === */
     --primary: #B4C7ED;
     --secondary: #1E304F;
     --background: #131316;
@@ -77,6 +77,123 @@
     /* Fondo del switch inactivo */
     --md-sys-color-on-surface-variant: var(--text-secondary);
     /* Bolita del switch inactivo */
+}
+
+/* === TEMA CLARO (BLANCO Y NEGRO) === */
+.light {
+    --primary: #000000;
+    --secondary: #F2F2F2;
+    --background: #FFFFFF;
+    --fill: #FAFAFA;
+    --border: #CCCCCC;
+    --red: #000000;
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --text-on-primary: #FFFFFF;
+    --text-green: #000000;
+    --text-red: #FFFFFF;
+    --green: #E5E5E5;
+    --text-yellow: #000000;
+    --yellow: #F0F0F0;
+
+    /* Variables para Material Design en tema claro */
+    --md-sys-color-primary: var(--primary);
+    --md-sys-color-secondary: var(--text-secondary);
+    --md-sys-color-on-primary: var(--text-on-primary);
+    --md-sys-color-outline: var(--border);
+    --md-sys-color-surface-container-highest: var(--fill);
+    --md-sys-color-primary-container: var(--secondary);
+    --md-sys-color-on-primary-container: var(--primary);
+    --md-sys-color-surface-variant: var(--fill);
+    --md-sys-color-on-surface-variant: var(--text-secondary);
+}
+
+/* === ESTILOS ESPECÍFICOS PARA LIGHT MODE === */
+.light .btn-green {
+    background-color: #000000 !important;
+    color: #FFFFFF !important;
+    border: 2px solid #000000;
+    font-weight: 600;
+}
+
+.light .btn-yellow {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    border: 2px solid #000000;
+    font-weight: 600;
+}
+
+.light .btn-red {
+    background-color: #666666 !important;
+    color: #FFFFFF !important;
+    border: 2px solid #666666;
+    font-weight: 600;
+}
+
+/* Asegurar que los iconos en los botones de estado también se vean */
+.light .btn-green md-icon,
+.light .btn-yellow md-icon,
+.light .btn-red md-icon {
+    color: inherit !important;
+}
+
+/* Indicadores circulares de estado en light mode */
+.light .btn-green.w-6.h-6.rounded-full {
+    background-color: #000000 !important;
+}
+
+.light .btn-yellow.w-6.h-6.rounded-full {
+    background-color: #FFFFFF !important;
+    border: 2px solid #000000 !important;
+}
+
+.light .btn-red.w-6.h-6.rounded-full {
+    background-color: #666666 !important;
+}
+
+/* Mejorar contraste de botones secundarios en light mode */
+.light .btn-secondary {
+    background-color: #F5F5F5 !important;
+    color: #000000 !important;
+    border: 1px solid #CCCCCC;
+}
+
+/* Arreglar botón de logout en sidebar en light mode */
+.light .sidebar-logout:hover .sidebar-icon,
+.light .sidebar-logout:hover .sidebar-text {
+    color: #000000 !important;
+}
+
+/* Asegurar que el botón de logout siempre sea visible en light mode */
+.light .sidebar-logout .sidebar-icon,
+.light .sidebar-logout .sidebar-text {
+    color: #333333 !important;
+}
+
+/* Arreglar todos los botones con hover en sidebar en light mode */
+.light .sidebar-button:hover .sidebar-icon,
+.light .sidebar-button:hover .sidebar-text,
+.light .sidebar-link:hover .sidebar-icon,
+.light .sidebar-link:hover .sidebar-text {
+    color: #000000 !important;
+}
+
+/* Arreglar botón de "Cancelar" en modales en light mode */
+.light .btn.text-blue {
+    color: #000000 !important;
+}
+
+.light .btn.text-blue:hover {
+    background-color: #F0F0F0 !important;
+    color: #000000 !important;
+}
+
+/* Asegurar que los md-filled-button también funcionen en light mode */
+.light md-filled-button.btn-red {
+    --md-filled-button-container-color: #666666 !important;
+    --md-filled-button-label-text-color: #FFFFFF !important;
+    --md-filled-button-hover-container-color: #333333 !important;
+    --md-filled-button-hover-label-text-color: #FFFFFF !important;
 }
 
 
@@ -304,6 +421,10 @@ md-icon {
     background-color: var(--red);
     color: var(--text-red);
     transition: background-color 0.3s, color 0.125s;
+    font-family: "DM Sans", sans-serif;
+    --md-filled-button-container-color: var(--red);
+    --md-filled-button-label-text-color: var(--text-red);
+    --md-filled-button-label-text-font: "DM Sans", sans-serif;
 }
 
 .btn:hover {
@@ -344,7 +465,6 @@ md-icon {
     background-color: var(--border) !important;
     color: var(--text-secondary) !important;
     opacity: 1;
-    /* Sobrescribe el opacity: 0.8 de .btn:hover */
     --md-filled-button-container-color: var(--border) !important;
     --md-filled-button-label-text-color: var(--text-secondary) !important;
     --md-filled-button-hover-label-text-color: var(--text-secondary) !important;
@@ -390,12 +510,6 @@ md-icon {
 
 .btn-secondary {
     background-color: var(--border);
-    color: var(--text-primary);
-}
-
-.btn-secondary:hover {
-    background-color: var(--fill);
-    opacity: 0.9;
 }
 
 .btn-outline {
@@ -406,8 +520,6 @@ md-icon {
 
 .btn-outline:hover {
     background-color: var(--fill);
-    border-color: var(--primary);
-    border: 1px solid var(--primary);
 }
 
 .btn-sm {

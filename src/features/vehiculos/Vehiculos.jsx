@@ -4,11 +4,17 @@ import '@material/web/switch/switch.js'
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import VehiculoProfile from './pages/VehiculoProfile';
+import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
+import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
 import { useState } from 'react';
 
 const Vehiculos = () => {
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [vehicleToDelete, setVehicleToDelete] = useState(null);
+    const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
+    const [vehicleToSwitch, setVehicleToSwitch] = useState(null);
     const allVehicles = [
         {
             name: 'Renault Alaskan',
@@ -184,6 +190,39 @@ const Vehiculos = () => {
         setSelectedVehicle(null);
     };
 
+    const handleDeleteClick = (vehicle) => {
+        setVehicleToDelete(vehicle);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        // Aquí iría la lógica para eliminar el vehículo
+        console.log('Eliminando vehículo:', vehicleToDelete);
+        setIsDeleteModalOpen(false);
+        setVehicleToDelete(null);
+    };
+
+    const handleDeleteCancel = () => {
+        setIsDeleteModalOpen(false);
+        setVehicleToDelete(null);
+    };
+
+    const handleSwitchClick = (vehicle) => {
+        setVehicleToSwitch(vehicle);
+        setIsSwitchModalOpen(true);
+    };
+
+    const handleSwitchConfirm = () => {
+        console.log('Cambiando estado de vehículo:', vehicleToSwitch);
+        setIsSwitchModalOpen(false);
+        setVehicleToSwitch(null);
+    };
+
+    const handleSwitchCancel = () => {
+        setIsSwitchModalOpen(false);
+        setVehicleToSwitch(null);
+    };
+
     const {
         currentPage,
         totalPages,
@@ -221,25 +260,25 @@ const Vehiculos = () => {
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Totales</span>
-                                    <h2 className='h4 text-white font-bold'>{totalItems}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{totalItems}</h2>
                                 </div>
                             </div>
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Activos</span>
-                                    <h2 className='h4 text-white font-bold'>{allVehicles.filter(vehicle => vehicle.status === 'Activo').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allVehicles.filter(vehicle => vehicle.status === 'Activo').length}</h2>
                                 </div>
                             </div>
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Inactivos</span>
-                                    <h2 className='h4 text-white font-bold'>{allVehicles.filter(vehicle => vehicle.status === 'Inactivo').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allVehicles.filter(vehicle => vehicle.status === 'Inactivo').length}</h2>
                                 </div>
                             </div>
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Mantenimiento</span>
-                                    <h2 className='h4 text-white font-bold'>{allVehicles.filter(vehicle => vehicle.status === 'Mantenimiento').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allVehicles.filter(vehicle => vehicle.status === 'Mantenimiento').length}</h2>
                                 </div>
                             </div>
                         </div>
@@ -327,13 +366,20 @@ const Vehiculos = () => {
                                                 icons
                                                 show-only-selected-icon
                                                 selected={vehicle.status === 'Activo'}
+                                                onClick={(e) => { e.stopPropagation(); handleSwitchClick(vehicle); }}
                                             ></md-switch>
                                             <div className='flex gap-2'>
                                                 <button className='btn btn-primary btn-lg font-medium flex items-center'>
                                                     <md-icon className="text-sm">edit</md-icon>
                                                     Editar
                                                 </button>
-                                                <button className='btn btn-outline btn-lg font-medium flex items-center'>
+                                                <button
+                                                    className='btn btn-outline btn-lg font-medium flex items-center'
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteClick(vehicle);
+                                                    }}
+                                                >
                                                     <md-icon className="text-sm">delete</md-icon>
                                                 </button>
                                             </div>
@@ -358,6 +404,23 @@ const Vehiculos = () => {
                     onClose={handleCloseProfile}
                 />
             )}
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                itemType="vehículo"
+                itemName={vehicleToDelete?.name}
+            />
+
+            <SwitchModal
+                isOpen={isSwitchModalOpen}
+                onClose={handleSwitchCancel}
+                onConfirm={handleSwitchConfirm}
+                itemType="vehículo"
+                isCurrentlyActive={vehicleToSwitch?.status === 'Activo'}
+            />
+
         </section>
     );
 }

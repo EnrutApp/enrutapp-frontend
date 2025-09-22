@@ -6,7 +6,7 @@ const Login = () => {
         <div className='min-h-screen flex items-center justify-center bg-background'>
             <div className='w-full max-w-md px-6'>
                 <div className='mb-3'>
-                    <h1 className='h2 font-medium text-white'>Inicia sesión</h1>
+                    <h1 className='h2 font-medium text-primary'>Inicia sesión</h1>
                 </div>
 
                 <div className='space-y-4'>
@@ -16,7 +16,7 @@ const Login = () => {
                             type="text"
                             id="documento"
                             placeholder='Aquí tu documento'
-                            className='w-full px-4 input bg-fill border border-border rounded-lg text-white placeholder-text-secondary focus:outline-none focus:border-primary transition-colors'
+                            className='w-full px-4 input bg-fill border border-border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:border-primary transition-colors'
                         />
                     </div>
 
@@ -27,7 +27,7 @@ const Login = () => {
                                 type="password"
                                 id="password"
                                 placeholder='Aquí tu contraseña'
-                                className='w-full input pr-12 bg-fill border border-border rounded-lg text-white placeholder-text-secondary focus:outline-none focus:border-primary transition-colors'
+                                className='w-full input pr-12 bg-fill border border-border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:border-primary transition-colors'
                             />
                         </div>
                     </div>

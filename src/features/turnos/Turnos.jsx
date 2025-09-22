@@ -1,6 +1,8 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js'
 import '@material/web/switch/switch.js'
+import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
+import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import TurnosProfile from './pages/TurnosProfile';
@@ -9,6 +11,10 @@ import { useState } from 'react';
 const Turnos = () => {
     const [selectedTurno, setSelectedTurno] = useState(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [turnoToDelete, setTurnoToDelete] = useState(null);
+    const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
+    const [turnoToSwitch, setTurnoToSwitch] = useState(null);
     const allTurnos = [
         {
             fecha: '20 de Mayo',
@@ -57,6 +63,38 @@ const Turnos = () => {
         setSelectedTurno(null);
     };
 
+    const handleDeleteClick = (turno) => {
+        setTurnoToDelete(turno);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        console.log('Eliminando turno:', turnoToDelete);
+        setIsDeleteModalOpen(false);
+        setTurnoToDelete(null);
+    };
+
+    const handleDeleteCancel = () => {
+        setIsDeleteModalOpen(false);
+        setTurnoToDelete(null);
+    };
+
+    const handleSwitchClick = (turno) => {
+        setTurnoToSwitch(turno);
+        setIsSwitchModalOpen(true);
+    };
+
+    const handleSwitchConfirm = () => {
+        console.log('Cambiando estado de turno:', turnoToSwitch);
+        setIsSwitchModalOpen(false);
+        setTurnoToSwitch(null);
+    };
+
+    const handleSwitchCancel = () => {
+        setIsSwitchModalOpen(false);
+        setTurnoToSwitch(null);
+    };
+
     const {
         currentPage,
         totalPages,
@@ -94,25 +132,25 @@ const Turnos = () => {
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Totales</span>
-                                    <h2 className='h4 text-white font-bold'>{totalItems}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{totalItems}</h2>
                                 </div>
                             </div>
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Programados</span>
-                                    <h2 className='h4 text-white font-bold'>1</h2>
+                                    <h2 className='h4 text-primary font-bold'>1</h2>
                                 </div>
                             </div>
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Completados</span>
-                                    <h2 className='h4 text-white font-bold'>0</h2>
+                                    <h2 className='h4 text-primary font-bold'>0</h2>
                                 </div>
                             </div>
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Cancelados</span>
-                                    <h2 className='h4 text-white font-bold'>0</h2>
+                                    <h2 className='h4 text-primary font-bold'>0</h2>
                                 </div>
                             </div>
                         </div>
@@ -141,7 +179,7 @@ const Turnos = () => {
                                 </select>
                             </div>
                         </div>
-                        
+
                         <div className='flex justify-between items-center mt-6 mb-4'>
                             <span className='text-sm text-secondary'>
                                 Mostrando {startIndex + 1}-{Math.min(startIndex + 3, totalItems)} de {totalItems} turnos
@@ -155,7 +193,11 @@ const Turnos = () => {
 
                         <div className='mt-3'>
                             {currentTurnos.map((turno, index) => (
-                                <div key={index} className={`content-box-outline-4-small ${index > 0 ? 'mt-2' : ''}`} onClick={() => handleOpenProfile(turno)}>
+                                <div
+                                    key={index}
+                                    className={`content-box-outline-4-small cursor-pointer hover:border-primary transition-colors ${index > 0 ? 'mt-2' : ''} ${turno.status !== 'Activo' ? 'opacity-60' : ''}`}
+                                    onClick={() => handleOpenProfile(turno)}
+                                >
                                     <div className='flex justify-between items-center'>
                                         <div>
                                             <div className='flex flex-col'>
@@ -170,11 +212,22 @@ const Turnos = () => {
                                             </div>
                                         </div>
                                         <div className='flex gap-2'>
-                                            <md-switch icons show-only-selected-icon selected></md-switch>
-                                            <button className='btn btn-secondary btn-lg font-medium flex items-center'>
+                                            <md-switch
+                                                icons
+                                                show-only-selected-icon
+                                                selected={turno.status === 'Activo'}
+                                                onClick={(e) => { e.stopPropagation(); handleSwitchClick(turno); }}
+                                            ></md-switch>
+                                            <button
+                                                className='btn btn-secondary btn-lg font-medium flex items-center'
+                                                onClick={(e) => { e.stopPropagation(); handleDeleteClick(turno); }}
+                                            >
                                                 <md-icon className="text-sm">delete</md-icon>
                                             </button>
-                                            <button className='btn btn-primary btn-lg font-medium flex items-center'>
+                                            <button
+                                                className='btn btn-primary btn-lg font-medium flex items-center'
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
                                                 <md-icon className="text-sm">edit</md-icon>
                                                 Editar
                                             </button>
@@ -198,6 +251,23 @@ const Turnos = () => {
                     onClose={handleCloseProfile}
                 />
             )}
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                itemType="turno"
+                itemName={turnoToDelete ? `${turnoToDelete.fecha} - ${turnoToDelete.hora}` : null}
+            />
+
+            <SwitchModal
+                isOpen={isSwitchModalOpen}
+                onClose={handleSwitchCancel}
+                onConfirm={handleSwitchConfirm}
+                itemType="turno"
+                isCurrentlyActive={turnoToSwitch?.status === 'Activo'}
+            />
+
         </section>
     );
 }

@@ -38,11 +38,11 @@ const UserProfile = ({ user, isOpen, onClose }) => {
                 <div className='flex items-center gap-1'>
                     <button
                         onClick={handleClose}
-                        className='text-secondary p-2 mr-2 btn-search rounded-full hover:text-white transition-colors cursor-pointer'
+                        className='text-secondary p-2 mr-2 btn-search rounded-full hover:text-primary transition-colors cursor-pointer'
                     >
                         <md-icon className="text-xl flex items-center justify-center">arrow_back</md-icon>
                     </button>
-                    <h2 className='h4 font-medium text-white'>Perfil de Usuario</h2>
+                    <h2 className='h4 font-medium text-primary'>Perfil de Usuario</h2>
                 </div>
                 <div className='flex gap-2'>
                     <div>

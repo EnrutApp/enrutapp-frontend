@@ -6,8 +6,8 @@ const RestablecerContraseña = () => {
         <div className='min-h-screen flex items-center justify-center bg-background'>
             <div className='w-full max-w-md px-6'>
                 <div className='mb-3 -space-y-2'>
-                    <h1 className='h2 font-medium text-white'>Restablecer</h1>
-                    <h1 className='h2 font-medium text-white'>contraseña</h1>
+                    <h1 className='h2 font-medium text-primary'>Restablecer</h1>
+                    <h1 className='h2 font-medium text-primary'>contraseña</h1>
                 </div>
 
                 <div className='space-y-4'>
@@ -17,7 +17,7 @@ const RestablecerContraseña = () => {
                             type="text"
                             id="documento"
                             placeholder='Aquí tu documento'
-                            className='w-full px-4 input bg-fill border border-border rounded-lg text-white placeholder-text-secondary focus:outline-none focus:border-primary transition-colors'
+                            className='w-full px-4 input bg-fill border border-border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:border-primary transition-colors'
                         />
                     </div>
 

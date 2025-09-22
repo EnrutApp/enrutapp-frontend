@@ -1,6 +1,8 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js'
 import '@material/web/switch/switch.js'
+import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
+import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import { useState } from 'react';
@@ -9,6 +11,10 @@ import UbicacionProfile from './pages/UbicacionesProfile';
 const Ubicacion = () => {
     const [selectedUbicacion, setSelectedUbicacion] = useState(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [ubicacionToDelete, setUbicacionToDelete] = useState(null);
+    const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
+    const [ubicacionToSwitch, setUbicacionToSwitch] = useState(null);
     const allUbicaciones = [
         {
             nombre: 'Terminal Medellín',
@@ -64,6 +70,38 @@ const Ubicacion = () => {
         setSelectedUbicacion(null);
     };
 
+    const handleDeleteClick = (ubicacion) => {
+        setUbicacionToDelete(ubicacion);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        console.log('Eliminando ubicación:', ubicacionToDelete);
+        setIsDeleteModalOpen(false);
+        setUbicacionToDelete(null);
+    };
+
+    const handleDeleteCancel = () => {
+        setIsDeleteModalOpen(false);
+        setUbicacionToDelete(null);
+    };
+
+    const handleSwitchClick = (ubicacion) => {
+        setUbicacionToSwitch(ubicacion);
+        setIsSwitchModalOpen(true);
+    };
+
+    const handleSwitchConfirm = () => {
+        console.log('Cambiando estado de ubicación:', ubicacionToSwitch);
+        setIsSwitchModalOpen(false);
+        setUbicacionToSwitch(null);
+    };
+
+    const handleSwitchCancel = () => {
+        setIsSwitchModalOpen(false);
+        setUbicacionToSwitch(null);
+    };
+
     const {
         currentPage,
         totalPages,
@@ -101,19 +139,19 @@ const Ubicacion = () => {
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Totales</span>
-                                    <h2 className='h4 text-white font-bold'>{totalItems}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{totalItems}</h2>
                                 </div>
                             </div>
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Activos</span>
-                                    <h2 className='h4 text-white font-bold'>{allUbicaciones.filter(u => u.estado === 'Activa').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allUbicaciones.filter(u => u.estado === 'Activa').length}</h2>
                                 </div>
                             </div>
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Inactivos</span>
-                                    <h2 className='h4 text-white font-bold'>{allUbicaciones.filter(u => u.estado === 'Inactiva').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allUbicaciones.filter(u => u.estado === 'Inactiva').length}</h2>
                                 </div>
                             </div>
                         </div>
@@ -156,7 +194,11 @@ const Ubicacion = () => {
 
                         <div className='mt-3'>
                             {currentUbicaciones.map((ubicacion, index) => (
-                                <div key={index} className='content-box-outline-4-small cursor-pointer hover:border-primary transition-colors mb-3' onClick={() => handleOpenProfile(ubicacion)}>
+                                <div
+                                    key={index}
+                                    className={`content-box-outline-4-small cursor-pointer hover:border-primary transition-colors mb-3 ${ubicacion.estado !== 'Activa' ? 'opacity-60' : ''}`}
+                                    onClick={() => handleOpenProfile(ubicacion)}
+                                >
                                     <div className='flex justify-between items-center'>
                                         <div>
                                             <h1 className='h4'>{ubicacion.nombre}</h1>
@@ -166,8 +208,16 @@ const Ubicacion = () => {
                                             </div>
                                         </div>
                                         <div className='flex gap-2'>
-                                            <md-switch icons show-only-selected-icon selected={ubicacion.estado === 'Activa'}></md-switch>
-                                            <button className='btn btn-secondary btn-lg font-medium flex items-center' onClick={e => e.stopPropagation()}>
+                                            <md-switch
+                                                icons
+                                                show-only-selected-icon
+                                                selected={ubicacion.estado === 'Activa'}
+                                                onClick={(e) => { e.stopPropagation(); handleSwitchClick(ubicacion); }}
+                                            ></md-switch>
+                                            <button
+                                                className='btn btn-secondary btn-lg font-medium flex items-center'
+                                                onClick={e => { e.stopPropagation(); handleDeleteClick(ubicacion); }}
+                                            >
                                                 <md-icon className="text-sm">delete</md-icon>
                                             </button>
                                             <button className='btn btn-primary btn-lg font-medium flex items-center' onClick={e => e.stopPropagation()}>
@@ -195,6 +245,23 @@ const Ubicacion = () => {
                     onClose={handleCloseProfile}
                 />
             )}
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                itemType="ubicación"
+                itemName={ubicacionToDelete?.nombre}
+            />
+
+            <SwitchModal
+                isOpen={isSwitchModalOpen}
+                onClose={handleSwitchCancel}
+                onConfirm={handleSwitchConfirm}
+                itemType="ubicación"
+                isCurrentlyActive={ubicacionToSwitch?.estado === 'Activa'}
+            />
+
         </section>
     )
 }

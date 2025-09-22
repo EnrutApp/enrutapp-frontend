@@ -1,6 +1,8 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js'
 import '@material/web/switch/switch.js'
+import DeleteModal from '../../../shared/components/modal/deleteModal/DeleteModal';
+import SwitchModal from '../../../shared/components/modal/switchModal/SwitchModal';
 import Pagination from '../../../shared/components/pagination/Pagination';
 import usePagination from '../../../shared/hooks/usePagination';
 import { useState } from 'react';
@@ -9,6 +11,10 @@ import RutasProfile from '../pages/RutasProfile';
 const RutasAdmin = () => {
     const [selectedRuta, setSelectedRuta] = useState(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [rutaToDelete, setRutaToDelete] = useState(null);
+    const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
+    const [rutaToSwitch, setRutaToSwitch] = useState(null);
     const allRutas = [
         {
             nombre: 'MED - UIB',
@@ -67,6 +73,38 @@ const RutasAdmin = () => {
         setSelectedRuta(null);
     };
 
+    const handleDeleteClick = (ruta) => {
+        setRutaToDelete(ruta);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        console.log('Eliminando ruta:', rutaToDelete);
+        setIsDeleteModalOpen(false);
+        setRutaToDelete(null);
+    };
+
+    const handleDeleteCancel = () => {
+        setIsDeleteModalOpen(false);
+        setRutaToDelete(null);
+    };
+
+    const handleSwitchClick = (ruta) => {
+        setRutaToSwitch(ruta);
+        setIsSwitchModalOpen(true);
+    };
+
+    const handleSwitchConfirm = () => {
+        console.log('Cambiando estado de ruta:', rutaToSwitch);
+        setIsSwitchModalOpen(false);
+        setRutaToSwitch(null);
+    };
+
+    const handleSwitchCancel = () => {
+        setIsSwitchModalOpen(false);
+        setRutaToSwitch(null);
+    };
+
     const {
         currentPage,
         totalPages,
@@ -104,19 +142,19 @@ const RutasAdmin = () => {
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Totales</span>
-                                    <h2 className='h4 text-white font-bold'>{totalItems}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{totalItems}</h2>
                                 </div>
                             </div>
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Activos</span>
-                                    <h2 className='h4 text-white font-bold'>{allRutas.filter(r => r.estado === 'Activa').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allRutas.filter(r => r.estado === 'Activa').length}</h2>
                                 </div>
                             </div>
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Inactivos</span>
-                                    <h2 className='h4 text-white font-bold'>{allRutas.filter(r => r.estado === 'Inactiva').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allRutas.filter(r => r.estado === 'Inactiva').length}</h2>
                                 </div>
                             </div>
                         </div>
@@ -159,7 +197,11 @@ const RutasAdmin = () => {
 
                         <div className='mt-3'>
                             {currentRutas.map((ruta, index) => (
-                                <div key={index} className='content-box-outline-4-small cursor-pointer hover:border-primary transition-colors mb-3' onClick={() => handleOpenProfile(ruta)}>
+                                <div
+                                    key={index}
+                                    className={`content-box-outline-4-small cursor-pointer hover:border-primary transition-colors mb-3 ${ruta.estado !== 'Activa' ? 'opacity-60' : ''}`}
+                                    onClick={() => handleOpenProfile(ruta)}
+                                >
                                     <div className='flex justify-between items-center'>
                                         <div>
                                             <div className='flex items-center'>
@@ -173,8 +215,16 @@ const RutasAdmin = () => {
                                             </div>
                                         </div>
                                         <div className='flex gap-2'>
-                                            <md-switch icons show-only-selected-icon selected={ruta.estado === 'Activa'}></md-switch>
-                                            <button className='btn btn-secondary btn-lg font-medium flex items-center' onClick={e => e.stopPropagation()}>
+                                            <md-switch
+                                                icons
+                                                show-only-selected-icon
+                                                selected={ruta.estado === 'Activa'}
+                                                onClick={(e) => { e.stopPropagation(); handleSwitchClick(ruta); }}
+                                            ></md-switch>
+                                            <button
+                                                className='btn btn-secondary btn-lg font-medium flex items-center'
+                                                onClick={e => { e.stopPropagation(); handleDeleteClick(ruta); }}
+                                            >
                                                 <md-icon className="text-sm">delete</md-icon>
                                             </button>
                                             <button className='btn btn-primary btn-lg font-medium flex items-center' onClick={e => e.stopPropagation()}>
@@ -202,6 +252,23 @@ const RutasAdmin = () => {
                     onClose={handleCloseProfile}
                 />
             )}
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                itemType="ruta"
+                itemName={rutaToDelete?.nombre}
+            />
+
+            <SwitchModal
+                isOpen={isSwitchModalOpen}
+                onClose={handleSwitchCancel}
+                onConfirm={handleSwitchConfirm}
+                itemType="ruta"
+                isCurrentlyActive={rutaToSwitch?.estado === 'Activa'}
+            />
+
         </section>
     )
 }

@@ -5,11 +5,13 @@ import '@material/web/button/outlined-button.js';
 import '@material/web/button/text-button.js';
 import '@material/web/iconbutton/filled-tonal-icon-button.js';
 import '@material/web/switch/switch.js';
+import DeleteModal from '../../../shared/components/modal/deleteModal/DeleteModal';
 import { useState } from 'react';
 
 const RutasProfile = ({ ruta, isOpen, onClose }) => {
     const [activeTab, setActiveTab] = useState('general');
     const [isClosing, setIsClosing] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     if (!isOpen || !ruta) return null;
 
@@ -25,6 +27,20 @@ const RutasProfile = ({ ruta, isOpen, onClose }) => {
         }, 300);
     };
 
+    const handleDeleteClick = () => {
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        console.log('Eliminando ruta:', ruta);
+        setIsDeleteModalOpen(false);
+        handleClose(); // Cerrar el perfil después de eliminar
+    };
+
+    const handleDeleteCancel = () => {
+        setIsDeleteModalOpen(false);
+    };
+
     return (
         <div className={`flex flex-col gap-4 overflow-auto ${isClosing ? 'profile-exit' : 'profile-enter'}`}
             style={{
@@ -38,11 +54,11 @@ const RutasProfile = ({ ruta, isOpen, onClose }) => {
                 <div className='flex items-center gap-1'>
                     <button
                         onClick={handleClose}
-                        className='text-secondary p-2 mr-2 btn-search rounded-full hover:text-white transition-colors cursor-pointer'
+                        className='text-secondary p-2 mr-2 btn-search rounded-full hover:text-primary transition-colors cursor-pointer'
                     >
                         <md-icon className="text-xl flex items-center justify-center">arrow_back</md-icon>
                     </button>
-                    <h2 className='h4 font-medium text-white'>Ruta</h2>
+                    <h2 className='h4 font-medium text-primary'>Ruta</h2>
                 </div>
                 <div className='flex gap-2'>
                     <div>
@@ -107,12 +123,23 @@ const RutasProfile = ({ ruta, isOpen, onClose }) => {
                 </div>
 
                 <div className='mt-14'>
-                    <button className=' font-medium flex text-red items-center'>
+                    <button
+                        className=' font-medium flex text-red items-center'
+                        onClick={handleDeleteClick}
+                    >
                         <md-icon className="text-sm">delete</md-icon>
                         Eliminar ruta
                     </button>
                 </div>
             </div>
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                itemType="ruta"
+                itemName={ruta?.nombre}
+            />
         </div>
     );
 };

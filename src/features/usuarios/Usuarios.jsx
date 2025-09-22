@@ -4,11 +4,17 @@ import '@material/web/switch/switch.js'
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import UserProfile from './pages/UserProfile';
+import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
+import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
 import { useState } from 'react';
 
 const Usuarios = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
+    const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
+    const [userToSwitch, setUserToSwitch] = useState(null);
 
     const allUsers = [
         {
@@ -77,6 +83,39 @@ const Usuarios = () => {
         setSelectedUser(null);
     };
 
+    const handleDeleteClick = (user) => {
+        setUserToDelete(user);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        // Aquí iría la lógica para eliminar el usuario
+        console.log('Eliminando usuario:', userToDelete);
+        setIsDeleteModalOpen(false);
+        setUserToDelete(null);
+    };
+
+    const handleDeleteCancel = () => {
+        setIsDeleteModalOpen(false);
+        setUserToDelete(null);
+    };
+
+    const handleSwitchClick = (user) => {
+        setUserToSwitch(user);
+        setIsSwitchModalOpen(true);
+    };
+
+    const handleSwitchConfirm = () => {
+        console.log('Cambiando estado del usuario:', userToSwitch);
+        setIsSwitchModalOpen(false);
+        setUserToSwitch(null);
+    };
+
+    const handleSwitchCancel = () => {
+        setIsSwitchModalOpen(false);
+        setUserToSwitch(null);
+    };
+
     const {
         currentPage,
         totalPages,
@@ -115,21 +154,21 @@ const Usuarios = () => {
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Totales</span>
-                                    <h2 className='h4 text-white font-bold'>{totalItems}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{totalItems}</h2>
                                 </div>
                             </div>
 
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Activos</span>
-                                    <h2 className='h4 text-white font-bold'>{allUsers.filter(user => user.status === 'Activo').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allUsers.filter(user => user.status === 'Activo').length}</h2>
                                 </div>
                             </div>
 
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Inactivos</span>
-                                    <h2 className='h4 text-white font-bold'>{allUsers.filter(user => user.status === 'Inactivo').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{allUsers.filter(user => user.status === 'Inactivo').length}</h2>
                                 </div>
                             </div>
                         </div>
@@ -174,7 +213,11 @@ const Usuarios = () => {
 
                         <div className='mt-3'>
                             {currentUsers.map((user, index) => (
-                                <div key={index} className={`content-box-outline-4-small ${index > 0 ? 'mt-2' : ''}`} onClick={() => handleOpenProfile(user)}>
+                                <div
+                                    key={index}
+                                    className={`content-box-outline-4-small ${index > 0 ? 'mt-2' : ''} ${user.status === 'Inactivo' ? 'opacity-60' : ''}`}
+                                    onClick={() => handleOpenProfile(user)}
+                                >
                                     <div className='flex justify-between items-center'>
                                         <div>
                                             <h1 className='h4'>{user.name}</h1>
@@ -192,8 +235,18 @@ const Usuarios = () => {
                                                 icons
                                                 show-only-selected-icon
                                                 selected={user.status === 'Activo'}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleSwitchClick(user);
+                                                }}
                                             ></md-switch>
-                                            <button className='btn btn-secondary btn-lg font-medium flex items-center'>
+                                            <button
+                                                className='btn btn-secondary btn-lg font-medium flex items-center'
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteClick(user);
+                                                }}
+                                            >
                                                 <md-icon className="text-sm">delete</md-icon>
                                             </button>
 
@@ -222,6 +275,23 @@ const Usuarios = () => {
                     onClose={handleCloseProfile}
                 />
             )}
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                itemType="usuario"
+                itemName={userToDelete?.name}
+            />
+
+            <SwitchModal
+                isOpen={isSwitchModalOpen}
+                onClose={handleSwitchCancel}
+                onConfirm={handleSwitchConfirm}
+                itemType="usuario"
+                itemName={userToSwitch?.name}
+                isCurrentlyActive={userToSwitch?.status === 'Activo'}
+            />
         </section>
     )
 }

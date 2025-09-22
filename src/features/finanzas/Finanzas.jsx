@@ -39,7 +39,7 @@ const Finanzas = () => {
                 <div className='content-box-outline-small'>
                     <div className='flex flex-col'>
                         <span className='subtitle2 font-light text-secondary'>Total encomiendas</span>
-                        <h2 className='h4 text-white font-bold'>$0.00</h2>
+                        <h2 className='h4 text-primary font-bold'>$0.00</h2>
                     </div>
                 </div>
 

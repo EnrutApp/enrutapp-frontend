@@ -56,7 +56,7 @@ nav.sidebar {
 /* === HOVER EFFECTS === */
 .sidebar-link:hover .sidebar-icon,
 .sidebar-link:hover .sidebar-text {
-    color: white !important;
+    color: var(--primary) !important;
 }
 
 /* Override hover para elementos activos - mantienen color azul */
@@ -67,7 +67,7 @@ nav.sidebar {
 
 .sidebar-button:hover .sidebar-icon,
 .sidebar-button:hover .sidebar-text {
-    color: white !important;
+    color: var(--primary) !important;
 }
 
 .sidebar-logout:hover .sidebar-icon,
