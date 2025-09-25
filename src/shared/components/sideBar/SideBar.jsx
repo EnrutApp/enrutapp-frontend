@@ -156,7 +156,7 @@ const SideBar = () => {
       },
     ]
   };
-  const menuSections = roleMenus[user?.role] || [];
+  const menuSections = roleMenus[user?.rol?.nombreRol] || [];
 
   return (
     <nav className="h-full flex flex-col sidebar">
@@ -164,20 +164,20 @@ const SideBar = () => {
         <div className="relative">
           <div className="transform transition-transform duration-300 hover:scale-110 z-10" onClick={handleMenuToggle}>
             <md-icon-button id="config-button">
-              <Avvvatars value={user?.name} style='character' size={38} />
+              <Avvvatars value={user?.nombre || 'Usuario'} style='character' size={38} />
             </md-icon-button>
           </div>
           <md-menu anchor="config-button" className="config-menu">
             <div className='flex flex-col items-center pt-5 gap-2'>
               <div className='border-6 border-border rounded-full relative'>
-                <Avvvatars value={user?.name} size={60} />
+                <Avvvatars value={user?.nombre || 'Usuario'} size={60} />
                 <div className='absolute -bottom-2 -right-1 px-1 bg-black rounded-full border-background hover:opacity-80 transition-all cursor-pointer'>
                   <md-icon className='text-white text-sm'>photo_camera</md-icon>
                 </div>
               </div>
               <div className='flex flex-col text-center'>
-                <span className='subtitle1 font-bold'>{user?.name} {user?.lastname}</span>
-                <span className='caption'>{user?.role}</span>
+                <span className='subtitle1 font-bold'>{user?.nombre || 'Usuario'}</span>
+                <span className='caption'>{user?.rol?.nombreRol || 'Sin rol'}</span>
                 <button className='p-2 cursor-pointer hover:opacity-65'>
                   <div slot="headline" className='caption border-2 border-border rounded-2xl px-4 py-1' onClick={handleProfileClick}>Editar perfil</div>
                 </button>
@@ -191,7 +191,7 @@ const SideBar = () => {
         </div>
         <div className='ml-3 flex-1'>
           <h1 className='text-lg font-semibold text-primary'>{user?.name || 'Usuario'}</h1>
-          <p className='caption text-secondary'>{user?.role || ''}</p>
+          <p className='caption text-secondary'>{user?.rol?.nombreRol || ''}</p>
         </div>
       </div>
 

@@ -7,7 +7,7 @@ import '@material/web/iconbutton/filled-tonal-icon-button.js';
 import '@material/web/switch/switch.js';
 import { useState } from 'react';
 
-const UserProfile = ({ user, isOpen, onClose }) => {
+const RoleAdd = ({ user, isOpen, onClose }) => {
     const [isClosing, setIsClosing] = useState(false);
 
     if (!isOpen || !user) return null;
@@ -57,7 +57,7 @@ const UserProfile = ({ user, isOpen, onClose }) => {
 
             <div className='bg-primary text-on-primary content-box-small'>
                 <h1 className='h3 text-on-primary'>{user.nombre}</h1>
-                <span className='subtitle1 font-medium text-on-primary'>{user.numDocumento}</span>
+                <span className='subtitle1 font-medium text-on-primary'>{user.id}</span>
             </div>
 
             <div className="flex flex-col gap-3 flex-1">
@@ -81,44 +81,26 @@ const UserProfile = ({ user, isOpen, onClose }) => {
                     </div>
                 </div>
 
-                {/* Card de información del usuario */}
-                <div className="md:col-span-3 w-full">
-                    <div className="card elevation-6 border-outline-variant rounded-xl">
-                        <div className="flex flex-col gap-4">
-                            <div className="flex gap-3 items-center">
-                                <div className="rounded-xl w-10 h-10 bg-primary flex items-center justify-center">
-                                    <md-icon className="text-on-primary">person</md-icon>
-                                </div>
-                                <span className="text-primary headline-small">Información personal</span>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <span className="subtitle1 text-secondary">
-                                    {user.tipoDocumento?.nombreTipoDoc}: {user.numDocumento}
-                                </span>
-                                <span className="subtitle1 text-secondary">
-                                    Fecha registro: {user.fechaRegistro ? new Date(user.fechaRegistro).toLocaleDateString() : 'No especificada'}
-                                </span>
-                                <span className="subtitle1 text-secondary">
-                                    Estado: {user.estado ? 'Activo' : 'Inactivo'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                <div className="content-box-outline-3-small">
+                    <span className="subtitle1 text-primary font-light">Identificación</span>
+                    <span className="subtitle1 text-secondary mt-1">
+                        {user.id}
+                    </span>
                 </div>
 
                 <div className="content-box-outline-3">
                     <div className="flex flex-col gap-1">
                         <span className="subtitle1 text-primary font-light">Contacto</span>
                         <span className="subtitle1 text-secondary">
-                            Correo: {user.correo}
+                            Correo: No especificado
                         </span>
                         <span className="subtitle1 text-secondary">
-                            Teléfono: {user.telefono}
+                            Telefono: {user.tel}
                         </span>
                         <div className="flex gap-2 flex-wrap mt-2">
                             <md-filled-button className="btn-add px-5">
                                 <md-icon slot="icon" className="text-lg text-on-primary">mail</md-icon>
-                                Actualizar correo
+                                Agregar un correo
                             </md-filled-button>
                         </div>
                     </div>
@@ -160,4 +142,4 @@ const UserProfile = ({ user, isOpen, onClose }) => {
     );
 };
 
-export default UserProfile;
+export default RoleAdd;

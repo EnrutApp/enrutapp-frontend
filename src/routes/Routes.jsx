@@ -16,6 +16,7 @@ import Roles from "../features/rol/Roles"
 import Ubicacion from "../features/ubicaciones/Ubicacion"
 import Finanzas from "../features/finanzas/Finanzas"
 import Login from "../features/login/Login"
+import Register from "../features/register/Register"
 import RestablecerContraseña from "../features/restablecerContraseña/RestablecerContraseña"
 import ProtectedRoute from "./ProtectedRoute"
 import HomeAdmin from "../features/home/pages/HomeAdmin"
@@ -29,6 +30,10 @@ const Routes = createBrowserRouter([
         element: <Login />
     },
     {
+        path: "register",
+        element: <Register />
+    },
+    {
         path: "reset-password",
         element: <RestablecerContraseña />
     },
@@ -39,6 +44,14 @@ const Routes = createBrowserRouter([
             {
                 index: true,
                 element: <RoleRedirect />
+            },
+            {
+                path: "dashboard",
+                element: (
+                    <ProtectedRoute>
+                        <RoleRedirect />
+                    </ProtectedRoute>
+                )
             },
             // ADMIN
             {

@@ -554,6 +554,19 @@ md-icon {
     appearance: none;
 }
 
+.select-filter-2 {
+    background-color: var(--fill);
+    color: var(--text-secondary);
+    border-radius: 11px;
+    padding: 8px 13px;
+    font-family: "DM Sans", sans-serif;
+    font-size: var(--text-button);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+}
+
 .select-filter:hover {
     background-color: var(--border);
 }
@@ -572,6 +585,15 @@ md-icon {
 .select-wrapper md-icon {
     position: absolute;
     left: 12px;
+    color: var(--text-secondary);
+    font-size: 16px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.select-wrapper-2 md-icon {
+    position: absolute;
+    left: 120px;
     color: var(--text-secondary);
     font-size: 16px;
     z-index: 1;

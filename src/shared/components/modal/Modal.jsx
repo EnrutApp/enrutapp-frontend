@@ -60,7 +60,7 @@ const Modal = ({ isOpen, onClose, children, size = 'md' }) => {
                 }}
             />
 
-            <div className={`relative bg-fill rounded-3xl ${size === 'lg' ? 'max-w-2xl' : size === 'xl' ? 'max-w-4xl' : 'max-w-md'} w-full mx-4 transform transition-all duration-200 z-10`}>
+            <div className={`relative bg-fill rounded-3xl ${size === 'lg' ? 'max-w-2xl' : size === 'xl' ? 'max-w-5xl' : 'max-w-md'} w-full mx-4 transform transition-all duration-200 z-10`}>
                 {children}
             </div>
         </div>,

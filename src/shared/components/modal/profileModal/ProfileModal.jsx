@@ -38,30 +38,55 @@ const ProfileModal = ({ isOpen, onClose }) => {
                 <div className="flex flex-col items-center gap-2.5">
                     <div className='bg-background content-box-small flex items-center'>
                         <div className='border-6 border-border rounded-full relative'>
-                            <Avvvatars value={user?.name} size={80} />
+                            <Avvvatars value={user?.nombre || 'Usuario'} size={80} />
                             <div className='absolute -bottom-2 -right-1 px-1 bg-black rounded-full border-background hover:opacity-80 transition-all cursor-pointer'>
                                 <md-icon className='text-white text-sm'>photo_camera</md-icon>
                             </div>
                         </div>
-                        <h1 className='h3'>{user.name} {user.lastname}</h1>
+                        <h1 className='h3'>{user?.nombre || 'Usuario sin nombre'}</h1>
                         <div className="text-center">
                             <span className="inline-block px-3 py-1 bg-primary text-on-primary rounded-full caption font-medium">
-                                {user?.role || 'Rol no definido'}
+                                {user?.rol?.nombreRol || 'Rol no definido'}
                             </span>
                         </div>
                     </div>
 
                     <div className='content-box-outline-3-small'>
-                        <span className="subtitle1 text-primary font-light">Documento:</span>
-                        <span className='subtitle1 text-secondary mt-1'>{user?.documento || 'Documento no disponible'}</span>
+                        <span className="subtitle1 text-primary font-light">Email:</span>
+                        <span className='subtitle1 text-secondary mt-1'>{user?.correo || 'Email no disponible'}</span>
                     </div>
 
                     <div className='content-box-outline-3-small'>
-                        <span className="subtitle1 text-primary font-light">Telefono:</span>
-                        <span className='subtitle1 text-secondary mt-1'>{user?.telefono || 'Telefono no disponible'}</span>
+                        <span className="subtitle1 text-primary font-light">Documento:</span>
+                        <span className='subtitle1 text-secondary mt-1'>
+                            {user?.numDocumento || 'Documento no disponible'}
+                            {user?.tipoDocumento?.nombreTipoDoc && ` (${user.tipoDocumento.nombreTipoDoc})`}
+                        </span>
+                    </div>
+
+                    <div className='content-box-outline-3-small'>
+                        <span className="subtitle1 text-primary font-light">Teléfono:</span>
+                        <span className='subtitle1 text-secondary mt-1'>{user?.telefono || 'Teléfono no disponible'}</span>
                         <div className='flex justify-end'>
                             <button className='btn-secondary btn-sm cursor-pointer'>Editar</button>
                         </div>
+                    </div>
+
+                    <div className='content-box-outline-3-small'>
+                        <span className="subtitle1 text-primary font-light">Dirección:</span>
+                        <span className='subtitle1 text-secondary mt-1'>{user?.direccion || 'Dirección no disponible'}</span>
+                    </div>
+
+                    <div className='content-box-outline-3-small'>
+                        <span className="subtitle1 text-primary font-light">Ciudad:</span>
+                        <span className='subtitle1 text-secondary mt-1'>{user?.ciudad || 'Ciudad no disponible'}</span>
+                    </div>
+
+                    <div className='content-box-outline-3-small'>
+                        <span className="subtitle1 text-primary font-light">Estado:</span>
+                        <span className={`subtitle1 mt-1 font-medium ${user?.estado ? 'text-green-600' : 'text-red-600'}`}>
+                            {user?.estado ? 'Activo' : 'Inactivo'}
+                        </span>
                     </div>
 
                     <button
