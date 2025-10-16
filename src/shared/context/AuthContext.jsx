@@ -57,6 +57,7 @@ export const AuthProvider = ({ children }) => {
 
       if (response.success && response.data) {
         setUser(response.data.user);
+        await updateProfile();
         return response;
       } else {
         throw new Error(response.message || 'Error en el login');

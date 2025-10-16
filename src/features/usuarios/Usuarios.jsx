@@ -6,9 +6,12 @@ import usePagination from '../../shared/hooks/usePagination';
 import UserProfile from './pages/UserProfile';
 import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
 import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
-import { useState, useEffect } from 'react';
+import AddModal from '../../shared/components/modal/addModal/AddModal';
+import EditModal from '../../shared/components/modal/editModal/EditModal';
+import { useState } from 'react';
 import userService from '../../shared/services/userService';
 import useApi from '../../shared/hooks/useApi';
+import Avvvatars from 'avvvatars-react';
 
 const Usuarios = () => {
     const [selectedUser, setSelectedUser] = useState(null);
@@ -21,6 +24,9 @@ const Usuarios = () => {
     const [statusFilter, setStatusFilter] = useState('Todos');
     const [sortBy, setSortBy] = useState('nombre');
     const [sortOrder, setSortOrder] = useState('asc');
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [userToEdit, setUserToEdit] = useState(null);
 
     const {
         data: users,
@@ -102,21 +108,17 @@ const Usuarios = () => {
 
     const handleSwitchConfirm = async () => {
         try {
-            await userService.updateUser(userToSwitch.idUsuario, {
-                estado: !userToSwitch.estado
-            });
-
-            setUsers(users.map(user =>
-                user.idUsuario === userToSwitch.idUsuario
-                    ? { ...user, estado: !user.estado }
-                    : user
-            ));
-
+            const response = await userService.cambiarEstado(userToSwitch.idUsuario, !userToSwitch.estado);
+            if (response.success === false) {
+                alert(response.message || 'No se pudo cambiar el estado del usuario');
+                setIsSwitchModalOpen(false);
+                return;
+            }
+            fetchUsers();
             setIsSwitchModalOpen(false);
-            setUserToSwitch(null);
         } catch (error) {
-            console.error('Error updating user status:', error);
-            alert('Error al cambiar el estado del usuario: ' + error.message);
+            alert('Error al cambiar el estado del usuario');
+            setIsSwitchModalOpen(false);
         }
     };
 
@@ -131,6 +133,22 @@ const Usuarios = () => {
         ));
     };
 
+    const handleEditClick = (user) => {
+        setUserToEdit(user);
+        setIsEditModalOpen(true);
+    };
+
+    const handleEditConfirm = (updatedUser) => {
+        handleUserUpdated(updatedUser);
+        setIsEditModalOpen(false);
+        setUserToEdit(null);
+    };
+
+    const handleEditCancel = () => {
+        setIsEditModalOpen(false);
+        setUserToEdit(null);
+    };
+
     const {
         currentPage,
         totalPages,
@@ -141,24 +159,16 @@ const Usuarios = () => {
         totalItems
     } = usePagination(sortedUsers, 4);
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                <span className="ml-3 text-secondary">Cargando usuarios...</span>
-            </div>
-        );
-    }
 
     if (error) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                    <md-icon className="text-6xl text-red-500 mb-4">error</md-icon>
-                    <p className="text-red-600 mb-4">Error al cargar usuarios: {error}</p>
-                    <md-filled-button onClick={fetchUsers} className="btn btn-primary">
+            <div className="flex items-center justify-center w-full content-box-outline-2-small list-enter" style={{ height: 'calc(100vh - 40px)' }}>
+                <div className="flex flex-col items-center justify-center" style={{ width: '340px' }}>
+                    <md-icon className="text-red mb-4">warning</md-icon>
+                    <p className="text-primary mb-4">Error al cargar usuarios: {error}</p>
+                    <button onClick={fetchUsers} className="btn btn-primary">
                         Reintentar
-                    </md-filled-button>
+                    </button>
                 </div>
             </div>
         );
@@ -178,21 +188,9 @@ const Usuarios = () => {
                                         <md-icon slot="icon" className="text-sm text-secondary">search</md-icon>
                                         Buscar
                                     </md-filled-button>
-                                    {/* <div className="relative">
-                                        <input
-                                            type="text"
-                                            placeholder="Buscar usuarios..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="input pl-10 pr-4 py-2 border border-border rounded-lg focus:border-primary transition-colors"
-                                        />
-                                        <md-icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary">
-                                            search
-                                        </md-icon>
-                                    </div> */}
                                 </div>
                                 <div>
-                                    <md-filled-button className="btn-add px-5">
+                                    <md-filled-button className="btn-add px-5" onClick={() => setIsAddModalOpen(true)}>
                                         <md-icon slot="icon" className="text-sm text-on-primary">person_add</md-icon>
                                         Agregar usuarios
                                     </md-filled-button>
@@ -269,7 +267,7 @@ const Usuarios = () => {
 
                         <div className='flex justify-between items-center mt-6 mb-4'>
                             <span className='text-sm text-secondary'>
-                                Mostrando {startIndex + 1}-{Math.min(startIndex + 6, totalItems)} de {totalItems} usuarios
+                                {isLoading ? 'Cargando usuarios...' : `Mostrando ${startIndex + 1}-${Math.min(startIndex + 6, totalItems)} de ${totalItems} usuarios`}
                             </span>
                             {showPagination && (
                                 <span className='text-xs text-secondary'>
@@ -278,50 +276,96 @@ const Usuarios = () => {
                             )}
                         </div>
 
-                        {/* <div className='mt-3'>
+                        <div className='mt-3'>
                             {currentUsers.map((user, index) => (
                                 <div
                                     key={user.idUsuario}
                                     className={`content-box-outline-4-small ${index > 0 ? 'mt-2' : ''} ${!user.estado ? 'opacity-60' : ''} cursor-pointer hover:shadow-md transition-shadow`}
-                                    onClick={() => handleOpenProfile(user)}
+                                    onClick={(e) => {
+                                        // Si el click viene del switch, no abrir el detalle
+                                        if (e.target.closest('md-switch')) return;
+                                        handleOpenProfile(user);
+                                    }}
                                 >
-                                    <div className='flex justify-between items-center'>
-                                        <div>
-                                            <h1 className='h4'>{user.nombre}</h1>
-                                            <div className='flex gap-2 mt-1'>
-                                                <span className='text-sm text-secondary'>{user.correo}</span>
-                                                <span className='text-sm text-secondary'>{user.numDocumento}</span>
+
+                                    <div className="flex justify-between items-center">
+                                        <div className='flex justify-center items-center'>
+                                            <div className="flex items-center justify-center w-16 h-16 mr-3">
+                                                {user?.foto ? (
+                                                    <img
+                                                        src={user.foto.startsWith('http') ? user.foto : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${user.foto}`}
+                                                        alt="Foto de perfil"
+                                                        className="rounded-lg w-16 h-16 object-cover shadow-2xl"
+                                                    />
+                                                ) : (
+                                                    <Avvvatars value={user?.nombre || 'Usuario'} size={64} radius={11} />
+                                                )}
                                             </div>
-                                            <div className='flex gap-1 mt-2'>
-                                                <button className={`btn font-medium btn-lg flex items-center ${user.estado ? 'btn-primary' : 'btn-secondary'}`}>
-                                                    {user.estado ? 'Activo' : 'Inactivo'}
-                                                </button>
-                                                <button className='btn btn-outline btn-lg font-medium flex items-center'>
-                                                    {user.rol?.nombreRol || 'Sin rol'}
-                                                </button>
+                                            <div>
+                                                <div className='leading-tight'>
+                                                    <h1 className="h4 font-bold">{user.nombre}</h1>
+                                                    <div className="flex gap-2 text-secondary">
+                                                        <span>{user.correo}</span>
+                                                        <span>|</span>
+                                                        <span>{user.numDocumento}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2 mt-2 items-center">
+                                                    <button className={`btn font-medium btn-lg flex items-center ${user.estado ? 'btn-primary' : 'btn-secondary'}`}>
+                                                        {user.estado ? 'Activo' : 'Inactivo'}
+                                                    </button>
+                                                    <button className='btn btn-outline btn-lg font-medium flex items-center'>
+                                                        <md-icon className="text-sm">person</md-icon>
+                                                        {user.rol?.nombreRol || 'Sin rol'}
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className='flex gap-2'>
-                                            <md-switch
-                                                icons
-                                                show-only-selected-icon
-                                                selected={user.estado}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleSwitchClick(user);
-                                                }}
-                                            ></md-switch>
+                                            {user.rol?.nombreRol?.toLowerCase() === 'administrador' ? (
+                                                <div
+                                                    className='btn btn-secondary btn-lg font-medium flex items-center opacity-50 cursor-not-allowed'
+                                                    title="No se puede deshabilitar un administrador"
+                                                >
+                                                    Administrador
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    className={`btn btn-lg font-medium flex items-center ${user.estado ? 'btn-outline' : 'btn-secondary'}`}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleSwitchClick(user);
+                                                    }}
+                                                >
+                                                    {user.estado ? 'Deshabilitar' : 'Habilitar'}
+                                                </button>
+                                            )}
+                                            {user.rol?.nombreRol?.toLowerCase() === 'administrador' ? (
+                                                <div
+                                                    className='btn btn-secondary btn-lg font-medium flex items-center opacity-50 cursor-not-allowed'
+                                                    title="No se puede eliminar un administrador"
+                                                >
+                                                    <md-icon className="text-sm">delete</md-icon>
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    className='btn btn-secondary btn-lg font-medium flex items-center'
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteClick(user);
+                                                    }}
+                                                >
+                                                    <md-icon className="text-sm">delete</md-icon>
+                                                </button>
+                                            )}
+
                                             <button
-                                                className='btn btn-secondary btn-lg font-medium flex items-center'
+                                                className='btn btn-primary btn-lg font-medium flex items-center'
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleDeleteClick(user);
+                                                    handleEditClick(user);
                                                 }}
                                             >
-                                                <md-icon className="text-sm">delete</md-icon>
-                                            </button>
-
-                                            <button className='btn btn-primary btn-lg font-medium flex items-center'>
                                                 <md-icon className="text-sm">edit</md-icon>
                                                 Editar
                                             </button>
@@ -331,44 +375,19 @@ const Usuarios = () => {
                             ))}
 
                             {currentUsers.length === 0 && (
-                                <div className="text-center py-8">
-                                    <md-icon className="text-6xl text-secondary mb-4">group</md-icon>
-                                    <p className="text-secondary">
-                                        {searchTerm || statusFilter !== 'Todos'
-                                            ? 'No se encontraron usuarios que coincidan con los filtros'
-                                            : 'No hay usuarios registrados'
-                                        }
-                                    </p>
+                                <div className="flex items-center justify-center w-full list-enter text-center" style={{ height: 'calc(60vh - 40px)' }}>
+                                    <div className="flex flex-col items-center justify-center" style={{ width: '340px' }}>
+                                        <md-icon className="text-secondary mb-4">group</md-icon>
+                                        <p className="text-secondary">
+                                            {searchTerm || statusFilter !== 'Todos'
+                                                ? 'No se encontraron usuarios que coincidan con los filtros'
+                                                : 'No hay usuarios registrados'
+                                            }
+                                        </p>
+                                    </div>
                                 </div>
                             )}
-                        </div> */}
-
-                        <table class="table-fixed">
-                            <thead>
-                                <tr>
-                                    <th>Song</th>
-                                    <th>Artist</th>
-                                    <th>Year</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>The Sliding Mr. Bones (Next Stop, Pottersville)</td>
-                                    <td>Malcolm Lockyer</td>
-                                    <td>1961</td>
-                                </tr>
-                                <tr>
-                                    <td>Witchy Woman</td>
-                                    <td>The Eagles</td>
-                                    <td>1972</td>
-                                </tr>
-                                <tr>
-                                    <td>Shining Star</td>
-                                    <td>Earth, Wind, and Fire</td>
-                                    <td>1975</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        </div>
                     </div>
 
                     <Pagination
@@ -376,6 +395,15 @@ const Usuarios = () => {
                         totalPages={totalPages}
                         onPageChange={handlePageChange}
                         showPagination={showPagination}
+                    />
+                    <AddModal
+                        isOpen={isAddModalOpen}
+                        onClose={() => setIsAddModalOpen(false)}
+                        onConfirm={() => {
+                            fetchUsers();
+                            setIsAddModalOpen(false);
+                        }}
+                        itemType="usuario"
                     />
                 </>
             ) : (
@@ -402,6 +430,14 @@ const Usuarios = () => {
                 itemType="usuario"
                 itemName={userToSwitch?.nombre}
                 isCurrentlyActive={userToSwitch?.estado}
+            />
+
+            <EditModal
+                isOpen={isEditModalOpen}
+                onClose={handleEditCancel}
+                onConfirm={handleEditConfirm}
+                itemType="usuario"
+                itemData={userToEdit}
             />
         </section>
     );

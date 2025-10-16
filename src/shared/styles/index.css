@@ -542,7 +542,6 @@ md-icon {
 
 /* === ESTILOS PARA SELECT === */
 .select-filter {
-    background-color: var(--fill);
     color: var(--text-secondary);
     border-radius: 100px;
     padding: 8px 13px;
@@ -577,6 +576,8 @@ md-icon {
 }
 
 .select-wrapper {
+    background: var(--fill);
+    border-radius: 100px;
     position: relative;
     display: flex;
     align-items: center;
@@ -828,6 +829,14 @@ md-icon {
     box-sizing: border-box;
 }
 
+.content-box-small-2 {
+    display: flex;
+    width: 100%;
+    padding: 20px;
+    border-radius: 24px;
+    box-sizing: border-box;
+}
+
 .content-box-outline-small {
     display: flex;
     flex-direction: column;
@@ -909,4 +918,8 @@ md-icon {
     position: absolute;
     top: -10px;
     right: 10px;
+}
+
+md-checkbox {
+    --md-checkbox-container-shape: 5px;
 }

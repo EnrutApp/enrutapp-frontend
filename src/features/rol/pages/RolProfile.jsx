@@ -7,7 +7,7 @@ import '@material/web/iconbutton/filled-tonal-icon-button.js';
 import '@material/web/switch/switch.js';
 import { useState } from 'react';
 
-const RolProfile = ({ role, isOpen, onClose }) => {
+const RolProfile = ({ role, isOpen, onClose, onAdd, onEdit }) => {
     const [activeTab, setActiveTab] = useState('general');
     const [isClosing, setIsClosing] = useState(false);
 
@@ -46,13 +46,13 @@ const RolProfile = ({ role, isOpen, onClose }) => {
                 </div>
                 <div className='flex gap-2'>
                     <div>
-                        <md-filled-button className="btn-add px-6 py-2">
+                        <md-filled-button className="btn-add px-6 py-2" onClick={() => onEdit && onEdit(role)}>
                             <md-icon slot="icon" className="text-sm text-on-primary">edit</md-icon>
-                            Editar roles
+                            Editar rol
                         </md-filled-button>
                     </div>
                     <div>
-                        <md-filled-button className="btn-add px-5">
+                        <md-filled-button className="btn-add px-5" onClick={() => onAdd && onAdd()}>
                             <md-icon slot="icon" className="text-sm text-on-primary">add</md-icon>
                             Agregar un rol
                         </md-filled-button>
@@ -61,7 +61,7 @@ const RolProfile = ({ role, isOpen, onClose }) => {
             </div>
 
             <div className='bg-primary text-on-primary content-box-small'>
-                <h1 className='h3 text-on-primary'>{role.roleName}</h1>
+                <h1 className='h3 text-on-primary'>{role.nombreRol || role.roleName}</h1>
             </div>
 
             <div className="flex flex-col gap-3 flex-1">
@@ -69,8 +69,8 @@ const RolProfile = ({ role, isOpen, onClose }) => {
                     <div className="content-box-outline-3-small">
                         <span className="subtitle1 text-primary font-light">Estado del rol</span>
                         <div className='flex mt-1'>
-                            <button className={`btn font-medium btn-lg flex items-center ${role.status === 'Activo' ? 'btn-primary' : 'btn-secondary'}`}>
-                                {role.status}
+                            <button className={`btn font-medium btn-lg flex items-center ${(role.estado ?? (role.status === 'Activo')) ? 'btn-primary' : 'btn-secondary'}`}>
+                                {(role.estado ?? (role.status === 'Activo')) ? 'Activo' : 'Inactivo'}
                             </button>
                         </div>
                     </div>
@@ -80,7 +80,7 @@ const RolProfile = ({ role, isOpen, onClose }) => {
                     <div className="content-box-outline-3-small">
                         <span className="subtitle1 text-primary font-light">Descripción</span>
                         <span className='subtitle1 text-secondary mt-1'>
-                            {role.description}
+                            {role.descripcion || role.description}
                         </span>
                         <div className='flex mt-1'>
                             <button className='btn btn-primary font-medium btn-lg flex items-center'>

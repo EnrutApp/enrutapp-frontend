@@ -5,10 +5,37 @@ import '@material/web/button/outlined-button.js';
 import '@material/web/button/text-button.js';
 import '@material/web/iconbutton/filled-tonal-icon-button.js';
 import '@material/web/switch/switch.js';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import DeleteModal from '../../../shared/components/modal/deleteModal/DeleteModal';
+import EditUserModal from '../../../shared/components/modal/editUserModal/EditUserModal';
+import AddModal from '../../../shared/components/modal/addModal/AddModal';
+import userService from '../../../shared/services/userService';
+import Avvvatars from 'avvvatars-react';
 
-const UserProfile = ({ user, isOpen, onClose }) => {
+const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
     const [isClosing, setIsClosing] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
+    const [fullUser, setFullUser] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+    useEffect(() => {
+        if (isOpen && user?.idUsuario) {
+            userService.getUserById(user.idUsuario)
+                .then((res) => {
+                    // Si la respuesta tiene formato { success, data, ... }
+                    if (res && res.data) {
+                        setFullUser(res.data);
+                    } else {
+                        setFullUser(res);
+                    }
+                })
+                .catch(() => setFullUser(user));
+        } else {
+            setFullUser(null);
+        }
+    }, [isOpen, user]);
 
     if (!isOpen || !user) return null;
 
@@ -18,6 +45,66 @@ const UserProfile = ({ user, isOpen, onClose }) => {
             setIsClosing(false);
             onClose();
         }, 300);
+    };
+
+    const handleDeleteClick = (user) => {
+        setUserToDelete(user);
+        setIsDeleteModalOpen(true);
+    };
+
+
+
+    const handleEditClick = () => {
+        setIsEditModalOpen(true);
+    };
+
+    const handleEditConfirm = (updatedUser) => {
+        setFullUser(updatedUser);
+        setIsEditModalOpen(false);
+        if (onUserUpdated) {
+            onUserUpdated(updatedUser);
+        }
+    };
+
+    const handleEditCancel = () => {
+        setIsEditModalOpen(false);
+    };
+
+    const handleAddClick = () => {
+        setIsAddModalOpen(true);
+    };
+
+    const handleAddConfirm = (newUser) => {
+        setIsAddModalOpen(false);
+        // Podrías aquí actualizar la lista principal si necesitas
+    };
+
+    const handleAddCancel = () => {
+        setIsAddModalOpen(false);
+    };
+
+    const handleDeleteConfirm = async () => {
+        try {
+            await userService.deleteUser(userToDelete.idUsuario);
+            setIsDeleteModalOpen(false);
+            setUserToDelete(null);
+            // Cerrar el perfil y volver a la lista
+            onClose();
+            // Notificar al componente padre para actualizar la lista
+            if (onUserUpdated) {
+                // Forzar actualización de la lista
+                window.location.reload(); // Temporal, mejor sería refetch
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            alert('Error al eliminar el usuario: ' + (error.message || 'Error desconocido'));
+            setIsDeleteModalOpen(false);
+        }
+    };
+
+    const handleDeleteCancel = () => {
+        setIsDeleteModalOpen(false);
+        setUserToDelete(null);
     };
 
     return (
@@ -41,13 +128,13 @@ const UserProfile = ({ user, isOpen, onClose }) => {
                 </div>
                 <div className='flex gap-2'>
                     <div>
-                        <md-filled-button className="btn-add px-6 py-2">
+                        <md-filled-button className="btn-add px-6 py-2" onClick={handleEditClick}>
                             <md-icon slot="icon" className="text-sm text-on-primary">edit</md-icon>
                             Editar datos
                         </md-filled-button>
                     </div>
                     <div>
-                        <md-filled-button className="btn-add px-5">
+                        <md-filled-button className="btn-add px-5" onClick={handleAddClick}>
                             <md-icon slot="icon" className="text-sm text-on-primary">person_add</md-icon>
                             Agregar un usuario
                         </md-filled-button>
@@ -55,9 +142,22 @@ const UserProfile = ({ user, isOpen, onClose }) => {
                 </div>
             </div>
 
-            <div className='bg-primary text-on-primary content-box-small'>
-                <h1 className='h3 text-on-primary'>{user.nombre}</h1>
-                <span className='subtitle1 font-medium text-on-primary'>{user.numDocumento}</span>
+            <div className='bg-primary text-on-primary content-box-small-2 flex justify-between gap-4'>
+                <div>
+                    <h1 className='h3 text-on-primary'>{fullUser?.nombre || user.nombre}</h1>
+                    <span className='subtitle1 font-medium text-on-primary'>{fullUser?.numDocumento || user.numDocumento}</span>
+                </div>
+                <div className="flex items-center justify-center w-20 h-20 rounded-full bg-background">
+                    {fullUser?.foto ? (
+                        <img
+                            src={fullUser.foto.startsWith('http') ? fullUser.foto : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${fullUser.foto}`}
+                            alt="Foto de perfil"
+                            className="rounded-lg w-20 h-20 object-cover"
+                        />
+                    ) : (
+                        <Avvvatars value={fullUser?.nombre || user.nombre || 'Usuario'} size={80} radius={12} />
+                    )}
+                </div>
             </div>
 
             <div className="flex flex-col gap-3 flex-1">
@@ -65,8 +165,8 @@ const UserProfile = ({ user, isOpen, onClose }) => {
                     <div className="content-box-outline-3-small">
                         <span className="subtitle1 text-primary font-light">Estado del usuario</span>
                         <div className='flex mt-1'>
-                            <button className={`btn font-medium btn-lg flex items-center ${user.estado ? 'btn-primary' : 'btn-secondary'}`}>
-                                {user.estado ? 'Activo' : 'Inactivo'}
+                            <button className={`btn font-medium btn-lg flex items-center ${fullUser?.estado ? 'btn-primary' : 'btn-secondary'}`}>
+                                {fullUser?.estado ? 'Activo' : 'Inactivo'}
                             </button>
                         </div>
                     </div>
@@ -76,33 +176,8 @@ const UserProfile = ({ user, isOpen, onClose }) => {
                     <div className="content-box-outline-3-small">
                         <span className="subtitle1 text-primary font-light">Rol</span>
                         <span className='subtitle1 text-secondary mt-1'>
-                            {user.rol?.nombreRol}
+                            {fullUser?.rol?.nombreRol || user.rol?.nombreRol}
                         </span>
-                    </div>
-                </div>
-
-                {/* Card de información del usuario */}
-                <div className="md:col-span-3 w-full">
-                    <div className="card elevation-6 border-outline-variant rounded-xl">
-                        <div className="flex flex-col gap-4">
-                            <div className="flex gap-3 items-center">
-                                <div className="rounded-xl w-10 h-10 bg-primary flex items-center justify-center">
-                                    <md-icon className="text-on-primary">person</md-icon>
-                                </div>
-                                <span className="text-primary headline-small">Información personal</span>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <span className="subtitle1 text-secondary">
-                                    {user.tipoDocumento?.nombreTipoDoc}: {user.numDocumento}
-                                </span>
-                                <span className="subtitle1 text-secondary">
-                                    Fecha registro: {user.fechaRegistro ? new Date(user.fechaRegistro).toLocaleDateString() : 'No especificada'}
-                                </span>
-                                <span className="subtitle1 text-secondary">
-                                    Estado: {user.estado ? 'Activo' : 'Inactivo'}
-                                </span>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -110,10 +185,10 @@ const UserProfile = ({ user, isOpen, onClose }) => {
                     <div className="flex flex-col gap-1">
                         <span className="subtitle1 text-primary font-light">Contacto</span>
                         <span className="subtitle1 text-secondary">
-                            Correo: {user.correo}
+                            Correo: {fullUser?.correo || user.correo}
                         </span>
                         <span className="subtitle1 text-secondary">
-                            Teléfono: {user.telefono}
+                            Teléfono: {fullUser?.telefono || user.telefono}
                         </span>
                         <div className="flex gap-2 flex-wrap mt-2">
                             <md-filled-button className="btn-add px-5">
@@ -138,24 +213,55 @@ const UserProfile = ({ user, isOpen, onClose }) => {
                     <div className="content-box-outline-3-small">
                         <span className="subtitle1">Ciudad</span>
                         <span className="subtitle1 text-secondary mt-1">
-                            {user.city}
+                            {fullUser?.ciudad?.nombreCiudad || user?.ciudad?.nombreCiudad}
                         </span>
                     </div>
                     <div className="content-box-outline-3-small">
                         <span className="subtitle1">Dirección</span>
                         <span className="subtitle1 text-secondary mt-1">
-                            {user.adress}
+                            {fullUser?.direccion || user.direccion}
                         </span>
                     </div>
                 </div>
 
                 <div>
-                    <button className='btn btn-red font-medium flex text-red items-center'>
-                        <md-icon className="text-sm">delete</md-icon>
-                        Eliminar usuario
-                    </button>
+                    {(fullUser?.rol?.nombreRol?.toLowerCase() === 'administrador' || user?.rol?.nombreRol?.toLowerCase() === 'administrador') ? (
+                        <div className='btn btn-secondary font-medium flex text-secondary items-center opacity-50 cursor-not-allowed' title="No se puede eliminar un administrador">
+                            <md-icon className="text-sm">delete</md-icon>
+                            Eliminar usuario
+                        </div>
+                    ) : (
+                        <button className='btn btn-red font-medium flex text-red items-center' onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(user);
+                        }}>
+                            <md-icon className="text-sm">delete</md-icon>
+                            Eliminar usuario
+                        </button>
+                    )}
                 </div>
             </div>
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                itemType="usuario"
+                itemName={userToDelete?.nombre}
+            />
+
+            <EditUserModal
+                isOpen={isEditModalOpen}
+                onClose={handleEditCancel}
+                onConfirm={handleEditConfirm}
+                user={fullUser || user}
+            />
+
+            <AddModal
+                isOpen={isAddModalOpen}
+                onClose={handleAddCancel}
+                onConfirm={handleAddConfirm}
+                itemType="usuario"
+            />
         </div>
     );
 };

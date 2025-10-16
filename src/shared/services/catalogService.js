@@ -18,6 +18,15 @@ export const catalogService = {
       throw error;
     }
   },
+
+  getCities: async () => {
+    try {
+      const response = await apiClient.get("/ciudades");
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default catalogService;

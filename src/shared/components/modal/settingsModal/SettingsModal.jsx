@@ -1,14 +1,11 @@
 import Modal from '../Modal'
-import { useState } from 'react'
 import { useTheme } from '../../../context/ThemeContext'
-import ChangePassword from '../../changePassword/ChangePassword'
 import '@material/web/icon/icon.js'
 import '@material/web/button/filled-button.js'
 import '@material/web/switch/switch.js'
 
 const SettingsModal = ({ isOpen, onClose }) => {
     const { theme, toggleTheme, isDark } = useTheme();
-    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
     return (
         <>
@@ -47,34 +44,9 @@ const SettingsModal = ({ isOpen, onClose }) => {
                                 </div>
                             </div>
                         </div>
-
-                        <div className="border-b border-border pb-6">
-                            <h3 className="text-lg font-medium text-primary mb-4">Seguridad</h3>
-
-                            <div className="flex items-center justify-between">
-                                <div className="flex flex-col">
-                                    <span className="text-primary font-medium">Contraseña</span>
-                                    <span className="text-secondary text-sm">
-                                        Cambia tu contraseña actual
-                                    </span>
-                                </div>
-                                <md-filled-button
-                                    className="btn btn-primary"
-                                    onClick={() => setIsChangePasswordOpen(true)}
-                                >
-                                    <md-icon slot="icon">lock</md-icon>
-                                    Cambiar contraseña
-                                </md-filled-button>
-                            </div>
-                        </div>
                     </div>
                 </main>
             </Modal>
-
-            <ChangePassword
-                isOpen={isChangePasswordOpen}
-                onClose={() => setIsChangePasswordOpen(false)}
-            />
         </>
     )
 }

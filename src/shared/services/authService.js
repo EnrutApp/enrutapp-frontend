@@ -9,9 +9,17 @@ export const authService = {
       });
 
       if (response.success && response.data) {
-        localStorage.setItem("access_token", response.data.access_token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-        localStorage.setItem("token_expires_in", response.data.expires_in);
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("token_expires_in");
+        sessionStorage.removeItem("access_token");
+        sessionStorage.removeItem("user");
+        sessionStorage.removeItem("token_expires_in");
+
+        const storage = credentials.remember ? localStorage : sessionStorage;
+        storage.setItem("access_token", response.data.access_token);
+        storage.setItem("user", JSON.stringify(response.data.user));
+        storage.setItem("token_expires_in", response.data.expires_in);
       }
 
       return response;
@@ -22,14 +30,14 @@ export const authService = {
 
   register: async (userData) => {
     try {
-      const response = await apiClient.post("/auth/register", {
+      const response = await apiClient.post("/usuarios", {
         correo: userData.email,
         contrasena: userData.password,
         nombre: userData.name,
         numDocumento: userData.documentNumber,
         telefono: userData.phone,
         direccion: userData.address,
-        ciudad: userData.city,
+        idCiudad: userData.idCiudad,
         idRol: userData.roleId,
         tipoDoc: userData.documentType,
       });
@@ -75,21 +83,30 @@ export const authService = {
     localStorage.removeItem("access_token");
     localStorage.removeItem("user");
     localStorage.removeItem("token_expires_in");
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("token_expires_in");
     window.location.href = "/login";
   },
 
   isAuthenticated: () => {
-    const token = localStorage.getItem("access_token");
+    const token =
+      localStorage.getItem("access_token") ||
+      sessionStorage.getItem("access_token");
     return !!token;
   },
 
   getCurrentUser: () => {
-    const userStr = localStorage.getItem("user");
+    const userStr =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
     return userStr ? JSON.parse(userStr) : null;
   },
 
   getToken: () => {
-    return localStorage.getItem("access_token");
+    return (
+      localStorage.getItem("access_token") ||
+      sessionStorage.getItem("access_token")
+    );
   },
 };
 

@@ -1,14 +1,86 @@
 import Modal from '../Modal'
+import userService from '../../../services/userService';
+import EditUserModal from '../editUserModal/EditUserModal';
+import catalogService from '../../../services/catalogService';
+import EditPhotoModal from '../editPhotoModal/EditPhotoModal';
+import Avvvatars from 'avvvatars-react';
+import photoService from '../../../services/photoService';
+import LogoutModal from '../logoutModal/LogoutModal';
+import ChangePasswordModal from '../changePasswordModal/ChangePasswordModal';
+import '@material/web/menu/menu.js'
+import '@material/web/menu/menu-item.js'
 import '@material/web/icon/icon.js'
 import '@material/web/button/filled-button.js';
-import Avvvatars from 'avvvatars-react';
 import { useAuth } from '../../../context/AuthContext';
-import { useState } from 'react';
-import LogoutModal from '../logoutModal/LogoutModal';
+import { useState, useRef } from 'react';
 
 const ProfileModal = ({ isOpen, onClose }) => {
-    const { user, logout } = useAuth();
-    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
+    const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
+    const [editUserLoading, setEditUserLoading] = useState(false);
+    const [cities, setCities] = useState([]);
+    const [citiesLoading, setCitiesLoading] = useState(false);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+
+    const handleEditUserClick = async () => {
+        setCitiesLoading(true);
+        try {
+            const res = await catalogService.getCities();
+            setCities(res.data || []);
+        } catch (err) {
+            setCities([]);
+        } finally {
+            setCitiesLoading(false);
+            setIsEditUserModalOpen(true);
+        }
+    };
+
+    const handleEditUserSave = async (data) => {
+        setEditUserLoading(true);
+        try {
+            await userService.updateUser(data);
+            await refreshAuth();
+            setIsEditUserModalOpen(false);
+        } catch (err) {
+        } finally {
+            setEditUserLoading(false);
+        }
+    };
+    const { user, logout, refreshAuth } = useAuth();
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef();
+
+    const [isEditPhotoModalOpen, setIsEditPhotoModalOpen] = useState(false);
+
+    const handleEditPhotoClick = () => {
+        setIsEditPhotoModalOpen(true);
+    };
+
+    const handleAddPhoto = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleDeletePhoto = async () => {
+        try {
+            await photoService.deleteProfilePhoto();
+            await refreshAuth();
+            setIsEditPhotoModalOpen(false);
+        } catch (err) { }
+    };
+
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+            await photoService.uploadProfilePhoto(file);
+            await refreshAuth();
+            setIsEditPhotoModalOpen(false);
+        } catch (err) {
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleLogoutClick = () => {
         setIsLogoutModalOpen(true)
@@ -24,8 +96,8 @@ const ProfileModal = ({ isOpen, onClose }) => {
     }
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} size='lg'>
-            <main className="p-6">
+        <Modal isOpen={isOpen} onClose={onClose} size='xl'>
+            <main className="p-6 list-enter max-h-[90vh] overflow-y-auto scrollbar-hide rounded-xl shadow-lg">
                 <div className='flex items-center gap-1 mb-4'>
                     <button
                         onClick={onClose}
@@ -38,9 +110,22 @@ const ProfileModal = ({ isOpen, onClose }) => {
                 <div className="flex flex-col items-center gap-2.5">
                     <div className='bg-background content-box-small flex items-center'>
                         <div className='border-6 border-border rounded-full relative'>
-                            <Avvvatars value={user?.nombre || 'Usuario'} size={80} />
-                            <div className='absolute -bottom-2 -right-1 px-1 bg-black rounded-full border-background hover:opacity-80 transition-all cursor-pointer'>
-                                <md-icon className='text-white text-sm'>photo_camera</md-icon>
+                            {user?.foto ? (
+                                <img
+                                    src={user.foto.startsWith('http') ? user.foto : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${user.foto}`}
+                                    alt="Foto de perfil"
+                                    className="rounded-full w-20 h-20 object-cover"
+                                />
+                            ) : (
+                                <Avvvatars value={user?.nombre || 'Usuario'} size={80} />
+                            )}
+                            <div
+                                className='absolute -bottom-2 -right-1 px-2 btn-primary rounded-full border-background hover:opacity-80 transition-all cursor-pointer'
+                                id="profile-photo-menu-anchor"
+                                onClick={handleEditPhotoClick}
+                                style={{ opacity: uploading ? 0.5 : 1 }}
+                            >
+                                <md-icon className='text-on-primary text-sm'>edit</md-icon>
                             </div>
                         </div>
                         <h1 className='h3'>{user?.nombre || 'Usuario sin nombre'}</h1>
@@ -65,28 +150,41 @@ const ProfileModal = ({ isOpen, onClose }) => {
                     </div>
 
                     <div className='content-box-outline-3-small'>
-                        <span className="subtitle1 text-primary font-light">Teléfono:</span>
-                        <span className='subtitle1 text-secondary mt-1'>{user?.telefono || 'Teléfono no disponible'}</span>
+                        <div className='flex gap-2'>
+                            <span className="subtitle1 text-primary font-light">Teléfono:</span>
+                            <span className='subtitle1 text-secondary'>{user?.telefono || 'Teléfono no disponible'}</span>
+                        </div>
+                        <div className='flex gap-2'>
+                            <span className="subtitle1 text-primary font-light">Dirección:</span>
+                            <span className='subtitle1 text-secondary'>{user?.direccion || 'Dirección no disponible'}</span>
+                        </div>
+                        <div className='flex gap-2'>
+                            <span className="subtitle1 text-primary font-light">Ciudad:</span>
+                            <span className='subtitle1 text-secondary'>{user?.ciudad?.nombreCiudad || 'Ciudad no disponible'}</span>
+                        </div>
                         <div className='flex justify-end'>
-                            <button className='btn-secondary btn-sm cursor-pointer'>Editar</button>
+                            <button className='btn-secondary btn-sm cursor-pointer' onClick={handleEditUserClick}>Editar</button>
                         </div>
                     </div>
 
-                    <div className='content-box-outline-3-small'>
-                        <span className="subtitle1 text-primary font-light">Dirección:</span>
-                        <span className='subtitle1 text-secondary mt-1'>{user?.direccion || 'Dirección no disponible'}</span>
-                    </div>
-
-                    <div className='content-box-outline-3-small'>
-                        <span className="subtitle1 text-primary font-light">Ciudad:</span>
-                        <span className='subtitle1 text-secondary mt-1'>{user?.ciudad || 'Ciudad no disponible'}</span>
-                    </div>
-
-                    <div className='content-box-outline-3-small'>
-                        <span className="subtitle1 text-primary font-light">Estado:</span>
-                        <span className={`subtitle1 mt-1 font-medium ${user?.estado ? 'text-green-600' : 'text-red-600'}`}>
-                            {user?.estado ? 'Activo' : 'Inactivo'}
-                        </span>
+                    <div className="content-box-outline-3-small">
+                        <div className="flex flex-col">
+                            <div className="flex flex-col">
+                                <span className="ubtitle1 text-primary font-light">Contraseña</span>
+                                <span className="subtitle1 text-secondary">
+                                    Cambia tu contraseña actual
+                                </span>
+                            </div>
+                            <div className='flex justify-end'>
+                                <md-filled-button
+                                    className="btn search-input"
+                                    onClick={() => setIsChangePasswordOpen(true)}
+                                >
+                                    <md-icon slot="icon">lock</md-icon>
+                                    Cambiar contraseña
+                                </md-filled-button>
+                            </div>
+                        </div>
                     </div>
 
                     <button
@@ -101,6 +199,30 @@ const ProfileModal = ({ isOpen, onClose }) => {
                 isOpen={isLogoutModalOpen}
                 onClose={handleLogoutCancel}
                 onConfirm={handleLogoutConfirm}
+            />
+            <EditPhotoModal
+                isOpen={isEditPhotoModalOpen}
+                onClose={() => setIsEditPhotoModalOpen(false)}
+                user={user}
+                uploading={uploading}
+                fileInputRef={fileInputRef}
+                handleAddPhoto={handleAddPhoto}
+                handleDeletePhoto={handleDeletePhoto}
+                handleFileChange={handleFileChange}
+            />
+            <EditUserModal
+                isOpen={isEditUserModalOpen}
+                onClose={() => setIsEditUserModalOpen(false)}
+                user={user}
+                onSave={handleEditUserSave}
+                loading={editUserLoading}
+                cities={cities}
+                citiesLoading={citiesLoading}
+            />
+
+            <ChangePasswordModal
+                isOpen={isChangePasswordOpen}
+                onClose={() => setIsChangePasswordOpen(false)}
             />
         </Modal>
     )

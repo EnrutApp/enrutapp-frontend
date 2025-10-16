@@ -10,6 +10,7 @@ export const loginSchema = yup.object().shape({
     .string()
     .min(6, "La contraseña debe tener al menos 6 caracteres")
     .required("La contraseña es obligatoria"),
+  remember: yup.boolean().default(false),
 });
 
 // Esquema de validación para registro
@@ -46,9 +47,17 @@ export const registerSchema = yup.object().shape({
     .string()
     .min(5, "La dirección debe tener al menos 5 caracteres")
     .required("La dirección es obligatoria"),
-  city: yup
-    .string()
-    .min(2, "La ciudad debe tener al menos 2 caracteres")
+  idCiudad: yup
+    .mixed()
+    .test(
+      "is-valid-idCiudad",
+      "La ciudad es obligatoria",
+      (value) =>
+        value !== undefined &&
+        value !== null &&
+        value !== "" &&
+        !isNaN(Number(value))
+    )
     .required("La ciudad es obligatoria"),
   roleId: yup.string().required("Debe seleccionar un rol"),
   documentType: yup.string().required("Debe seleccionar un tipo de documento"),

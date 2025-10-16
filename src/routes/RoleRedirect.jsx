@@ -5,11 +5,8 @@ const RoleRedirect = () => {
     const { user, isLoading, isAuthenticated } = useAuth();
 
     if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-            </div>
-        );
+        // Evitar duplicar loaders: usar barra global del Layout
+        return null;
     }
 
     if (!isAuthenticated) {
@@ -22,7 +19,6 @@ const RoleRedirect = () => {
     if (userRole === "Conductor") return <Navigate to="/conductor/" replace />;
     if (userRole === "Cliente") return <Navigate to="/usuario/" replace />;
 
-    // Si el rol no coincide con ninguno de los esperados, ir al dashboard genérico
     return <Navigate to="/dashboard" replace />;
 };
 

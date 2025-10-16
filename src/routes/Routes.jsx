@@ -1,50 +1,107 @@
-import { createBrowserRouter } from "react-router-dom"
-import Layout from '../components/Layout'
-import Home from "../features/home/Home"
-import NotFound from "../features/notFound/NotFound"
-import Clientes from "../features/clientes/Clientes"
-import Usuarios from "../features/usuarios/Usuarios"
-import Conductores from "../features/conductores/Conductores"
-import Vehiculos from "../features/vehiculos/Vehiculos"
-import RutasAdmin from "../features/rutas/pages/RutasAdmin"
-import RutasConductor from "../features/rutas/pages/RutasConductor"
-import RutasUsuario from "../features/rutas/pages/RutasUsuario"
-import Turnos from "../features/turnos/Turnos"
-import Reservas from "../features/reservas/Reservas"
-import Encomiendas from "../features/encomiendas/Encomiendas"
-import Roles from "../features/rol/Roles"
-import Ubicacion from "../features/ubicaciones/Ubicacion"
-import Finanzas from "../features/finanzas/Finanzas"
-import Login from "../features/login/Login"
-import Register from "../features/register/Register"
-import RestablecerContraseña from "../features/restablecerContraseña/RestablecerContraseña"
-import ProtectedRoute from "./ProtectedRoute"
-import HomeAdmin from "../features/home/pages/HomeAdmin"
-import HomeConductor from "../features/home/pages/HomeConductor"
-import HomeUsuario from "../features/home/pages/HomeUsuario"
-import RoleRedirect from "./RoleRedirect"
+import { createBrowserRouter } from "react-router-dom";
+import { lazy } from "react";
 
+// Importaciones de constantes y utilidades
+import { ROUTES, USER_ROLES } from "./routeConstants";
+import { withErrorBoundary } from "./RouteErrorBoundary";
+import { withLazyLoading } from "./LazyLoadingFallback";
+import ProtectedRoute from "./ProtectedRoute";
+
+// Importaciones de rutas modulares
+import {
+    adminRoutes,
+    ADMIN_REQUIRED_ROLE
+} from "./modules/adminRoutes";
+import {
+    conductorRoutes,
+    CONDUCTOR_REQUIRED_ROLE
+} from "./modules/conductorRoutes";
+import {
+    usuarioRoutes,
+    USUARIO_REQUIRED_ROLE
+} from "./modules/usuarioRoutes";
+
+// Se removieron data loaders de router: los componentes no usan useLoaderData y esto ralentizaba la navegación
+
+// Lazy loading de componentes principales
+const Layout = withLazyLoading(
+    lazy(() => import('../components/Layout')),
+    'Cargando aplicación...'
+);
+
+const Login = withLazyLoading(
+    lazy(() => import('../features/auth/Login')),
+    'Cargando inicio de sesión...'
+);
+
+const NotFound = withLazyLoading(
+    lazy(() => import('../features/notFound/NotFound')),
+    'Página no encontrada...'
+);
+
+const RoleRedirect = withLazyLoading(
+    lazy(() => import('./RoleRedirect')),
+    'Redirigiendo...'
+);
+
+// Componentes con error boundary
+const LayoutWithErrorBoundary = withErrorBoundary(Layout, {
+    title: 'Error de la Aplicación',
+    message: 'Ha ocurrido un error en la aplicación. Por favor, recarga la página.'
+});
+
+const LoginWithErrorBoundary = withErrorBoundary(Login, {
+    title: 'Error de Inicio de Sesión',
+    message: 'No se pudo cargar el formulario de inicio de sesión.'
+});
+
+// Función helper para crear rutas protegidas con roles
+const createProtectedRoute = (element, allowedRoles) => {
+    const route = {
+        element: (
+            <ProtectedRoute allowedRoles={allowedRoles}>
+                {element}
+            </ProtectedRoute>
+        )
+    };
+
+    return route;
+};
+
+// Función helper para mapear rutas con protección y loaders
+const mapRoutesWithProtection = (routes, requiredRoles) => {
+    return routes.map(route => ({
+        path: route.path,
+        ...createProtectedRoute(
+            route.element,
+            requiredRoles
+        ),
+        handle: route.handle
+    }));
+};
+
+// Configuración principal del router
 const Routes = createBrowserRouter([
+    // Rutas públicas
     {
-        path: "login",
-        element: <Login />
+        path: ROUTES.LOGIN,
+        element: <LoginWithErrorBoundary />,
+        errorElement: <div>Error cargando login</div>
     },
+
+    // Rutas principales con layout
     {
-        path: "register",
-        element: <Register />
-    },
-    {
-        path: "reset-password",
-        element: <RestablecerContraseña />
-    },
-    {
-        path: "/",
-        element: <Layout />,
+        path: ROUTES.ROOT,
+        element: <LayoutWithErrorBoundary />,
+        errorElement: <NotFound />,
         children: [
+            // Ruta raíz - redirige según el rol
             {
                 index: true,
                 element: <RoleRedirect />
             },
+
+            // Dashboard genérico - redirige según el rol
             {
                 path: "dashboard",
                 element: (
@@ -53,209 +110,43 @@ const Routes = createBrowserRouter([
                     </ProtectedRoute>
                 )
             },
-            // ADMIN
-            {
-                path: "admin/",
-                element: (
-                    <ProtectedRoute allowedRoles={["Administrador"]}>
-                        <HomeAdmin />
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "admin/rutas",
-                element: (
-                    <ProtectedRoute allowedRoles={["Administrador"]}>
-                        <RutasAdmin />
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "admin/clientes",
-                element: (
-                    <ProtectedRoute allowedRoles={["Administrador"]}>
-                        <Clientes />
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "admin/usuarios",
-                element: (
-                    <ProtectedRoute allowedRoles={["Administrador"]}>
-                        <Usuarios />
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "admin/conductores",
-                element: (
-                    <ProtectedRoute allowedRoles={["Administrador"]}>
-                        <Conductores />
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "admin/vehiculos",
-                element: (
-                    <ProtectedRoute allowedRoles={["Administrador"]}>
-                        <Vehiculos />
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "admin/turnos",
-                element: (
-                    <ProtectedRoute allowedRoles={["Administrador"]}>
-                        <Turnos />
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "admin/reservas",
-                element: (
-                    <ProtectedRoute allowedRoles={["Administrador"]}>
-                        <Reservas />
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "admin/encomiendas",
-                element: (
-                    <ProtectedRoute allowedRoles={["Administrador"]}>
-                        <Encomiendas />
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "admin/finanzas",
-                element: (
-                    <ProtectedRoute allowedRoles={["Administrador"]}>
-                        <Finanzas />
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "admin/ubicaciones",
-                element: (
-                    <ProtectedRoute allowedRoles={["Administrador"]}>
-                        <Ubicacion />
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "admin/rol",
-                element: (
-                    <ProtectedRoute allowedRoles={["Administrador"]}>
-                        <Roles />
-                    </ProtectedRoute>
-                )
-            },
 
-            // CONDUCTOR
-            {
-                path: "conductor/",
-                element: (
-                    <ProtectedRoute allowedRoles={["Conductor"]}>
-                        <HomeConductor />
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "conductor/mis-viajes",
-                element: (
-                    <ProtectedRoute allowedRoles={["Conductor"]}>
-                        <div>Mis viajes (Conductor)</div>
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "conductor/calendario",
-                element: (
-                    <ProtectedRoute allowedRoles={["Conductor"]}>
-                        <div>Calendario (Conductor)</div>
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "conductor/turnos",
-                element: (
-                    <ProtectedRoute allowedRoles={["Conductor"]}>
-                        <div>Calendario (Conductor)</div>
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "conductor/reservas",
-                element: (
-                    <ProtectedRoute allowedRoles={["Conductor"]}>
-                        <div>Reservas (Conductor)</div>
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "conductor/historial",
-                element: (
-                    <ProtectedRoute allowedRoles={["Conductor"]}>
-                        <div>Historial (Conductor)</div>
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "conductor/rutas",
-                element: (
-                    <ProtectedRoute allowedRoles={["Conductor"]}>
-                        <RutasConductor />
-                    </ProtectedRoute>
-                )
-            },
+            // Rutas de Administrador con protección y loaders
+            ...mapRoutesWithProtection(
+                adminRoutes,
+                ADMIN_REQUIRED_ROLE
+            ),
 
-            // CLIENTE
-            {
-                path: "usuario/",
-                element: (
-                    <ProtectedRoute allowedRoles={["Cliente"]}>
-                        <HomeUsuario />
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "usuario/mis-viajes",
-                element: (
-                    <ProtectedRoute allowedRoles={["Cliente"]}>
-                        <div>Mis viajes (Cliente)</div>
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "usuario/reservas",
-                element: (
-                    <ProtectedRoute allowedRoles={["Cliente"]}>
-                        <div>Reservas (Cliente)</div>
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "usuario/encomiendas",
-                element: (
-                    <ProtectedRoute allowedRoles={["Cliente"]}>
-                        <div>Encomiendas (Cliente)</div>
-                    </ProtectedRoute>
-                )
-            },
-            {
-                path: "usuario/historial",
-                element: (
-                    <ProtectedRoute allowedRoles={["Cliente"]}>
-                        <div>Historial (Cliente)</div>
-                    </ProtectedRoute>
-                )
-            },
+            // Rutas de Conductor con protección y loaders
+            ...mapRoutesWithProtection(
+                conductorRoutes,
+                CONDUCTOR_REQUIRED_ROLE
+            ),
+
+            // Rutas de Usuario/Cliente con protección y loaders
+            ...mapRoutesWithProtection(
+                usuarioRoutes,
+                USUARIO_REQUIRED_ROLE
+            )
         ]
     },
+
+    // Ruta 404 - debe ir al final
     {
         path: "*",
         element: <NotFound />
     }
-])
+]);
 
-export default Routes
+// Configuración adicional del router
+Routes.subscribe?.((state) => {
+    // Log de navegación en desarrollo
+    if (process.env.NODE_ENV === 'development') {
+        console.log('Navegación:', state.location?.pathname);
+    }
+});
+
+export default Routes;
+
+// Exportar también las constantes para uso en otros componentes
+export { ROUTES, USER_ROLES } from './routeConstants';

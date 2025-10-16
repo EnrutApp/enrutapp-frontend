@@ -30,11 +30,9 @@ const SideBar = () => {
   })
 
   const isActive = (path) => {
-    // Para rutas exactas como '/', '/admin/', '/conductor/', '/usuario/'
     if (path.endsWith('/')) {
       return location.pathname === path;
     }
-    // Para otras rutas, usar startsWith
     return location.pathname.startsWith(path);
   }
 
@@ -48,6 +46,7 @@ const SideBar = () => {
 
   const handleLogoutClick = () => {
     setIsLogoutModalOpen(true)
+    document.querySelector('md-menu.config-menu')?.close();
   }
 
   const handleLogoutConfirm = () => {
@@ -61,6 +60,7 @@ const SideBar = () => {
 
   const handleProfileClick = () => {
     setIsProfileModalOpen(true)
+    document.querySelector('md-menu.config-menu')?.close();
   }
 
   const handleProfileExit = () => {
@@ -69,6 +69,7 @@ const SideBar = () => {
 
   const handleSettingsClick = () => {
     setIsSettingsModalOpen(true)
+    document.querySelector('md-menu.config-menu')?.close();
   }
 
   const handleSettingsExit = () => {
@@ -83,6 +84,13 @@ const SideBar = () => {
     setCollapsedSections(newState)
     localStorage.setItem('sidebarSections', JSON.stringify(newState))
   }
+
+  const getProfilePhotoUrl = (foto) => {
+    if (!foto) return null;
+    return foto.startsWith('http')
+      ? foto
+      : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${foto}`;
+  };
 
   const roleMenus = {
     Administrador: [
@@ -156,42 +164,16 @@ const SideBar = () => {
       },
     ]
   };
+
   const menuSections = roleMenus[user?.rol?.nombreRol] || [];
 
   return (
     <nav className="h-full flex flex-col sidebar">
-      <div className='flex items-center p-4 border-b-2 border-border mb-4 rounded-b-2xl'>
-        <div className="relative">
-          <div className="transform transition-transform duration-300 hover:scale-110 z-10" onClick={handleMenuToggle}>
-            <md-icon-button id="config-button">
-              <Avvvatars value={user?.nombre || 'Usuario'} style='character' size={38} />
-            </md-icon-button>
-          </div>
-          <md-menu anchor="config-button" className="config-menu">
-            <div className='flex flex-col items-center pt-5 gap-2'>
-              <div className='border-6 border-border rounded-full relative'>
-                <Avvvatars value={user?.nombre || 'Usuario'} size={60} />
-                <div className='absolute -bottom-2 -right-1 px-1 bg-black rounded-full border-background hover:opacity-80 transition-all cursor-pointer'>
-                  <md-icon className='text-white text-sm'>photo_camera</md-icon>
-                </div>
-              </div>
-              <div className='flex flex-col text-center'>
-                <span className='subtitle1 font-bold'>{user?.nombre || 'Usuario'}</span>
-                <span className='caption'>{user?.rol?.nombreRol || 'Sin rol'}</span>
-                <button className='p-2 cursor-pointer hover:opacity-65'>
-                  <div slot="headline" className='caption border-2 border-border rounded-2xl px-4 py-1' onClick={handleProfileClick}>Editar perfil</div>
-                </button>
-              </div>
-            </div>
-            <md-menu-item onClick={handleSettingsClick}>
-              <div slot="headline" className='text-base'>Configuración</div>
-              <md-icon slot="start" className="text-base">settings</md-icon>
-            </md-menu-item>
-          </md-menu>
-        </div>
-        <div className='ml-3 flex-1'>
-          <h1 className='text-lg font-semibold text-primary'>{user?.name || 'Usuario'}</h1>
-          <p className='caption text-secondary'>{user?.rol?.nombreRol || ''}</p>
+      <div className='flex gap-2 items-center p-4 border-b-2 border-border mb-4 rounded-b-2xl'>
+        <img src="/public/favicon.ico" alt="logo" width={37} className />
+        <div className="flex flex-col leading-tight">
+          <h1 className="h5 font-bold mb-1">Enrutapp</h1>
+          <span className="caption text-secondary -mt-1">{user?.rol?.nombreRol || 'Sin rol'}</span>
         </div>
       </div>
 
@@ -244,16 +226,66 @@ const SideBar = () => {
         ))}
       </div>
 
-      <div className='border-t-2 border-border p-3'>
-        <button
-          onClick={handleLogoutClick}
-          className='sidebar-logout cursor-pointer group w-full flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-red hover:bg-opacity-10 hover:scale-105'
-          style={{ transformOrigin: 'left' }}
-        >
-          <md-icon className="sidebar-icon text-lg mr-3 transition-colors duration-200 text-secondary">logout</md-icon>
-          <span className="sidebar-text text-base transition-colors duration-200 text-secondary">Cerrar sesión</span>
-        </button>
+      <div className='border-t-2 border-border'>
+        <div className='flex items-center'>
+          <div className="relative">
+            <button className="flex gap-2 items-center cursor-pointer p-3 w-full focus:outline-none hover:bg-fill hover:bg-opacity-20 rounded-xl transition-all duration-200 group" onClick={handleMenuToggle} id="config-button"
+              aria-label="Abrir menú de usuario" tabIndex={0} role="button">
+              <div className="relative flex-shrink-0">
+                {user?.foto ? (
+                  <img
+                    src={getProfilePhotoUrl(user.foto)}
+                    alt="Foto de perfil"
+                    className="rounded-full w-8 h-8 object-cover shadow-md border-2 border-border group-hover:border-blue transition-all duration-200"
+                  />
+                ) : (
+                  <Avvvatars value={user?.nombre || 'Usuario'} size={32} />
+                )}
+              </div>
+              <div className="flex gap-1 justify-center text-left ml-1">
+                <span className='font-medium leading-tight text-secondary whitespace-nowrap'>
+                  {user?.nombre?.split(' ')[0] || 'Usuario'}
+                </span>
+                <span className='font-medium leading-tight text-secondary whitespace-nowrap'>
+                  {user?.nombre?.split(' ')[1] || ''}
+                </span>
+              </div>
+            </button>
+            <md-menu anchor="config-button" className="config-menu">
+              <div className='flex flex-col items-center pt-5 gap-2'>
+                <div className='border-6 border-border rounded-full relative'>
+                  {user?.foto ? (
+                    <img
+                      src={getProfilePhotoUrl(user.foto)}
+                      alt="Foto de perfil"
+                      className="rounded-full w-16 h-16 object-cover shadow-md"
+                    />
+                  ) : (
+                    <Avvvatars value={user?.nombre || 'Usuario'} size={60} />
+                  )}
+                </div>
+                <div className='flex flex-col text-center'>
+                  <span className='subtitle1 font-bold'>{user?.nombre || 'Usuario'}</span>
+                  <span className='caption'>{user?.rol?.nombreRol || 'Sin rol'}</span>
+                  <button className='p-2 cursor-pointer hover:opacity-65'>
+                    <div slot="headline" className='caption border-2 border-border rounded-2xl px-4 py-1' onClick={handleProfileClick}>Editar perfil</div>
+                  </button>
+                </div>
+              </div>
+              <md-menu-item onClick={handleSettingsClick}>
+                <div slot="headline" className='text-base'>Configuración</div>
+                <md-icon slot="start" className="text-base">settings</md-icon>
+              </md-menu-item>
+              <md-menu-item onClick={handleLogoutClick}>
+                <div slot="headline" className='text-base'>Salir</div>
+                <md-icon slot="start" className="text-base">logout</md-icon>
+              </md-menu-item>
+            </md-menu>
+          </div>
+        </div>
       </div>
+
+
 
       <LogoutModal
         isOpen={isLogoutModalOpen}

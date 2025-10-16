@@ -1,6 +1,25 @@
 import apiClient from "./apiService";
 
 export const userService = {
+  cambiarEstado: async (idUsuario, estado) => {
+    try {
+      const response = await apiClient.patch("/auth/estado", {
+        idUsuario,
+        estado,
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+  updateUser: async (data) => {
+    try {
+      const response = await apiClient.patch("/auth/update", data);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
   getUsers: async () => {
     try {
       const response = await apiClient.get("/usuarios");
@@ -39,34 +58,23 @@ export const userService = {
     }
   },
 
-  updateUser: async (id, userData) => {
-    try {
-      const updateData = {};
-
-      if (userData.email) updateData.correo = userData.email;
-      if (userData.password) updateData.contrasena = userData.password;
-      if (userData.name) updateData.nombre = userData.name;
-      if (userData.documentNumber)
-        updateData.numDocumento = userData.documentNumber;
-      if (userData.phone) updateData.telefono = userData.phone;
-      if (userData.address) updateData.direccion = userData.address;
-      if (userData.city) updateData.ciudad = userData.city;
-      if (userData.roleId) updateData.idRol = userData.roleId;
-      if (userData.documentType) updateData.tipoDoc = userData.documentType;
-      if (userData.estado !== undefined) updateData.estado = userData.estado;
-
-      const response = await apiClient.put(`/usuarios/${id}`, updateData);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
   deleteUser: async (id) => {
     try {
       const response = await apiClient.delete(`/usuarios/${id}`);
       return response;
     } catch (error) {
+      // Mejorar el mensaje de error para el usuario
+      if (error.statusCode === 409) {
+        throw new Error(
+          error.message ||
+            "No se puede eliminar el usuario porque tiene registros asociados"
+        );
+      }
+      if (error.statusCode === 403) {
+        throw new Error(
+          error.message || "No tienes permisos para eliminar este usuario"
+        );
+      }
       throw error;
     }
   },
