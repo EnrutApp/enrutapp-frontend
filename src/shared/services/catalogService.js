@@ -27,6 +27,24 @@ export const catalogService = {
       throw error;
     }
   },
+
+  getTiposVehiculo: async () => {
+    try {
+      const response = await apiClient.get("/tipos-vehiculo");
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getMarcasVehiculo: async () => {
+    try {
+      const response = await apiClient.get("/marcas-vehiculos");
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default catalogService;

@@ -7,7 +7,7 @@ import '@material/web/iconbutton/filled-tonal-icon-button.js';
 import '@material/web/switch/switch.js';
 import { useState } from 'react';
 
-const VehiculoProfile = ({ vehicle, isOpen, onClose }) => {
+const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
     const [activeTab, setActiveTab] = useState('general');
     const [isClosing, setIsClosing] = useState(false);
 
@@ -46,7 +46,7 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose }) => {
                 </div>
                 <div className='flex gap-2'>
                     <div>
-                        <md-filled-button className="btn-add px-6 py-2">
+                        <md-filled-button className="btn-add px-6 py-2" onClick={() => onEdit?.(vehicle)}>
                             <md-icon slot="icon" className="text-sm text-on-primary">edit</md-icon>
                             Editar vehículo
                         </md-filled-button>

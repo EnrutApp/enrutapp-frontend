@@ -15,7 +15,7 @@ const Clientes = withLazyLoading(
 );
 
 const Usuarios = withLazyLoading(
-    lazy(() => import('../../features/usuarios/Usuarios')),
+    lazy(() => import('../../features/usuarios/UsuariosPage')),
     'Cargando gestión de usuarios...'
 );
 
@@ -60,7 +60,7 @@ const Ubicacion = withLazyLoading(
 );
 
 const Roles = withLazyLoading(
-    lazy(() => import('../../features/rol/Roles')),
+    lazy(() => import('../../features/roles/RolesPage')),
     'Cargando gestión de roles...'
 );
 

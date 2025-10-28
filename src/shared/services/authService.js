@@ -30,17 +30,21 @@ export const authService = {
 
   register: async (userData) => {
     try {
-      const response = await apiClient.post("/usuarios", {
+      // Asegurar que los IDs están en el formato correcto
+      const payload = {
         correo: userData.email,
         contrasena: userData.password,
         nombre: userData.name,
         numDocumento: userData.documentNumber,
         telefono: userData.phone,
         direccion: userData.address,
-        idCiudad: userData.idCiudad,
-        idRol: userData.roleId,
-        tipoDoc: userData.documentType,
-      });
+        idCiudad: Number(userData.idCiudad), // Convertir a número
+        idRol: String(userData.roleId || "").trim(), // Asegurar que es string
+        tipoDoc: String(userData.documentType || "").trim(), // Asegurar que es string
+      };
+
+      console.log("Payload de registro:", payload); // Debug
+      const response = await apiClient.post("/auth/register", payload);
 
       return response;
     } catch (error) {

@@ -6,88 +6,52 @@ import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import ClienteProfile from './pages/ClienteProfile';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import userService from '../../shared/services/userService';
 
 
 const Clientes = () => {
     const [selectedCliente, setSelectedCliente] = useState(null);
+    const [clientes, setClientes] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [clienteToDelete, setClienteToDelete] = useState(null);
     const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
     const [clienteToSwitch, setClienteToSwitch] = useState(null);
-    const allClients = [
-        {
-            name: 'Lucelly Renteria',
-            status: 'Activo',
-            document: '1234567890',
-            phone: '+57 300 123 4567',
-            email: 'lucelly.renteria@email.com',
-            address: 'Calle 123 #45-67, Medellín',
-            registrationDate: '15 de Marzo, 2024',
-            city: 'Medellin'
-        },
-        {
-            name: 'Carlos Mendoza',
-            status: 'Activo',
-            document: '0987654321',
-            phone: '+57 301 987 6543',
-            email: 'carlos.mendoza@email.com',
-            address: 'Carrera 45 #12-34, Bogotá',
-            registrationDate: '20 de Febrero, 2024',
-            city: 'Bogotá'
-        },
-        {
-            name: 'María González',
-            status: 'Inactivo',
-            document: '1122334455',
-            phone: '+57 302 555 1234',
-            email: 'maria.gonzalez@email.com',
-            address: 'Avenida 80 #23-45, Cali',
-            registrationDate: '10 de Enero, 2024',
-            city: 'Cali'
-        },
-        {
-            name: 'María González',
-            status: 'Inactivo',
-            document: '1122334455',
-            phone: '+57 302 555 1234',
-            email: 'maria.gonzalez@email.com',
-            address: 'Avenida 80 #23-45, Cali',
-            registrationDate: '10 de Enero, 2024',
-            city: 'Cali'
-        },
-        {
-            name: 'María González',
-            status: 'Inactivo',
-            document: '1122334455',
-            phone: '+57 302 555 1234',
-            email: 'maria.gonzalez@email.com',
-            address: 'Avenida 80 #23-45, Cali',
-            registrationDate: '10 de Enero, 2024',
-            city: 'Cali'
-        },
-        {
-            name: 'María González',
-            status: 'Inactivo',
-            document: '1122334455',
-            phone: '+57 302 555 1234',
-            email: 'maria.gonzalez@email.com',
-            address: 'Avenida 80 #23-45, Cali',
-            registrationDate: '10 de Enero, 2024',
-            city: 'Cali'
-        },
-        {
-            name: 'María González',
-            status: 'Inactivo',
-            document: '1122334455',
-            phone: '+57 302 555 1234',
-            email: 'maria.gonzalez@email.com',
-            address: 'Avenida 80 #23-45, Cali',
-            registrationDate: '10 de Enero, 2024',
-            city: 'Cali'
-        }
-    ];
+    useEffect(() => {
+        let mounted = true;
+        const fetchClientes = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const res = await userService.getClientes();
+                const data = Array.isArray(res?.data) ? res.data : res?.data?.data || [];
+                // Mapear al modelo de UI esperado
+                const mapped = data.map((u) => ({
+                    idUsuario: u.idUsuario,
+                    name: u.nombre,
+                    status: u.estado ? 'Activo' : 'Inactivo',
+                    document: u.numDocumento,
+                    phone: u.telefono || '',
+                    email: u.correo,
+                    address: u.direccion || '',
+                    city: u.ciudad?.nombreCiudad || '',
+                    raw: u,
+                }));
+                if (mounted) setClientes(mapped);
+            } catch (e) {
+                if (mounted) setError(e?.message || 'Error al cargar clientes');
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        };
+        void fetchClientes();
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
     const {
         currentPage,
@@ -97,7 +61,7 @@ const Clientes = () => {
         handlePageChange,
         startIndex,
         totalItems
-    } = usePagination(allClients, 4);
+    } = usePagination(clientes, 4);
 
     const handleOpenProfile = (cliente) => {
         setSelectedCliente(cliente);
@@ -170,14 +134,14 @@ const Clientes = () => {
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Activos</span>
-                                    <h2 className='h4 text-primary font-bold'>{allClients.filter(client => client.status === 'Activo').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{clientes.filter(client => client.status === 'Activo').length}</h2>
                                 </div>
                             </div>
 
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Inactivos</span>
-                                    <h2 className='h4 text-primary font-bold'>{allClients.filter(client => client.status === 'Inactivo').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{clientes.filter(client => client.status === 'Inactivo').length}</h2>
                                 </div>
                             </div>
                         </div>
@@ -221,7 +185,22 @@ const Clientes = () => {
                         </div>
 
                         <div className='mt-3'>
-                            {currentClients.map((client, index) => (
+                            {loading && (
+                                <div className='content-box-outline-4-small mb-3'>
+                                    <div className='flex items-center gap-2 p-3'>
+                                        <md-circular-progress indeterminate></md-circular-progress>
+                                        <span className='text-secondary'>Cargando clientes…</span>
+                                    </div>
+                                </div>
+                            )}
+                            {error && (
+                                <div className='content-box-outline-4-small mb-3'>
+                                    <div className='p-3 text-red-600'>
+                                        {error}
+                                    </div>
+                                </div>
+                            )}
+                            {!loading && !error && currentClients.map((client, index) => (
                                 <div
                                     key={index}
                                     className={`content-box-outline-4-small cursor-pointer hover:border-primary transition-colors mb-3 ${client.status === 'Inactivo' ? 'opacity-60' : ''}`}

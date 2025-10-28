@@ -3,7 +3,7 @@ import '@material/web/button/filled-button.js';
 import '@material/web/switch/switch.js';
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
-import UserProfile from './pages/UserProfile';
+import UserProfile from './pages/UsuarioProfilePage';
 import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
 import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
 import AddModal from '../../shared/components/modal/addModal/AddModal';

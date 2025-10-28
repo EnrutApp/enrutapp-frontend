@@ -30,7 +30,7 @@ const Layout = withLazyLoading(
 );
 
 const Login = withLazyLoading(
-    lazy(() => import('../features/auth/Login')),
+    lazy(() => import('../features/auth/LoginPage')),
     'Cargando inicio de sesión...'
 );
 
