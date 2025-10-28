@@ -6,7 +6,10 @@ import usePagination from '../../shared/hooks/usePagination';
 import VehiculoProfile from './pages/VehiculoProfile';
 import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
 import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
-import { useState } from 'react';
+import AddVehiculoModal from '../../shared/components/modal/addModal/AddVehiculoModal';
+import EditVehiculoModal from '../../shared/components/modal/editModal/EditVehiculoModal';
+import { vehiculoService } from '../../shared/services/vehiculoService';
+import { useEffect, useMemo, useState } from 'react';
 
 const Vehiculos = () => {
     const [selectedVehicle, setSelectedVehicle] = useState(null);
@@ -15,170 +18,41 @@ const Vehiculos = () => {
     const [vehicleToDelete, setVehicleToDelete] = useState(null);
     const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
     const [vehicleToSwitch, setVehicleToSwitch] = useState(null);
-    const allVehicles = [
-        {
-            name: 'Renault Alaskan',
-            plate: 'JYN023',
-            capacity: '5 pasajeros',
-            model: '2018',
-            status: 'Activo',
-            image: '/alaskan.png',
-            statusIcon: 'check'
-        },
-        {
-            name: 'Sandero',
-            plate: 'ABC456',
-            capacity: '5 pasajeros',
-            model: '2018',
-            status: 'Mantenimiento',
-            image: '/sandero.png',
-            statusIcon: 'pause'
-        },
-        {
-            name: 'Toyota Hilux',
-            plate: 'DEF789',
-            capacity: '4 pasajeros',
-            model: '2020',
-            status: 'Activo',
-            image: '/alaskan.png',
-            statusIcon: 'check'
-        },
-        {
-            name: 'Chevrolet Spark',
-            plate: 'GHI012',
-            capacity: '4 pasajeros',
-            model: '2019',
-            status: 'Inactivo',
-            image: '/sandero.png',
-            statusIcon: 'block'
-        },
-        {
-            name: 'Ford Ranger',
-            plate: 'JKL345',
-            capacity: '5 pasajeros',
-            model: '2021',
-            status: 'Activo',
-            image: '/alaskan.png',
-            statusIcon: 'check'
-        },
-        {
-            name: 'Nissan Frontier',
-            plate: 'MNO678',
-            capacity: '5 pasajeros',
-            model: '2017',
-            status: 'Mantenimiento',
-            image: '/sandero.png',
-            statusIcon: 'pause'
-        },
-        {
-            name: 'Renault Alaskan',
-            plate: 'JYN023',
-            capacity: '5 pasajeros',
-            model: '2018',
-            status: 'Activo',
-            image: '/alaskan.png',
-            statusIcon: 'check'
-        },
-        {
-            name: 'Sandero',
-            plate: 'ABC456',
-            capacity: '5 pasajeros',
-            model: '2018',
-            status: 'Mantenimiento',
-            image: '/sandero.png',
-            statusIcon: 'pause'
-        },
-        {
-            name: 'Toyota Hilux',
-            plate: 'DEF789',
-            capacity: '4 pasajeros',
-            model: '2020',
-            status: 'Activo',
-            image: '/alaskan.png',
-            statusIcon: 'check'
-        },
-        {
-            name: 'Chevrolet Spark',
-            plate: 'GHI012',
-            capacity: '4 pasajeros',
-            model: '2019',
-            status: 'Inactivo',
-            image: '/sandero.png',
-            statusIcon: 'block'
-        },
-        {
-            name: 'Ford Ranger',
-            plate: 'JKL345',
-            capacity: '5 pasajeros',
-            model: '2021',
-            status: 'Activo',
-            image: '/alaskan.png',
-            statusIcon: 'check'
-        },
-        {
-            name: 'Nissan Frontier',
-            plate: 'MNO678',
-            capacity: '5 pasajeros',
-            model: '2017',
-            status: 'Mantenimiento',
-            image: '/sandero.png',
-            statusIcon: 'pause'
-        },
-        {
-            name: 'Renault Alaskan',
-            plate: 'JYN023',
-            capacity: '5 pasajeros',
-            model: '2018',
-            status: 'Activo',
-            image: '/alaskan.png',
-            statusIcon: 'check'
-        },
-        {
-            name: 'Sandero',
-            plate: 'ABC456',
-            capacity: '5 pasajeros',
-            model: '2018',
-            status: 'Mantenimiento',
-            image: '/sandero.png',
-            statusIcon: 'pause'
-        },
-        {
-            name: 'Toyota Hilux',
-            plate: 'DEF789',
-            capacity: '4 pasajeros',
-            model: '2020',
-            status: 'Activo',
-            image: '/alaskan.png',
-            statusIcon: 'check'
-        },
-        {
-            name: 'Chevrolet Spark',
-            plate: 'GHI012',
-            capacity: '4 pasajeros',
-            model: '2019',
-            status: 'Inactivo',
-            image: '/sandero.png',
-            statusIcon: 'block'
-        },
-        {
-            name: 'Ford Ranger',
-            plate: 'JKL345',
-            capacity: '5 pasajeros',
-            model: '2021',
-            status: 'Activo',
-            image: '/alaskan.png',
-            statusIcon: 'check'
-        },
-        {
-            name: 'Nissan Frontier',
-            plate: 'MNO678',
-            capacity: '5 pasajeros',
-            model: '2017',
-            status: 'Mantenimiento',
-            image: '/sandero.png',
-            statusIcon: 'pause'
+    const [vehiculos, setVehiculos] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [isAddOpen, setIsAddOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [vehicleToEdit, setVehicleToEdit] = useState(null);
+
+    const cargarVehiculos = async () => {
+        try {
+            setLoading(true);
+            const res = await vehiculoService.getVehiculos();
+            const list = res?.data || res; // apiClient interceptor devuelve data directamente
+            setVehiculos(Array.isArray(list) ? list : []);
+        } catch (err) {
+            setError(err.message || 'Error al cargar vehículos');
+        } finally {
+            setLoading(false);
         }
-    ];
+    };
+
+    useEffect(() => {
+        cargarVehiculos();
+    }, []);
+
+    const mapToCard = (v) => ({
+        idVehiculo: v.idVehiculo,
+        name: v.linea,
+        plate: v.placa,
+        capacity: v.capacidadPasajeros ? `${v.capacidadPasajeros} pasajeros` : '-',
+        model: v.modelo,
+        status: v.estado ? 'Activo' : 'Inactivo',
+        image: v.fotoUrl ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${v.fotoUrl}` : '/alaskan.png',
+        statusIcon: v.estado ? 'check' : 'block',
+        raw: v,
+    });
 
     const handleOpenProfile = (vehicle) => {
         setSelectedVehicle(vehicle);
@@ -195,11 +69,16 @@ const Vehiculos = () => {
         setIsDeleteModalOpen(true);
     };
 
-    const handleDeleteConfirm = () => {
-        // Aquí iría la lógica para eliminar el vehículo
-        console.log('Eliminando vehículo:', vehicleToDelete);
-        setIsDeleteModalOpen(false);
-        setVehicleToDelete(null);
+    const handleDeleteConfirm = async () => {
+        try {
+            await vehiculoService.deleteVehiculo(vehicleToDelete?.raw?.idVehiculo || vehicleToDelete?.idVehiculo);
+            await cargarVehiculos();
+        } catch (err) {
+            console.error('Error al eliminar', err);
+        } finally {
+            setIsDeleteModalOpen(false);
+            setVehicleToDelete(null);
+        }
     };
 
     const handleDeleteCancel = () => {
@@ -212,10 +91,18 @@ const Vehiculos = () => {
         setIsSwitchModalOpen(true);
     };
 
-    const handleSwitchConfirm = () => {
-        console.log('Cambiando estado de vehículo:', vehicleToSwitch);
-        setIsSwitchModalOpen(false);
-        setVehicleToSwitch(null);
+    const handleSwitchConfirm = async () => {
+        try {
+            const id = vehicleToSwitch?.raw?.idVehiculo || vehicleToSwitch?.idVehiculo;
+            const nuevoEstado = !(vehicleToSwitch?.raw?.estado ?? (vehicleToSwitch?.status === 'Activo'));
+            await vehiculoService.updateVehiculo(id, { estado: nuevoEstado });
+            await cargarVehiculos();
+        } catch (err) {
+            console.error('Error al cambiar estado', err);
+        } finally {
+            setIsSwitchModalOpen(false);
+            setVehicleToSwitch(null);
+        }
     };
 
     const handleSwitchCancel = () => {
@@ -223,6 +110,7 @@ const Vehiculos = () => {
         setVehicleToSwitch(null);
     };
 
+    const cards = useMemo(() => vehiculos.map(mapToCard), [vehiculos]);
     const {
         currentPage,
         totalPages,
@@ -231,7 +119,33 @@ const Vehiculos = () => {
         handlePageChange,
         startIndex,
         totalItems
-    } = usePagination(allVehicles, 3);
+    } = usePagination(cards, 3);
+
+    const handleOpenAdd = () => setIsAddOpen(true);
+    const handleCloseAdd = () => setIsAddOpen(false);
+    const handleSubmitVehiculo = async (form, file) => {
+        await vehiculoService.createVehiculo({
+            ...form,
+            modelo: Number(form.modelo),
+            capacidadPasajeros: Number(form.capacidadPasajeros),
+            capacidadCarga: form.capacidadCarga ? Number(form.capacidadCarga) : undefined,
+        }, file);
+        await cargarVehiculos();
+    };
+
+    const handleOpenEdit = (vehicle) => {
+        setVehicleToEdit(vehicle.raw || vehicle);
+        setIsEditOpen(true);
+    };
+    const handleCloseEdit = () => setIsEditOpen(false);
+    const handleUpdateVehiculo = async (id, data) => {
+        await vehiculoService.updateVehiculo(id, data);
+        await cargarVehiculos();
+    };
+    const handleUpdateFoto = async (id, file) => {
+        await vehiculoService.updateFoto(id, file);
+        await cargarVehiculos();
+    };
 
     return (
         <section>
@@ -248,7 +162,7 @@ const Vehiculos = () => {
                                     </md-filled-button>
                                 </div>
                                 <div>
-                                    <md-filled-button className="btn-add px-5">
+                                    <md-filled-button className="btn-add px-5" onClick={handleOpenAdd}>
                                         <md-icon slot="icon" className="text-sm text-on-primary">add</md-icon>
                                         Agregar un vehículo
                                     </md-filled-button>
@@ -266,19 +180,19 @@ const Vehiculos = () => {
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Activos</span>
-                                    <h2 className='h4 text-primary font-bold'>{allVehicles.filter(vehicle => vehicle.status === 'Activo').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{cards.filter(vehicle => vehicle.status === 'Activo').length}</h2>
                                 </div>
                             </div>
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Inactivos</span>
-                                    <h2 className='h4 text-primary font-bold'>{allVehicles.filter(vehicle => vehicle.status === 'Inactivo').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{cards.filter(vehicle => vehicle.status === 'Inactivo').length}</h2>
                                 </div>
                             </div>
                             <div className='content-box-outline-3-small'>
                                 <div className='flex flex-col'>
                                     <span className='subtitle2 font-light'>Mantenimiento</span>
-                                    <h2 className='h4 text-primary font-bold'>{allVehicles.filter(vehicle => vehicle.status === 'Mantenimiento').length}</h2>
+                                    <h2 className='h4 text-primary font-bold'>{0}</h2>
                                 </div>
                             </div>
                         </div>
@@ -369,7 +283,7 @@ const Vehiculos = () => {
                                                 onClick={(e) => { e.stopPropagation(); handleSwitchClick(vehicle); }}
                                             ></md-switch>
                                             <div className='flex gap-2'>
-                                                <button className='btn btn-primary btn-lg font-medium flex items-center'>
+                                                <button className='btn btn-primary btn-lg font-medium flex items-center' onClick={(e) => { e.stopPropagation(); handleOpenEdit(vehicle); }}>
                                                     <md-icon className="text-sm">edit</md-icon>
                                                     Editar
                                                 </button>
@@ -402,6 +316,7 @@ const Vehiculos = () => {
                     vehicle={selectedVehicle}
                     isOpen={isProfileOpen}
                     onClose={handleCloseProfile}
+                    onEdit={(v) => { setVehicleToEdit(v.raw || v); setIsEditOpen(true); }}
                 />
             )}
 
@@ -420,6 +335,23 @@ const Vehiculos = () => {
                 itemType="vehículo"
                 isCurrentlyActive={vehicleToSwitch?.status === 'Activo'}
             />
+
+            <AddVehiculoModal
+                isOpen={isAddOpen}
+                onClose={handleCloseAdd}
+                onConfirm={() => { }}
+                onSubmitVehiculo={handleSubmitVehiculo}
+            />
+
+            {isEditOpen && (
+                <EditVehiculoModal
+                    isOpen={isEditOpen}
+                    onClose={handleCloseEdit}
+                    vehiculo={vehicleToEdit}
+                    onUpdateVehiculo={handleUpdateVehiculo}
+                    onUpdateFoto={handleUpdateFoto}
+                />
+            )}
 
         </section>
     );

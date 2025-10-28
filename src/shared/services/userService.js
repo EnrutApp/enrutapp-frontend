@@ -29,6 +29,17 @@ export const userService = {
     }
   },
 
+  getClientes: async () => {
+    try {
+      const response = await apiClient.get("/usuarios", {
+        params: { rol: "cliente" },
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   getUserById: async (id) => {
     try {
       const response = await apiClient.get(`/usuarios/${id}`);

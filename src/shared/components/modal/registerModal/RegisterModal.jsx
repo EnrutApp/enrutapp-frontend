@@ -1,6 +1,6 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import '@material/web/progress/linear-progress.js';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -49,6 +49,12 @@ const ModalRegister = ({ isOpen, onClose }) => {
         isLoading: rolesLoading
     } = useApi(catalogService.getRoles, []);
 
+    // Calcular el ID del rol Cliente de forma segura
+    const clienteRoleId = useMemo(() => {
+        if (!roles || !Array.isArray(roles)) return '';
+        const clienteRole = roles.find(r => r.nombreRol?.toLowerCase() === 'cliente');
+        return clienteRole?.idRol || '';
+    }, [roles]);
 
     const {
         data: documentTypes,
@@ -62,9 +68,29 @@ const ModalRegister = ({ isOpen, onClose }) => {
 
     const onSubmit = async (data) => {
         setRegisterError("");
+
+        // Asignar el roleId del Cliente si no está presente
+        if (!data.roleId) {
+            data.roleId = clienteRoleId;
+        }
+
+        // Validar que roleId y documentType no estén vacíos
+        if (!data.roleId || data.roleId.trim() === '') {
+            setRegisterError('No se pudo obtener el rol de Cliente. Por favor, recarga la página.');
+            return;
+        }
+        if (!data.documentType || data.documentType.trim() === '') {
+            setRegisterError('Por favor, selecciona un tipo de documento.');
+            return;
+        }
+
+        // Convertir idCiudad a número
         if (data.idCiudad) {
             data.idCiudad = Number(data.idCiudad);
         }
+
+        console.log('Datos a enviar:', { ...data, contrasena: '[oculta]' }); // Debug
+
         try {
             const response = await registerUser(data);
             if (response.success) {
@@ -352,7 +378,12 @@ const ModalRegister = ({ isOpen, onClose }) => {
                                     </div>
                                 </div>
 
-                                <input type="hidden" value={roles?.find(r => r.nombreRol === 'Cliente')?.idRol || ''} {...register('roleId')} />
+                                {/* Input hidden para roleId con valor del rol Cliente calculado */}
+                                <input
+                                    type="hidden"
+                                    value={clienteRoleId}
+                                    {...register('roleId')}
+                                />
 
                                 <div className='flex justify-between items-center gap-2 pt-2 w-full mx-auto max-w-md'>
                                     <button type="button" className='btn btn-secondary w-1/2' onClick={() => setStep(1)}>Anterior</button>

@@ -1,6 +1,6 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js'
-import RolProfile from './pages/RolProfile';
+import RolProfile from './pages/RolProfilePage';
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
