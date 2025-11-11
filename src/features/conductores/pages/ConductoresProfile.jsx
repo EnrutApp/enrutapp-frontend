@@ -7,15 +7,10 @@ import '@material/web/iconbutton/filled-tonal-icon-button.js';
 import '@material/web/switch/switch.js';
 import { useState } from 'react';
 
-const ConductorProfile = ({ conductor, isOpen, onClose }) => {
-    const [activeTab, setActiveTab] = useState('general');
+const ConductorProfile = ({ conductor, isOpen, onClose, onEdit }) => {
     const [isClosing, setIsClosing] = useState(false);
 
     if (!isOpen || !conductor) return null;
-
-    const handleTabChange = (tabId) => {
-        setActiveTab(tabId);
-    };
 
     const handleClose = () => {
         setIsClosing(true);
@@ -46,14 +41,14 @@ const ConductorProfile = ({ conductor, isOpen, onClose }) => {
                 </div>
                 <div className='flex gap-2'>
                     <div>
-                        <md-filled-button className="btn-add px-6 py-2">
+                        <md-filled-button className="btn-add px-6 py-2" onClick={() => onEdit?.(conductor)}>
                             <md-icon slot="icon" className="text-sm text-on-primary">edit</md-icon>
                             Editar conductor
                         </md-filled-button>
                     </div>
                     <div>
                         <md-filled-button className="btn-add px-5">
-                            <md-icon slot="icon" className="text-sm text-on-primary">add</md-icon>
+                            <md-icon slot="icon" className="text-sm text-on-primary">person_add</md-icon>
                             Agregar conductor
                         </md-filled-button>
                     </div>
@@ -62,7 +57,7 @@ const ConductorProfile = ({ conductor, isOpen, onClose }) => {
 
             <div className='bg-primary text-on-primary content-box-small'>
                 <h1 className='h3 text-on-primary'>{conductor.nombre}</h1>
-                <span className='subtitle1 font-medium text-on-primary'>{conductor.licencia}</span>
+                <span className='subtitle1 font-medium text-on-primary'>{conductor.cedula}</span>
             </div>
 
             <div className="flex flex-col gap-3 flex-1">
@@ -79,30 +74,32 @@ const ConductorProfile = ({ conductor, isOpen, onClose }) => {
 
                 <div className="flex flex-col">
                     <div className="content-box-outline-3-small">
-                        <span className="subtitle1 text-primary font-light">Datos</span>
+                        <span className="subtitle1 text-primary font-light">Información personal</span>
+                        <span className='subtitle1 text-secondary mt-1'>
+                            Nombre: {conductor.nombre}
+                        </span>
+                        <span className='subtitle1 text-secondary mt-1'>
+                            Apellido: {conductor.apellido}
+                        </span>
+                        <span className='subtitle1 text-secondary mt-1'>
+                            Cédula: {conductor.cedula}
+                        </span>
                         <span className='subtitle1 text-secondary mt-1'>
                             Teléfono: {conductor.telefono}
                         </span>
+                        {conductor.correo && (
+                            <span className='subtitle1 text-secondary mt-1'>
+                                Correo: {conductor.correo}
+                            </span>
+                        )}
                         <span className='subtitle1 text-secondary mt-1'>
-                            Correo: {conductor.correo}
+                            Licencia: {conductor.licencia}
                         </span>
-                        <span className='subtitle1 text-secondary mt-1'>
-                            Dirección: {conductor.direccion}
-                        </span>
-                        <div className='flex mt-1'>
-                            <button className='btn btn-primary font-medium btn-lg flex items-center'>
+                        <div className='flex mt-3'>
+                            <button className='btn btn-primary font-medium btn-lg flex items-center' onClick={() => onEdit?.(conductor)}>
                                 Editar
                             </button>
                         </div>
-                    </div>
-                </div>
-
-                <div className="content-box-outline-3-small">
-                    <span className="subtitle1 text-primary font-light">Permisos</span>
-                    <div className='flex mt-1'>
-                        <button className='btn btn-primary font-medium btn-lg flex items-center'>
-                            Ver permisos
-                        </button>
                     </div>
                 </div>
 

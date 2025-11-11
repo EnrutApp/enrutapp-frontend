@@ -2,7 +2,7 @@ import Modal from '../Modal'
 import '@material/web/icon/icon.js'
 import '@material/web/button/filled-button.js';
 
-const SwitchModal = ({ isOpen, onClose, onConfirm, itemType = "elemento", isCurrentlyActive = true }) => {
+const SwitchModal = ({ isOpen, onClose, onConfirm, itemType = "elemento", itemName = "", isCurrentlyActive = true }) => {
     const action = isCurrentlyActive ? "deshabilitar" : "habilitar";
     const actionCapitalized = isCurrentlyActive ? "Deshabilitar" : "Habilitar";
 
@@ -18,7 +18,7 @@ const SwitchModal = ({ isOpen, onClose, onConfirm, itemType = "elemento", isCurr
                         ¿Quieres {action} {itemType}?
                     </h2>
                     <p className="text-secondary subtitle1 font-light">
-                        ¿Estás seguro(a) que quieres <br /> {action} este {itemType}?
+                        ¿Estás seguro(a) que quieres <br /> {action} {itemName ? `a ${itemName}` : `este ${itemType}`}?
                     </p>
                 </div>
 
