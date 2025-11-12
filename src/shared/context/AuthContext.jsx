@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import authService from '../services/authService';
+import authService from '../../features/auth/api/authService';
 
 const AuthContext = createContext();
 
@@ -23,32 +23,56 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async () => {
     setIsLoading(true);
     try {
-      if (authService.isAuthenticated()) {
-        const storedUser = authService.getCurrentUser();
-        if (storedUser) {
-          setUser(storedUser);
-          try {
-            const profileData = await authService.getMe();
-            if (profileData.success && profileData.data) {
-              const updatedUser = profileData.data;
-              setUser(updatedUser);
-              localStorage.setItem('user', JSON.stringify(updatedUser));
-            }
-          } catch (error) {
-            console.warn('Token verification failed:', error);
+      if (!authService.isAuthenticated()) {
+        setIsLoading(false);
+        return;
+      }
+
+      const storedUser = authService.getCurrentUser();
+      if (storedUser) {
+        setUser(storedUser);
+
+        try {
+          const profileData = await authService.getMe();
+          if (profileData.success && profileData.data) {
+            const updatedUser = profileData.data;
+            setUser(updatedUser);
+            const token = authService.getToken();
+            const storage = localStorage.getItem('access_token')
+              ? localStorage
+              : sessionStorage;
+            storage.setItem('user', JSON.stringify(updatedUser));
+          }
+        } catch (error) {
+
+
+          const isAuthError =
+            error.response?.status === 401 ||
+            error.statusCode === 401 ||
+            (error.message && error.message.includes('401'));
+
+          if (isAuthError) {
             logout();
           }
         }
       }
     } catch (error) {
-      console.error('Error checking auth status:', error);
-      setError(error.message);
+      const isAuthError =
+        error.response?.status === 401 ||
+        error.statusCode === 401 ||
+        (error.message && error.message.includes('401'));
+
+      if (isAuthError) {
+        logout();
+      } else {
+        setError(error.message);
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const login = async (credentials) => {
+  const login = async credentials => {
     setIsLoading(true);
     setError(null);
 
@@ -63,14 +87,24 @@ export const AuthProvider = ({ children }) => {
         throw new Error(response.message || 'Error en el login');
       }
     } catch (error) {
-      setError(error.message || 'Error al iniciar sesión');
+      let errorMessage = 'Error al iniciar sesión';
+
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      }
+
+      setError(errorMessage);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (userData) => {
+  const register = async userData => {
     setIsLoading(true);
     setError(null);
 
@@ -85,7 +119,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const changePassword = async (passwordData) => {
+  const changePassword = async passwordData => {
     setError(null);
 
     try {
@@ -107,7 +141,7 @@ export const AuthProvider = ({ children }) => {
         return updatedUser;
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
+
       throw error;
     }
   };
@@ -133,12 +167,8 @@ export const AuthProvider = ({ children }) => {
     updateProfile,
     clearError,
     isAuthenticated: !!user && authService.isAuthenticated(),
-    refreshAuth: checkAuthStatus
+    refreshAuth: checkAuthStatus,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

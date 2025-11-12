@@ -1,11 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from 'react';
 
 export const useApi = (apiFunction, dependencies = []) => {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const hasExecutedRef = useRef(false);
+  const isExecutingRef = useRef(false);
 
   const execute = async (...args) => {
+    if (isExecutingRef.current) {
+      return;
+    }
+
+    isExecutingRef.current = true;
     setIsLoading(true);
     setError(null);
 
@@ -15,30 +22,35 @@ export const useApi = (apiFunction, dependencies = []) => {
         setData(response.data);
         return response;
       } else {
-        throw new Error(response.message || "Error en la operación");
+        throw new Error(response.message || 'Error en la operación');
       }
     } catch (err) {
-      setError(err.message || "Error desconocido");
+      setError(err.message || 'Error desconocido');
       throw err;
     } finally {
       setIsLoading(false);
+      isExecutingRef.current = false;
     }
   };
 
   const refetch = () => {
+    hasExecutedRef.current = false;
     if (dependencies.length === 0) {
       execute();
     }
   };
 
   useEffect(() => {
-    if (
+    if (dependencies.length === 0) {
+      if (!hasExecutedRef.current) {
+        hasExecutedRef.current = true;
+        execute();
+      }
+    } else if (
       dependencies.length > 0 &&
-      dependencies.every((dep) => dep !== undefined && dep !== null)
+      dependencies.every(dep => dep !== undefined && dep !== null)
     ) {
       execute(...dependencies);
-    } else if (dependencies.length === 0) {
-      execute();
     }
   }, dependencies);
 
@@ -57,7 +69,7 @@ export const useAsyncOperation = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const execute = async (asyncFunction) => {
+  const execute = async asyncFunction => {
     setIsLoading(true);
     setError(null);
 
@@ -65,7 +77,7 @@ export const useAsyncOperation = () => {
       const result = await asyncFunction();
       return result;
     } catch (err) {
-      setError(err.message || "Error en la operación");
+      setError(err.message || 'Error en la operación');
       throw err;
     } finally {
       setIsLoading(false);

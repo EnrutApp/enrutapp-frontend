@@ -1,9 +1,9 @@
-import apiClient from "./apiService";
+import apiClient from './apiService';
 
 export const catalogService = {
   getRoles: async () => {
     try {
-      const response = await apiClient.get("/roles");
+      const response = await apiClient.get('/roles');
       return response;
     } catch (error) {
       throw error;
@@ -12,7 +12,7 @@ export const catalogService = {
 
   getDocumentTypes: async () => {
     try {
-      const response = await apiClient.get("/tipos-documento");
+      const response = await apiClient.get('/tipos-documento');
       return response;
     } catch (error) {
       throw error;
@@ -21,7 +21,7 @@ export const catalogService = {
 
   getCities: async () => {
     try {
-      const response = await apiClient.get("/ciudades");
+      const response = await apiClient.get('/ciudades');
       return response;
     } catch (error) {
       throw error;
@@ -30,7 +30,7 @@ export const catalogService = {
 
   getTiposVehiculo: async () => {
     try {
-      const response = await apiClient.get("/tipos-vehiculo");
+      const response = await apiClient.get('/tipos-vehiculo');
       return response;
     } catch (error) {
       throw error;
@@ -39,7 +39,7 @@ export const catalogService = {
 
   getMarcasVehiculo: async () => {
     try {
-      const response = await apiClient.get("/marcas-vehiculos");
+      const response = await apiClient.get('/marcas-vehiculos');
       return response;
     } catch (error) {
       throw error;

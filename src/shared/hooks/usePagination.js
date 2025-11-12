@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 const usePagination = (data, itemsPerPage = 10) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -9,10 +9,10 @@ const usePagination = (data, itemsPerPage = 10) => {
   const currentData = data.slice(startIndex, endIndex);
   const showPagination = totalPages > 1;
 
-  const handlePageChange = (page) => {
+  const handlePageChange = page => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -21,20 +21,20 @@ const usePagination = (data, itemsPerPage = 10) => {
   }, [data.length]);
 
   useEffect(() => {
-    const handleGlobalKeyDown = (event) => {
+    const handleGlobalKeyDown = event => {
       if (showPagination) {
-        if (event.key === "ArrowLeft" && currentPage > 1) {
+        if (event.key === 'ArrowLeft' && currentPage > 1) {
           event.preventDefault();
           handlePageChange(currentPage - 1);
-        } else if (event.key === "ArrowRight" && currentPage < totalPages) {
+        } else if (event.key === 'ArrowRight' && currentPage < totalPages) {
           event.preventDefault();
           handlePageChange(currentPage + 1);
         }
       }
     };
 
-    window.addEventListener("keydown", handleGlobalKeyDown);
-    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, [currentPage, totalPages, showPagination]);
 
   return {
