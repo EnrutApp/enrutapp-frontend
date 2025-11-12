@@ -1,9 +1,7 @@
-import React from 'react'
+import React from 'react';
 
 const HomeUsuario = () => {
-  return (
-    <div>HomeUsuario</div>
-  )
-}
+  return <div>HomeUsuario</div>;
+};
 
-export default HomeUsuario
+export default HomeUsuario;
