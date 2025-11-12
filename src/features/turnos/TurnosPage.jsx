@@ -3,6 +3,8 @@ import '@material/web/button/filled-button.js';
 import '@material/web/switch/switch.js';
 import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
 import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
+import AddTurnoModal from './components/addTurnoModal/AddTurnoModal';
+import EditTurnoModal from './components/editTurnoModal/EditTurnoModal';
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import TurnosProfile from './pages/TurnosProfile';
@@ -15,6 +17,9 @@ const TurnosPage = () => {
   const [turnoToDelete, setTurnoToDelete] = useState(null);
   const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
   const [turnoToSwitch, setTurnoToSwitch] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [turnoToEdit, setTurnoToEdit] = useState(null);
   const allTurnos = [
     {
       fecha: '20 de Mayo',
@@ -93,6 +98,29 @@ const TurnosPage = () => {
     setTurnoToSwitch(null);
   };
 
+  const handleAddClick = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleAddTurno = async (data) => {
+    // Aquí se implementará la lógica con el API
+    console.log('Agregar turno:', data);
+    setIsAddModalOpen(false);
+  };
+
+  const handleEditClick = (e, turno) => {
+    e.stopPropagation();
+    setTurnoToEdit(turno);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateTurno = async (data) => {
+    // Aquí se implementará la lógica con el API
+    console.log('Actualizar turno:', data);
+    setIsEditModalOpen(false);
+    setTurnoToEdit(null);
+  };
+
   const {
     currentPage,
     totalPages,
@@ -120,7 +148,10 @@ const TurnosPage = () => {
                   </md-filled-button>
                 </div>
                 <div>
-                  <md-filled-button className="btn-add px-5">
+                  <md-filled-button 
+                    className="btn-add px-5"
+                    onClick={handleAddClick}
+                  >
                     <md-icon slot="icon" className="text-sm text-on-primary">
                       add
                     </md-icon>
@@ -239,7 +270,7 @@ const TurnosPage = () => {
                       </button>
                       <button
                         className="btn btn-primary btn-lg font-medium flex items-center"
-                        onClick={e => e.stopPropagation()}
+                        onClick={e => handleEditClick(e, turno)}
                       >
                         <md-icon className="text-sm">edit</md-icon>
                         Editar
@@ -283,6 +314,22 @@ const TurnosPage = () => {
         onConfirm={handleSwitchConfirm}
         itemType="turno"
         isCurrentlyActive={turnoToSwitch?.status === 'Activo'}
+      />
+
+      <AddTurnoModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSubmitTurno={handleAddTurno}
+      />
+
+      <EditTurnoModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setTurnoToEdit(null);
+        }}
+        turno={turnoToEdit}
+        onUpdateTurno={handleUpdateTurno}
       />
     </section>
   );

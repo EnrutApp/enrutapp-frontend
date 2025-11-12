@@ -6,6 +6,8 @@ import usePagination from '../../shared/hooks/usePagination';
 import ConductorProfile from './pages/ConductoresProfile';
 import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
 import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
+import AddConductorModal from './components/addConductorModal/AddConductorModal';
+import EditConductorModal from './components/editConductorModal/EditConductorModal';
 import { useState } from 'react';
 
 const ConductoresPage = () => {
@@ -15,6 +17,9 @@ const ConductoresPage = () => {
   const [conductorToDelete, setConductorToDelete] = useState(null);
   const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false);
   const [conductorToSwitch, setConductorToSwitch] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [conductorToEdit, setConductorToEdit] = useState(null);
   const allConductores = [
     {
       nombre: 'Diomedes Diaz',
@@ -106,6 +111,34 @@ const ConductoresPage = () => {
     setConductorToSwitch(null);
   };
 
+  const handleAddClick = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleAddConductor = async (data, file) => {
+    // Aquí se implementará la lógica con el API
+    console.log('Agregar conductor:', data, file);
+    setIsAddModalOpen(false);
+  };
+
+  const handleEditClick = (e, conductor) => {
+    e.stopPropagation();
+    setConductorToEdit(conductor);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateConductor = async (data) => {
+    // Aquí se implementará la lógica con el API
+    console.log('Actualizar conductor:', data);
+    setIsEditModalOpen(false);
+    setConductorToEdit(null);
+  };
+
+  const handleUpdateFoto = async (file) => {
+    // Aquí se implementará la lógica con el API
+    console.log('Actualizar foto:', file);
+  };
+
   const {
     currentPage,
     totalPages,
@@ -133,7 +166,10 @@ const ConductoresPage = () => {
                   </md-filled-button>
                 </div>
                 <div>
-                  <md-filled-button className="btn-add px-5">
+                  <md-filled-button 
+                    className="btn-add px-5"
+                    onClick={handleAddClick}
+                  >
                     <md-icon slot="icon" className="text-sm text-on-primary">
                       person_add
                     </md-icon>
@@ -244,7 +280,7 @@ const ConductoresPage = () => {
                       </button>
                       <button
                         className="btn btn-primary btn-lg font-medium flex items-center"
-                        onClick={e => e.stopPropagation()}
+                        onClick={e => handleEditClick(e, conductor)}
                       >
                         <md-icon className="text-sm">edit</md-icon>
                         Editar
@@ -286,6 +322,23 @@ const ConductoresPage = () => {
         itemType="conductor"
         itemName={conductorToSwitch?.nombre}
         isCurrentlyActive={conductorToSwitch?.estado === 'Activo'}
+      />
+
+      <AddConductorModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSubmitConductor={handleAddConductor}
+      />
+
+      <EditConductorModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setConductorToEdit(null);
+        }}
+        conductor={conductorToEdit}
+        onUpdateConductor={handleUpdateConductor}
+        onUpdateFoto={handleUpdateFoto}
       />
     </section>
   );
