@@ -1,71 +1,79 @@
-import { createPortal } from 'react-dom'
-import { useEffect } from 'react'
+import { createPortal } from 'react-dom';
+import { useEffect } from 'react';
 
-const Modal = ({ isOpen, onClose, children, size = 'md' }) => {
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden'
-        } else {
-            document.body.style.overflow = 'unset'
-        }
+const Modal = ({
+  isOpen,
+  onClose,
+  children,
+  size = 'md',
+  closeOnOverlay = true,
+}) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
 
-        return () => {
-            document.body.style.overflow = 'unset'
-        }
-    }, [isOpen])
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
-    useEffect(() => {
-        const handleEscape = (e) => {
-            if (e.key === 'Escape') {
-                onClose()
-            }
-        }
+  useEffect(() => {
+    const handleEscape = e => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
 
-        if (isOpen) {
-            document.addEventListener('keydown', handleEscape)
-        }
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+    }
 
-        return () => {
-            document.removeEventListener('keydown', handleEscape)
-        }
-    }, [isOpen, onClose])
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, onClose]);
 
-    if (!isOpen) return null
+  if (!isOpen) return null;
 
-    return createPortal(
-        <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center"
-            style={{
-                zIndex: 9999,
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                width: '100vw',
-                height: '100vh'
-            }}
-        >
-            <div
-                className="absolute inset-0 bg-black  opacity-30"
-                onClick={onClose}
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    width: '100%',
-                    height: '100%'
-                }}
-            />
+  const sizeClasses = {
+    sm: 'max-w-md',
+    md: 'max-w-lg',
+    lg: 'max-w-3xl',
+    xl: 'max-w-5xl',
+    '2xl': 'max-w-7xl',
+  };
 
-            <div className={`relative bg-black border-1 border-border rounded-4xl ${size === 'lg' ? 'max-w-2xl' : size === 'xl' ? 'max-w-5xl' : 'max-w-md'} w-full mx-4 transform transition-all duration-200 z-10`}>
-                {children}
-            </div>
-        </div>,
-        document.body
-    )
-}
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 modal-overlay"
+      style={{
+        zIndex: 9999,
+      }}
+    >
+      <div
+        className="absolute inset-0 bg-black/60"
+        onClick={closeOnOverlay ? onClose : undefined}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      />
 
-export default Modal
+      <div
+        className={`relative bg-black border border-border rounded-3xl shadow-2xl ${sizeClasses[size] || sizeClasses.md} w-full mx-auto modal-content`}
+        onClick={e => e.stopPropagation()}
+      >
+        {children}
+      </div>
+    </div>,
+    document.body
+  );
+};
+
+export default Modal;
