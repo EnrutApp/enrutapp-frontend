@@ -4,21 +4,24 @@ import { useAuth } from '../shared/context/AuthContext';
 import '@material/web/progress/linear-progress.js';
 
 const Layout = () => {
-  const { isLoading } = useAuth();
+  const { isLoading, isAuthenticated } = useAuth();
+
+  // No renderizar el layout hasta que se verifique la autenticación
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+          </div>
+          <p className="text-secondary font-medium animate-pulse">Cargando aplicación...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-background overflow-hidden">
-      {isLoading && (
-        <md-linear-progress
-          indeterminate
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            zIndex: 1000,
-          }}
-        ></md-linear-progress>
-      )}
       <SideBar />
       <main className="flex-1 ml-[210px] p-4 overflow-y-auto scrollbar-hide">
         <Outlet />

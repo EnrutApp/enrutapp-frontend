@@ -21,39 +21,43 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAuthStatus = async () => {
-    setIsLoading(true);
     try {
+      // Verificación rápida primero
       if (!authService.isAuthenticated()) {
         setIsLoading(false);
         return;
       }
 
       const storedUser = authService.getCurrentUser();
-      if (storedUser) {
-        setUser(storedUser);
+      if (!storedUser) {
+        setIsLoading(false);
+        return;
+      }
 
-        try {
-          const profileData = await authService.getMe();
-          if (profileData.success && profileData.data) {
-            const updatedUser = profileData.data;
-            setUser(updatedUser);
-            const token = authService.getToken();
-            const storage = localStorage.getItem('access_token')
-              ? localStorage
-              : sessionStorage;
-            storage.setItem('user', JSON.stringify(updatedUser));
-          }
-        } catch (error) {
+      // Establecer el usuario inmediatamente desde el storage
+      setUser(storedUser);
+      setIsLoading(false);
 
+      // Luego verificar con el servidor en segundo plano
+      try {
+        const profileData = await authService.getMe();
+        if (profileData.success && profileData.data) {
+          const updatedUser = profileData.data;
+          setUser(updatedUser);
+          const token = authService.getToken();
+          const storage = localStorage.getItem('access_token')
+            ? localStorage
+            : sessionStorage;
+          storage.setItem('user', JSON.stringify(updatedUser));
+        }
+      } catch (error) {
+        const isAuthError =
+          error.response?.status === 401 ||
+          error.statusCode === 401 ||
+          (error.message && error.message.includes('401'));
 
-          const isAuthError =
-            error.response?.status === 401 ||
-            error.statusCode === 401 ||
-            (error.message && error.message.includes('401'));
-
-          if (isAuthError) {
-            logout();
-          }
+        if (isAuthError) {
+          logout();
         }
       }
     } catch (error) {
@@ -67,7 +71,6 @@ export const AuthProvider = ({ children }) => {
       } else {
         setError(error.message);
       }
-    } finally {
       setIsLoading(false);
     }
   };
