@@ -302,7 +302,7 @@ const RolesPage = () => {
         await roleService.deleteRole(roleId);
         return { success: true, id: roleId };
       } catch (err) {
-        
+
         return { success: false, id: roleId, error: err };
       }
     });
@@ -616,7 +616,7 @@ const RolesPage = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="flex gap-2 items-center flex-shrink-0">
+                        <div className="flex gap-2 items-center shrink-0">
                           {role.nombreRol === 'Administrador' ? (
                             <div
                               className="btn btn-secondary btn-lg font-medium flex items-center gap-1 opacity-50 btn-disabled"

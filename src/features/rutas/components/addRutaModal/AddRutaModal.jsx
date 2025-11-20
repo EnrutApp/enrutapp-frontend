@@ -227,10 +227,19 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         const response = await apiClient.get('/ubicaciones');
         const data = response?.data || response || [];
 
-        const ubicacionesValidas = data.filter(
-          u => u.estado && u.latitud && u.longitud
-        );
-        setUbicaciones(ubicacionesValidas);
+        // Mapear los datos para usar la estructura esperada por el resto del componente
+        const ubicacionesMapeadas = data
+          .filter(u => u.estado && u.latitud && u.longitud)
+          .map(u => ({
+            idUbicacion: u.id, // Mapear id a idUbicacion
+            nombreUbicacion: u.nombre, // Mapear nombre a nombreUbicacion
+            direccion: u.direccion,
+            latitud: u.latitud,
+            longitud: u.longitud,
+            estado: u.estado,
+          }));
+        
+        setUbicaciones(ubicacionesMapeadas);
       } catch (error) {
 
         setError('No se pudieron cargar las ubicaciones');
@@ -246,10 +255,19 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
       const response = await apiClient.get('/ubicaciones');
       const data = response?.data || response || [];
 
-      const ubicacionesValidas = data.filter(
-        u => u.estado && u.latitud && u.longitud
-      );
-      setUbicaciones(ubicacionesValidas);
+      // Mapear los datos para usar la estructura esperada
+      const ubicacionesMapeadas = data
+        .filter(u => u.estado && u.latitud && u.longitud)
+        .map(u => ({
+          idUbicacion: u.id,
+          nombreUbicacion: u.nombre,
+          direccion: u.direccion,
+          latitud: u.latitud,
+          longitud: u.longitud,
+          estado: u.estado,
+        }));
+      
+      setUbicaciones(ubicacionesMapeadas);
 
       // Si se creó una nueva ubicación y tenemos el tipo, seleccionarla automáticamente
       if (nuevaUbicacion && tipoUbicacion) {
@@ -257,10 +275,11 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         const idUbicacion =
           nuevaUbicacion.idUbicacion ||
           nuevaUbicacion.data?.idUbicacion ||
+          nuevaUbicacion.data?.id ||
           nuevaUbicacion.id;
 
         if (idUbicacion) {
-          const ubicacionCreada = ubicacionesValidas.find(
+          const ubicacionCreada = ubicacionesMapeadas.find(
             u => u.idUbicacion === idUbicacion
           );
 
@@ -311,20 +330,30 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
     try {
       const response = await apiClient.get('/ubicaciones');
       const data = response?.data || response || [];
-      const ubicacionesValidas = data.filter(
-        u => u.estado && u.latitud && u.longitud
-      );
+      
+      // Mapear los datos para usar la estructura esperada
+      const ubicacionesMapeadas = data
+        .filter(u => u.estado && u.latitud && u.longitud)
+        .map(u => ({
+          idUbicacion: u.id,
+          nombreUbicacion: u.nombre,
+          direccion: u.direccion,
+          latitud: u.latitud,
+          longitud: u.longitud,
+          estado: u.estado,
+        }));
 
       // Actualizar ubicaciones sin causar efectos secundarios
       setUbicaciones(prevUbicaciones => {
         // Si la nueva lista tiene más ubicaciones, actualizar
         // pero mantener las que ya estaban para evitar reseteos
-        return ubicacionesValidas;
+        return ubicacionesMapeadas;
       });
 
-      // Buscar la ubicación actualizada
+      // Buscar la ubicación actualizada (puede venir con id o idUbicacion)
+      const idBuscado = ubicacion.idUbicacion || ubicacion.id;
       const ubicacionActualizada =
-        ubicacionesValidas.find(u => u.idUbicacion === ubicacion.idUbicacion) ||
+        ubicacionesMapeadas.find(u => u.idUbicacion === idBuscado) ||
         ubicacion;
 
       // Usar el estado actual de paradas de forma segura
@@ -384,9 +413,13 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
 
   const handleOrigenChange = e => {
     const idUbicacion = e.target.value;
-    setFormData({ ...formData, idUbicacionOrigen: idUbicacion });
+    console.log('Origen seleccionado ID:', idUbicacion);
+    console.log('Ubicaciones disponibles:', ubicaciones);
+    
+    setFormData(prev => ({ ...prev, idUbicacionOrigen: idUbicacion }));
 
-    const ubicacion = ubicaciones.find(u => u.idUbicacion === idUbicacion);
+    const ubicacion = ubicaciones.find(u => String(u.idUbicacion) === String(idUbicacion));
+    console.log('Ubicación encontrada para origen:', ubicacion);
     setOrigenSeleccionado(ubicacion || null);
 
     // Ocultar estado vacío cuando se selecciona origen
@@ -397,9 +430,13 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
 
   const handleDestinoChange = e => {
     const idUbicacion = e.target.value;
-    setFormData({ ...formData, idUbicacionDestino: idUbicacion });
+    console.log('Destino seleccionado ID:', idUbicacion);
+    console.log('Ubicaciones disponibles:', ubicaciones);
+    
+    setFormData(prev => ({ ...prev, idUbicacionDestino: idUbicacion }));
 
-    const ubicacion = ubicaciones.find(u => u.idUbicacion === idUbicacion);
+    const ubicacion = ubicaciones.find(u => String(u.idUbicacion) === String(idUbicacion));
+    console.log('Ubicación encontrada para destino:', ubicacion);
     setDestinoSeleccionado(ubicacion || null);
 
     // Ocultar estado vacío cuando se selecciona destino
@@ -716,8 +753,8 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                           u =>
                             // Filtrar ubicaciones que ya están en paradas o es el destino
                             !paradas.some(
-                              p => p.idUbicacion === u.idUbicacion
-                            ) && u.idUbicacion !== formData.idUbicacionDestino
+                              p => String(p.idUbicacion) === String(u.idUbicacion)
+                            ) && String(u.idUbicacion) !== String(formData.idUbicacionDestino)
                         )
                         .map(ubicacion => (
                           <option
@@ -769,8 +806,8 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                           u =>
                             // Filtrar ubicaciones que ya están en paradas o es el origen
                             !paradas.some(
-                              p => p.idUbicacion === u.idUbicacion
-                            ) && u.idUbicacion !== formData.idUbicacionOrigen
+                              p => String(p.idUbicacion) === String(u.idUbicacion)
+                            ) && String(u.idUbicacion) !== String(formData.idUbicacionOrigen)
                         )
                         .map(ubicacion => (
                           <option
@@ -799,12 +836,21 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                         disabled={loading}
                         type="button"
                         onClick={() => {
-                          if (!origenSeleccionado || !destinoSeleccionado) {
+                          console.log('Intentando agregar parada');
+                          console.log('origenSeleccionado:', origenSeleccionado);
+                          console.log('destinoSeleccionado:', destinoSeleccionado);
+                          console.log('formData:', formData);
+                          
+                          const tieneOrigen = origenSeleccionado || formData.idUbicacionOrigen;
+                          const tieneDestino = destinoSeleccionado || formData.idUbicacionDestino;
+                          
+                          if (!tieneOrigen || !tieneDestino) {
                             setError(
                               'Primero debes seleccionar origen y destino'
                             );
                             return;
                           }
+                          setError(null);
                           setIsParadaModalOpen(true);
                         }}
                       >
@@ -1020,9 +1066,9 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         ubicaciones={ubicaciones.filter(
           u =>
             // Filtrar ubicaciones que ya están en paradas o son origen/destino
-            !paradas.some(p => p.idUbicacion === u.idUbicacion) &&
-            u.idUbicacion !== formData.idUbicacionOrigen &&
-            u.idUbicacion !== formData.idUbicacionDestino
+            !paradas.some(p => String(p.idUbicacion) === String(u.idUbicacion)) &&
+            String(u.idUbicacion) !== String(formData.idUbicacionOrigen) &&
+            String(u.idUbicacion) !== String(formData.idUbicacionDestino)
         )}
         loading={loading}
       />

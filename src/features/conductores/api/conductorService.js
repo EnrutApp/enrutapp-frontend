@@ -1,63 +1,117 @@
-import apiClient from "../../../shared/services/apiService";
+import apiClient from '../../../shared/services/apiService';
 
-function buildConductorFormData(data, file) {
-  const formData = new FormData();
-  if (file) formData.append("foto", file);
-  
-  const fields = {
-    idConductor: data.idConductor,
-    nombre: data.nombre,
-    apellido: data.apellido,
-    cedula: data.cedula,
-    telefono: data.telefono,
-    correo: data.correo,
-    licencia: data.licencia,
-    estado: typeof data.estado === "boolean" ? String(data.estado) : data.estado,
+/**
+ * Construye el objeto de datos para crear/actualizar un conductor
+ * La estructura ahora usa el usuario como base y agrega información de licencia
+ * @param {Object} data - Datos del conductor
+ * @returns {Object} Objeto con los datos formateados
+ */
+function buildConductorData(data) {
+  const conductorData = {
+    idUsuario: data.idUsuario,
+    numeroLicencia: data.numeroLicencia,
+    idCategoriaLicencia: data.idCategoriaLicencia,
+    fechaVencimientoLicencia: data.fechaVencimientoLicencia,
   };
-  
-  Object.entries(fields).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && v !== "") {
-      formData.append(k, String(v));
-    }
-  });
-  
-  return formData;
+
+  if (data.idConductor) {
+    conductorData.idConductor = data.idConductor;
+  }
+
+  if (data.observaciones) {
+    conductorData.observaciones = data.observaciones;
+  }
+
+  return conductorData;
 }
 
 export const conductorService = {
+  /**
+   * Obtiene todos los conductores con información completa
+   * Incluye información del usuario asociado, categoría de licencia y estado de vigencia
+   */
   async getConductores() {
-    return await apiClient.get("/conductores");
+    return await apiClient.get('/conductores');
   },
 
+  /**
+   * Obtiene un conductor por ID con información detallada
+   * @param {string} idConductor - ID del conductor
+   */
   async getConductorById(idConductor) {
     return await apiClient.get(`/conductores/${idConductor}`);
   },
 
-  async createConductor(data, file = null) {
-    const formData = buildConductorFormData(
-      { ...data, estado: data?.estado ?? true },
-      file
-    );
-    return await apiClient.post("/conductores", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+  /**
+   * Crea un nuevo conductor asociado a un usuario existente
+   * El usuario debe tener rol de conductor
+   * @param {Object} data - Datos del conductor
+   * @param {string} data.idUsuario - ID del usuario
+   * @param {string} data.numeroLicencia - Número de licencia
+   * @param {string} data.idCategoriaLicencia - ID de la categoría (A1, A2, B1, etc.)
+   * @param {string} data.fechaVencimientoLicencia - Fecha de vencimiento (YYYY-MM-DD)
+   * @param {string} [data.observaciones] - Observaciones adicionales
+   */
+  async createConductor(data) {
+    const conductorData = buildConductorData(data);
+    return await apiClient.post('/conductores', conductorData);
   },
 
+  /**
+   * Actualiza la información de un conductor existente
+   * @param {string} idConductor - ID del conductor
+   * @param {Object} data - Datos a actualizar
+   */
   async updateConductor(idConductor, data) {
-    return await apiClient.put(`/conductores/${idConductor}`, data);
+    const conductorData = buildConductorData(data);
+    return await apiClient.put(`/conductores/${idConductor}`, conductorData);
   },
 
-  async updateFoto(idConductor, file) {
-    if (!file) throw new Error("Archivo de foto requerido");
-    const formData = new FormData();
-    formData.append("foto", file);
-    return await apiClient.post(`/conductores/${idConductor}/foto`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+  /**
+   * Verifica el estado de la licencia de un conductor
+   * @param {string} idConductor - ID del conductor
+   * @returns {Object} Estado de la licencia (VIGENTE, PROXIMA_A_VENCER, VENCIDA)
+   */
+  async verificarLicencia(idConductor) {
+    return await apiClient.get(
+      `/conductores/${idConductor}/verificar-licencia`
+    );
   },
 
+  /**
+   * Elimina un conductor del sistema
+   * @param {string} idConductor - ID del conductor
+   */
   async deleteConductor(idConductor) {
     return await apiClient.delete(`/conductores/${idConductor}`);
+  },
+
+  /**
+   * Verifica si el perfil de conductor del usuario autenticado está completo
+   * @returns {Object} Estado del perfil { esConductor, completado, conductor }
+   */
+  async verificarPerfilCompleto() {
+    return await apiClient.get('/conductores/verificar-perfil/me');
+  },
+
+  /**
+   * Completa el perfil de conductor del usuario autenticado (self-service)
+   * @param {Object} data - Datos de la licencia
+   * @param {string} data.idCategoriaLicencia - ID de la categoría de licencia
+   * @param {string} data.fechaVencimientoLicencia - Fecha de vencimiento (YYYY-MM-DD)
+   * @param {string} [data.observaciones] - Observaciones adicionales
+   */
+  async completarPerfil(data) {
+    const perfilData = {
+      idCategoriaLicencia: data.idCategoriaLicencia,
+      fechaVencimientoLicencia: data.fechaVencimientoLicencia,
+    };
+
+    if (data.observaciones) {
+      perfilData.observaciones = data.observaciones;
+    }
+
+    return await apiClient.post('/conductores/completar-perfil/me', perfilData);
   },
 };
 

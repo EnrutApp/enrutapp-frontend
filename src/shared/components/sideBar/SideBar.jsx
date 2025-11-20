@@ -2,6 +2,7 @@ import Avvvatars from 'avvvatars-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import LogoutModal from '../../../features/auth/components/logoutModal/LogoutModal';
 import SettingsModal from '../../../features/auth/components/settingsModal/SettingsModal';
 import ProfileModal from '../../../features/auth/components/profileModal/ProfileModal';
@@ -14,6 +15,7 @@ import { resolveAssetUrl } from '../../utils/url';
 
 const SideBar = () => {
   const { user, logout } = useAuth();
+  const { isDark } = useTheme();
   const location = useLocation();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -132,6 +134,7 @@ const SideBar = () => {
             icon: 'inventory_2',
           },
           { path: '/admin/turnos', label: 'Turnos', icon: 'schedule' },
+          { path: '/admin/contratos', label: 'Contratos', icon: 'file_present' },
         ],
       },
       {
@@ -211,7 +214,13 @@ const SideBar = () => {
     <nav className="h-full flex flex-col sidebar">
       <div className="flex gap-3 items-center p-4 border-b border-border mb-6">
         <div className="bg-blue bg-opacity-10 p-2 rounded-xl">
-          <img src="/public/favicon.ico" alt="logo" width={32} />
+          <a href="/dashboard">
+          {isDark ? (
+            <img src="/logoPositivo.png" alt="logo" width={32} />
+            ) : (
+              <img src="/logoNegativo.png" alt="logo" width={32} />
+            )}
+          </a>
         </div>
         <div className="flex flex-col leading-tight">
           <h1 className="h5 font-bold mb-0.5">Enrutapp</h1>
@@ -308,7 +317,7 @@ const SideBar = () => {
               tabIndex={0}
               role="button"
             >
-              <div className="relative flex-shrink-0">
+              <div className="relative">
                 {user?.foto ? (
                   <img
                     src={getProfilePhotoUrl(user.foto)}

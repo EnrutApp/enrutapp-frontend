@@ -10,6 +10,7 @@ import DeleteModal from '../../../shared/components/modal/deleteModal/DeleteModa
 import EditUserModal from '../../usuarios/components/editUserModal/EditUserModal';
 import userService from '../../usuarios/api/userService';
 import Avvvatars from 'avvvatars-react';
+import resolveAssetUrl from '../../../shared/utils/url';
 
 const ClienteProfile = ({ cliente, isOpen, onClose, onClienteUpdated }) => {
   const [isClosing, setIsClosing] = useState(false);
@@ -60,11 +61,7 @@ const ClienteProfile = ({ cliente, isOpen, onClose, onClienteUpdated }) => {
   const estadoLabel = estadoBool ? 'Activo' : 'Inactivo';
   const rol = fullCliente?.rol?.nombreRol ?? base.rol?.nombreRol ?? 'Cliente';
   const foto = fullCliente?.foto || base.foto || base.fotoUrl || null;
-  const fotoUrl = foto
-    ? foto.startsWith?.('http')
-      ? foto
-      : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${foto}`
-    : null;
+  const fotoUrl = foto ? resolveAssetUrl(foto) : null;
   const idUsuario = fullCliente?.idUsuario ?? base.idUsuario;
 
   const handleClose = () => {

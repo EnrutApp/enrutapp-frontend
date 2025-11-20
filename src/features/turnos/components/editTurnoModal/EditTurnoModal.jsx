@@ -2,8 +2,8 @@ import Modal from '../../../../shared/components/modal/Modal';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import { useState, useEffect } from 'react';
-import { conductorService } from '../../../services/conductorService';
-import { vehiculoService } from '../../../services/vehiculoService';
+import conductorService from '../../../conductores/api/conductorService';
+import vehiculoService from '../../../vehiculos/api/vehiculoService';
 
 const turnoFields = [
     { label: 'Conductor', name: 'idConductor', type: 'select', required: true },
@@ -63,10 +63,10 @@ export default function EditTurnoModal({ isOpen, onClose, turno, onUpdateTurno }
                 conductorService.getConductores(),
                 vehiculoService.getVehiculos(),
             ]);
-            
+
             const listConductores = resConductores?.data || resConductores;
             const listVehiculos = resVehiculos?.data || resVehiculos;
-            
+
             setConductores(Array.isArray(listConductores) ? listConductores : []);
             setVehiculos(Array.isArray(listVehiculos) ? listVehiculos : []);
         } catch (err) {
@@ -102,12 +102,12 @@ export default function EditTurnoModal({ isOpen, onClose, turno, onUpdateTurno }
 
         try {
             const fechaISO = new Date(form.fecha).toISOString();
-            
+
             await onUpdateTurno(turno.idTurno, {
                 ...form,
                 fecha: fechaISO,
             });
-            
+
             setSuccess(true);
             setTimeout(() => {
                 onClose();
@@ -234,11 +234,14 @@ export default function EditTurnoModal({ isOpen, onClose, turno, onUpdateTurno }
                             <button type="button" className="btn px-5 text-secondary" onClick={onClose}>
                                 Cancelar
                             </button>
-                            <md-filled-button 
-                                className="btn-add px-24" 
-                                type="submit" 
+                            <md-filled-button
+                                className="btn-add px-24 flex items-center justify-center gap-2"
+                                type="submit"
                                 disabled={loading || success}
                             >
+                                {loading && (
+                                    <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                )}
                                 {loading ? 'Actualizando...' : success ? 'Actualizado' : 'Actualizar'}
                             </md-filled-button>
                         </div>

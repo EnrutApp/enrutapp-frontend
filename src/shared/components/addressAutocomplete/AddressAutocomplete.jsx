@@ -209,8 +209,8 @@ const AddressAutocomplete = ({
         />
         {isLoading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            <md-icon className="text-secondary text-base animate-spin">
-              refresh
+            <md-icon className="text-secondary text-base">
+              search
             </md-icon>
           </div>
         )}

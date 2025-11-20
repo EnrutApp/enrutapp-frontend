@@ -63,6 +63,7 @@ const UbicacionesPage = () => {
   const [statusFilter, setStatusFilter] = useState('Todos');
   const [sortBy, setSortBy] = useState('nombre');
   const [sortOrder, setSortOrder] = useState('asc');
+  const [viewMode, setViewMode] = useState('list');
 
   const [selectedUbicaciones, setSelectedUbicaciones] = useState([]);
   const [isDeleteMultipleModalOpen, setIsDeleteMultipleModalOpen] =
@@ -78,8 +79,8 @@ const UbicacionesPage = () => {
       const data = Array.isArray(res) ? res : res.data || [];
 
       const allMapped = data.map(u => ({
-        id: u.idUbicacion,
-        nombre: u.nombreUbicacion,
+        id: u.id,
+        nombre: u.nombre,
         direccion: u.direccion,
         activo: u.estado,
         latitud: u.latitud,
@@ -175,7 +176,7 @@ const UbicacionesPage = () => {
     handlePageChange,
     startIndex,
     totalItems,
-  } = usePagination(filteredAndSortedUbicaciones, 4);
+  } = usePagination(filteredAndSortedUbicaciones, viewMode === 'grid' ? 8 : 4);
 
   const handleOpenProfile = ubicacion => {
     setSelectedUbicacion(ubicacion);
@@ -631,101 +632,215 @@ const UbicacionesPage = () => {
                     <span className="text-sm text-secondary">
                       {loading
                         ? 'Cargando ubicaciones...'
-                        : `Mostrando ${totalItems > 0 ? startIndex + 1 : 0}-${Math.min(startIndex + 4, totalItems)} de ${totalItems} ubicaciones`}
+                        : `Mostrando ${totalItems > 0 ? startIndex + 1 : 0}-${Math.min(startIndex + (viewMode === 'grid' ? 8 : 4), totalItems)} de ${totalItems} ubicaciones`}
                     </span>
                   )}
                 </div>
-                {showPagination && (
-                  <span className="text-xs text-secondary">
-                    Página {currentPage} de {totalPages}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {showPagination && (
+                    <span className="text-xs text-secondary">
+                      Página {currentPage} de {totalPages}
+                    </span>
+                  )}
+
+                  <div className="flex bg-fill rounded-lg p-1 border border-border ml-2">
+                    <button
+                      className={`p-1 rounded-md transition-all ${viewMode === 'list'
+                          ? 'bg-background text-primary shadow-sm'
+                          : 'text-secondary hover:text-primary'
+                        }`}
+                      onClick={() => setViewMode('list')}
+                    >
+                      <md-icon className="text-xl">view_list</md-icon>
+                    </button>
+                    <button
+                      className={`p-1 rounded-md transition-all ${viewMode === 'grid'
+                          ? 'bg-background text-primary shadow-sm'
+                          : 'text-secondary hover:text-primary'
+                        }`}
+                      onClick={() => setViewMode('grid')}
+                    >
+                      <md-icon className="text-xl">grid_view</md-icon>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="mt-3">
                 {loading ? (
                   <p className="text-secondary">Cargando ubicaciones...</p>
                 ) : currentUbicaciones.length > 0 ? (
-                  currentUbicaciones.map((ubicacion, index) => (
-                    <div
-                      key={ubicacion.id || index}
-                      className={`content-box-outline-4-small ${index > 0 ? 'mt-2' : ''
-                        } ${ubicacion.activo ? '' : 'opacity-60'}`}
-                      onClick={() => handleOpenProfile(ubicacion)}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-3 flex-1">
-                          {isSelectionMode && (
-                            <div
-                              style={{
-                                animation:
-                                  'checkboxAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                                transformOrigin: 'center',
+                  <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
+                    {currentUbicaciones.map((ubicacion, index) => (
+                      <div
+                        key={ubicacion.id || index}
+                        className={`content-box-outline-4-small cursor-pointer relative ${ubicacion.activo ? '' : 'opacity-60'}`}
+                        onClick={() => handleOpenProfile(ubicacion)}
+                      >
+                        {isSelectionMode && (
+                          <div
+                            className="absolute top-3 left-3 z-10"
+                            style={{
+                              animation:
+                                'checkboxAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                              transformOrigin: 'center',
+                            }}
+                          >
+                            <md-checkbox
+                              checked={selectedUbicaciones.includes(
+                                ubicacion.id
+                              )}
+                              onChange={e => {
+                                e.stopPropagation();
+                                handleSelectUbicacion(ubicacion.id);
                               }}
-                            >
-                              <md-checkbox
-                                checked={selectedUbicaciones.includes(
-                                  ubicacion.id
-                                )}
-                                onChange={e => {
-                                  e.stopPropagation();
-                                  handleSelectUbicacion(ubicacion.id);
-                                }}
-                                onClick={e => e.stopPropagation()}
-                                touch-target="wrapper"
-                              />
+                              onClick={e => e.stopPropagation()}
+                              touch-target="wrapper"
+                            />
+                          </div>
+                        )}
+
+                        {viewMode === 'grid' ? (
+                          <div className="flex flex-col gap-3">
+                            <div className="relative w-full h-40 rounded-xl overflow-hidden bg-surface border border-border flex items-center justify-center">
+                              <md-icon style={{ fontSize: '48px' }} className="text-secondary">location_on</md-icon>
                             </div>
-                          )}
-                          <div>
-                            <h1 className="h4 font-bold">{ubicacion.nombre}</h1>
-                            <div className="flex gap-2 mt-2 items-center">
-                              <span
-                                className={`btn font-medium btn-lg flex items-center ${ubicacion.activo ? 'btn-green' : 'btn-red'}`}
-                              >
-                                {ubicacion.activo ? 'Activo' : 'Inactivo'}
-                              </span>
-                              <span
-                                className="truncate max-w-57 btn-primary btn-lg"
-                                title={ubicacion.direccion}
-                              >
-                                {ubicacion.direccion}
-                              </span>
+
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-start justify-between gap-2 pb-3">
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="text-h5 font-bold text-primary truncate mb-1">
+                                    {ubicacion.nombre}
+                                  </h3>
+                                  <div className="flex items-center gap-2 text-body2">
+                                    <md-icon className="text-xs text-secondary">place</md-icon>
+                                    <span className="text-secondary truncate">
+                                      {ubicacion.direccion}
+                                    </span>
+                                  </div>
+                                </div>
+                                <span
+                                  className={`btn font-medium btn-sm flex items-center ${ubicacion.activo ? 'btn-green' : 'btn-red'
+                                    }`}
+                                >
+                                  {ubicacion.activo ? 'Activo' : 'Inactivo'}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                              <div className="relative group flex-1">
+                                <button
+                                  className={`btn btn-sm-2 font-medium flex items-center gap-1 w-full justify-center ${ubicacion.activo ? 'btn-outline' : 'btn-secondary'
+                                    }`}
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleSwitchClick(ubicacion);
+                                  }}
+                                >
+                                  <md-icon className="text-sm">
+                                    {ubicacion.activo ? 'block' : 'check'}
+                                  </md-icon>
+                                </button>
+                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
+                                    <p className="text-xs text-primary">
+                                      {ubicacion.activo ? 'Deshabilitar' : 'Habilitar'}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="relative group flex-1">
+                                <button
+                                  className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleOpenEdit(ubicacion);
+                                  }}
+                                >
+                                  <md-icon className="text-sm">edit</md-icon>
+                                </button>
+                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
+                                    <p className="text-xs text-primary">Editar</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="relative group flex-1">
+                                <button
+                                  className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleDeleteClick(ubicacion);
+                                  }}
+                                >
+                                  <md-icon className="text-sm">delete</md-icon>
+                                </button>
+                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
+                                    <p className="text-xs text-primary">Eliminar</p>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="flex gap-2 items-center flex-shrink-0">
-                          <button
-                            className={`btn btn-lg font-medium flex items-center gap-1 ${ubicacion.activo ? 'btn-outline' : 'btn-secondary'}`}
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleSwitchClick(ubicacion);
-                            }}
-                          >
-                            {ubicacion.activo ? 'Deshabilitar' : 'Habilitar'}
-                          </button>
-                          <button
-                            className="btn btn-primary btn-lg font-medium flex items-center gap-1"
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleOpenEdit(ubicacion);
-                            }}
-                          >
-                            <md-icon className="text-sm">edit</md-icon>
-                            Editar
-                          </button>
-                          <button
-                            className="btn btn-secondary btn-lg font-medium flex items-center gap-1"
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleDeleteClick(ubicacion);
-                            }}
-                          >
-                            <md-icon className="text-sm">delete</md-icon>
-                          </button>
-                        </div>
+                        ) : (
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-3 flex-1">
+                              <div>
+                                <h1 className="h4 font-bold">{ubicacion.nombre}</h1>
+                                <div className="flex gap-2 mt-2 items-center">
+                                  <span
+                                    className={`btn font-medium btn-lg flex items-center ${ubicacion.activo ? 'btn-green' : 'btn-red'}`}
+                                  >
+                                    {ubicacion.activo ? 'Activo' : 'Inactivo'}
+                                  </span>
+                                  <span
+                                    className="truncate max-w-57 btn-primary btn-lg"
+                                    title={ubicacion.direccion}
+                                  >
+                                    {ubicacion.direccion}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-2 items-center">
+                              <button
+                                className={`btn btn-lg font-medium flex items-center gap-1 ${ubicacion.activo ? 'btn-outline' : 'btn-secondary'}`}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleSwitchClick(ubicacion);
+                                }}
+                              >
+                                {ubicacion.activo ? 'Deshabilitar' : 'Habilitar'}
+                              </button>
+                              <button
+                                className="btn btn-primary btn-lg font-medium flex items-center gap-1"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleOpenEdit(ubicacion);
+                                }}
+                              >
+                                <md-icon className="text-sm">edit</md-icon>
+                                Editar
+                              </button>
+                              <button
+                                className="btn btn-secondary btn-lg font-medium flex items-center gap-1"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleDeleteClick(ubicacion);
+                                }}
+                              >
+                                <md-icon className="text-sm">delete</md-icon>
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 ) : (
                   <div
                     className="flex items-center justify-center w-full list-enter text-center content-box-outline-2-small"

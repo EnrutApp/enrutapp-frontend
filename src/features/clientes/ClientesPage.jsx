@@ -12,6 +12,7 @@ import ClienteProfile from './pages/ClienteProfile';
 import { useEffect, useMemo, useState } from 'react';
 import userService from '../usuarios/api/userService';
 import Avvvatars from 'avvvatars-react';
+import resolveAssetUrl from '../../shared/utils/url';
 
 const styles = `
   @keyframes checkboxAppear {
@@ -57,6 +58,7 @@ const ClientesPage = () => {
   const [statusFilter, setStatusFilter] = useState('Todos');
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
+  const [viewMode, setViewMode] = useState('list');
 
   const [selectedClientes, setSelectedClientes] = useState([]);
   const [isDeleteMultipleModalOpen, setIsDeleteMultipleModalOpen] =
@@ -146,7 +148,7 @@ const ClientesPage = () => {
     handlePageChange,
     startIndex,
     totalItems,
-  } = usePagination(sortedClientes, 4);
+  } = usePagination(sortedClientes, viewMode === 'grid' ? 8 : 4);
 
   const handleOpenProfile = cliente => {
     setSelectedCliente(cliente);
@@ -491,17 +493,40 @@ const ClientesPage = () => {
                     </>
                   ) : (
                     <span className="text-sm text-secondary">
-                      Mostrando {startIndex + 1}-
-                      {Math.min(startIndex + 4, totalItems)} de {totalItems}{' '}
+                      Mostrando {totalItems > 0 ? startIndex + 1 : 0}-
+                      {Math.min(startIndex + (viewMode === 'grid' ? 8 : 4), totalItems)} de {totalItems}{' '}
                       clientes
                     </span>
                   )}
                 </div>
-                {showPagination && (
-                  <span className="text-xs text-secondary">
-                    Página {currentPage} de {totalPages}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {showPagination && (
+                    <span className="text-xs text-secondary">
+                      Página {currentPage} de {totalPages}
+                    </span>
+                  )}
+
+                  <div className="flex bg-fill rounded-lg p-1 border border-border ml-2">
+                    <button
+                      className={`p-1 rounded-md transition-all ${viewMode === 'list'
+                          ? 'bg-background text-primary shadow-sm'
+                          : 'text-secondary hover:text-primary'
+                        }`}
+                      onClick={() => setViewMode('list')}
+                    >
+                      <md-icon className="text-xl">view_list</md-icon>
+                    </button>
+                    <button
+                      className={`p-1 rounded-md transition-all ${viewMode === 'grid'
+                          ? 'bg-background text-primary shadow-sm'
+                          : 'text-secondary hover:text-primary'
+                        }`}
+                      onClick={() => setViewMode('grid')}
+                    >
+                      <md-icon className="text-xl">grid_view</md-icon>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="mt-3">
@@ -539,20 +564,20 @@ const ClientesPage = () => {
                   </div>
                 ) : (
                   !loading &&
-                  !error &&
-                  currentClients.map((client, index) => (
-                    <div
-                      key={index}
-                      className={`content-box-outline-4-small ${index > 0 ? 'mt-2' : ''} ${client.status === 'Inactivo' ? 'opacity-60' : ''} cursor-pointer hover:shadow-md transition-shadow`}
-                      onClick={e => {
-                        if (e.target.closest('md-switch')) return;
-                        handleOpenProfile(client);
-                      }}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-3">
+                  !error && (
+                    <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
+                      {currentClients.map((client, index) => (
+                        <div
+                          key={index}
+                          className={`content-box-outline-4-small ${client.status === 'Inactivo' ? 'opacity-60' : ''} cursor-pointer hover:shadow-md transition-shadow relative`}
+                          onClick={e => {
+                            if (e.target.closest('md-switch')) return;
+                            handleOpenProfile(client);
+                          }}
+                        >
                           {isSelectionMode && (
                             <div
+                              className="absolute top-3 left-3 z-10"
                               style={{
                                 animation:
                                   'checkboxAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
@@ -572,86 +597,207 @@ const ClientesPage = () => {
                               />
                             </div>
                           )}
-                          <div className="flex items-center justify-center w-16 h-16">
-                            {client?.foto ? (
-                              <img
-                                src={
-                                  client.foto.startsWith('http')
-                                    ? client.foto
-                                    : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${client.foto}`
-                                }
-                                alt="Foto cliente"
-                                className="rounded-lg w-16 h-16 object-cover shadow-2xl"
-                              />
-                            ) : (
-                              <Avvvatars
-                                value={client?.name || 'Cliente'}
-                                size={64}
-                                radius={11}
-                              />
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <div className="leading-tight">
-                              <h1 className="h4 font-bold">{client.name}</h1>
-                              <div className="flex gap-2 text-secondary">
-                                <span>{client.email}</span>
-                                <span>|</span>
-                                <span>{client.document}</span>
+
+                          {viewMode === 'grid' ? (
+                            <div className="flex flex-col h-full">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center justify-center w-10 h-10">
+                                    {client?.foto ? (
+                                      <img
+                                        src={resolveAssetUrl(client.foto)}
+                                        alt="Foto cliente"
+                                        className="rounded-lg w-10 h-10 object-cover shadow-sm"
+                                      />
+                                    ) : (
+                                      <Avvvatars
+                                        value={client?.name || 'Cliente'}
+                                        size={40}
+                                        radius={8}
+                                      />
+                                    )}
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                    <h3 className="text-sm font-bold text-primary truncate max-w-[120px]">
+                                      {client.name}
+                                    </h3>
+                                    <span className="text-xs text-secondary truncate max-w-[120px]">
+                                      {client.email}
+                                    </span>
+                                  </div>
+                                </div>
+                                <span
+                                  className={`btn font-medium btn-xs flex items-center ${client.status === 'Activo' ? 'btn-green' : 'btn-red'}`}
+                                >
+                                  {client.status}
+                                </span>
+                              </div>
+
+                              <div className="flex-1 space-y-2 mb-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-7 h-7 rounded-lg bg-fill flex items-center justify-center">
+                                    <md-icon className="text-sm text-primary">badge</md-icon>
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="text-[10px] text-secondary">Documento</span>
+                                    <span className="text-xs font-semibold text-primary truncate">
+                                      {client.document || 'N/A'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-7 h-7 rounded-lg bg-fill flex items-center justify-center">
+                                    <md-icon className="text-sm text-primary">location_on</md-icon>
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="text-[10px] text-secondary">Ciudad</span>
+                                    <span className="text-xs font-semibold text-primary truncate">
+                                      {client.city || 'Sin ciudad'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex gap-2 mt-auto">
+                                <div className="relative group flex-1">
+                                  <button
+                                    className={`btn btn-sm-2 font-medium flex items-center gap-1 w-full justify-center ${client.status === 'Activo' ? 'btn-outline' : 'btn-secondary'}`}
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      handleSwitchClick(client);
+                                    }}
+                                  >
+                                    <md-icon className="text-sm">
+                                      {client.status === 'Activo' ? 'block' : 'check'}
+                                    </md-icon>
+                                  </button>
+                                  <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                    <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
+                                      <p className="text-xs text-primary">
+                                        {client.status === 'Activo' ? 'Deshabilitar' : 'Habilitar'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="relative group flex-1">
+                                  <button
+                                    className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      setClienteToEdit(client);
+                                      setIsEditModalOpen(true);
+                                    }}
+                                  >
+                                    <md-icon className="text-sm">edit</md-icon>
+                                  </button>
+                                  <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                    <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
+                                      <p className="text-xs text-primary">Editar</p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="relative group flex-1">
+                                  <button
+                                    className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      handleDeleteClick(client);
+                                    }}
+                                  >
+                                    <md-icon className="text-sm">delete</md-icon>
+                                  </button>
+                                  <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                    <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
+                                      <p className="text-xs text-primary">Eliminar</p>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                            <div className="flex gap-2 mt-2 items-center">
-                              <button
-                                className={`btn font-medium btn-lg flex items-center ${client.status === 'Activo' ? 'btn-primary' : 'btn-secondary'}`}
-                              >
-                                {client.status}
-                              </button>
-                              <button className="btn btn-outline btn-lg font-medium flex items-center">
-                                <md-icon className="text-sm">
-                                  location_on
-                                </md-icon>
-                                {client.city || 'Sin ciudad'}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 flex-shrink-0">
-                          <button
-                            className={`btn btn-lg font-medium flex items-center ${client.status === 'Activo' ? 'btn-outline' : 'btn-secondary'}`}
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleSwitchClick(client);
-                            }}
-                          >
-                            {client.status === 'Activo'
-                              ? 'Deshabilitar'
-                              : 'Habilitar'}
-                          </button>
-                          <button
-                            className="btn btn-secondary btn-lg font-medium flex items-center"
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleDeleteClick(client);
-                            }}
-                          >
-                            <md-icon className="text-sm">delete</md-icon>
-                          </button>
+                          ) : (
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-3">
+                                <div className="flex items-center justify-center w-16 h-16">
+                                  {client?.foto ? (
+                                    <img
+                                      src={resolveAssetUrl(client.foto)}
+                                      alt="Foto cliente"
+                                      className="rounded-lg w-16 h-16 object-cover shadow-2xl"
+                                    />
+                                  ) : (
+                                    <Avvvatars
+                                      value={client?.name || 'Cliente'}
+                                      size={64}
+                                      radius={11}
+                                    />
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="leading-tight">
+                                    <h1 className="h4 font-bold">{client.name}</h1>
+                                    <div className="flex gap-2 text-secondary">
+                                      <span>{client.email}</span>
+                                      <span>|</span>
+                                      <span>{client.document}</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2 mt-2 items-center">
+                                    <button
+                                      className={`btn font-medium btn-lg flex items-center ${client.status === 'Activo' ? 'btn-green' : 'btn-red'}`}
+                                    >
+                                      {client.status}
+                                    </button>
+                                    <button className="btn btn-outline btn-lg font-medium flex items-center">
+                                      <md-icon className="text-sm">
+                                        location_on
+                                      </md-icon>
+                                      {client.city || 'Sin ciudad'}
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 shrink-0">
+                                <button
+                                  className={`btn btn-lg font-medium flex items-center ${client.status === 'Activo' ? 'btn-outline' : 'btn-secondary'}`}
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleSwitchClick(client);
+                                  }}
+                                >
+                                  {client.status === 'Activo'
+                                    ? 'Deshabilitar'
+                                    : 'Habilitar'}
+                                </button>
+                                <button
+                                  className="btn btn-secondary btn-lg font-medium flex items-center"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleDeleteClick(client);
+                                  }}
+                                >
+                                  <md-icon className="text-sm">delete</md-icon>
+                                </button>
 
-                          <button
-                            className="btn btn-primary btn-lg font-medium flex items-center"
-                            onClick={e => {
-                              e.stopPropagation();
-                              setClienteToEdit(client);
-                              setIsEditModalOpen(true);
-                            }}
-                          >
-                            <md-icon className="text-sm">edit</md-icon>
-                            Editar
-                          </button>
+                                <button
+                                  className="btn btn-primary btn-lg font-medium flex items-center"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    setClienteToEdit(client);
+                                    setIsEditModalOpen(true);
+                                  }}
+                                >
+                                  <md-icon className="text-sm">edit</md-icon>
+                                  Editar
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  ))
+                  )
                 )}
               </div>
             </div>

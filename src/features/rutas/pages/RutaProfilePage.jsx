@@ -103,7 +103,7 @@ const RutaProfilePage = ({
               <h1 className="h4 text-on-primary font-bold truncate max-w-[45%]">
                 {origenNombre}
               </h1>
-              <md-icon className="text-xl text-on-primary/80 flex-shrink-0">
+              <md-icon className="text-xl text-on-primary/80 shrink-0">
                 arrow_right
               </md-icon>
               <h1 className="h4 text-on-primary font-bold truncate max-w-[45%]">

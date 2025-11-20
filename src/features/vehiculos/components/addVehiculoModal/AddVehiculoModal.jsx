@@ -284,8 +284,6 @@ export default function AddVehiculoModal({
             {success ? (
               <div className="flex flex-col items-center justify-center py-16 px-4 animate-fade-in">
                 <div className="relative mb-8">
-                  <div className="absolute inset-0 bg-green/20 rounded-full animate-ping"></div>
-
                   <div className="flex items-center justify-center mb-4 mt-3 animate-scale-in">
                     <md-icon className="text-green text-3xl">directions_car</md-icon>
                   </div>
@@ -591,7 +589,6 @@ export default function AddVehiculoModal({
                                 alt="Vista previa"
                                 className="w-full h-80 object-cover transition-transform duration-300 "
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
                             </div>
 
                             <button
@@ -982,9 +979,12 @@ export default function AddVehiculoModal({
                   <button
                     type="button"
                     onClick={handleConfirmAndCreate}
-                    className="btn btn-primary flex-1"
+                    className="btn btn-primary flex-1 flex items-center justify-center gap-2"
                     disabled={loading}
                   >
+                    {loading && (
+                      <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    )}
                     {loading ? 'Creando vehículo...' : 'Confirmar y crear'}
                   </button>
                 ) : (

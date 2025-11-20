@@ -17,17 +17,26 @@ const ParadaModal = ({
   const [isUbicacionAddOpen, setIsUbicacionAddOpen] = useState(false);
 
   const handleConfirm = () => {
+    console.log('handleConfirm llamado');
+    console.log('ubicacionSeleccionada:', ubicacionSeleccionada);
+    console.log('ubicaciones disponibles:', ubicaciones);
+    
     if (!ubicacionSeleccionada) {
+      console.log('No hay ubicación seleccionada');
       return;
     }
 
     const ubicacion = ubicaciones.find(
-      u => u.idUbicacion === ubicacionSeleccionada
+      u => String(u.idUbicacion) === String(ubicacionSeleccionada)
     );
+    console.log('Ubicación encontrada:', ubicacion);
+    
     if (ubicacion) {
       onConfirm(ubicacion);
       setUbicacionSeleccionada('');
       onClose();
+    } else {
+      console.log('No se encontró la ubicación con ID:', ubicacionSeleccionada);
     }
   };
 
@@ -42,19 +51,30 @@ const ParadaModal = ({
     try {
       const response = await apiClient.get('/ubicaciones');
       const data = response?.data || response || [];
-      const ubicacionesValidas = data.filter(
-        u => u.estado && u.latitud && u.longitud
-      );
-      setUbicaciones(ubicacionesValidas);
+      
+      // Mapear los datos para usar la estructura esperada
+      const ubicacionesMapeadas = data
+        .filter(u => u.estado && u.latitud && u.longitud)
+        .map(u => ({
+          idUbicacion: u.id,
+          nombreUbicacion: u.nombre,
+          direccion: u.direccion,
+          latitud: u.latitud,
+          longitud: u.longitud,
+          estado: u.estado,
+        }));
+      
+      setUbicaciones(ubicacionesMapeadas);
 
       // Seleccionar la nueva ubicación
       if (nuevaUbicacion) {
         const idUbicacion =
           nuevaUbicacion.idUbicacion ||
           nuevaUbicacion.data?.idUbicacion ||
+          nuevaUbicacion.data?.id ||
           nuevaUbicacion.id;
         if (idUbicacion) {
-          setUbicacionSeleccionada(idUbicacion);
+          setUbicacionSeleccionada(String(idUbicacion));
         }
       }
     } catch (error) {

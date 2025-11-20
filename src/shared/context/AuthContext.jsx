@@ -14,6 +14,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -24,23 +25,34 @@ export const AuthProvider = ({ children }) => {
     try {
       // Verificación rápida primero
       if (!authService.isAuthenticated()) {
+        setUser(null);
         setIsLoading(false);
         return;
       }
 
       const storedUser = authService.getCurrentUser();
       if (!storedUser) {
+        setUser(null);
         setIsLoading(false);
         return;
       }
 
-      // Establecer el usuario inmediatamente desde el storage
+      // Establecer el usuario desde el storage temporalmente
       setUser(storedUser);
-      setIsLoading(false);
 
-      // Luego verificar con el servidor en segundo plano
+      // Verificar con el servidor ANTES de establecer isLoading = false
+      // Agregar timeout de 5 segundos para evitar bloqueo indefinido
       try {
-        const profileData = await authService.getMe();
+        const profileDataPromise = authService.getMe();
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout')), 5000)
+        );
+
+        const profileData = await Promise.race([
+          profileDataPromise,
+          timeoutPromise,
+        ]);
+
         if (profileData.success && profileData.data) {
           const updatedUser = profileData.data;
           setUser(updatedUser);
@@ -49,6 +61,10 @@ export const AuthProvider = ({ children }) => {
             ? localStorage
             : sessionStorage;
           storage.setItem('user', JSON.stringify(updatedUser));
+        } else {
+          // Si no hay datos válidos, limpiar
+          setUser(null);
+          authService.logout();
         }
       } catch (error) {
         const isAuthError =
@@ -57,7 +73,14 @@ export const AuthProvider = ({ children }) => {
           (error.message && error.message.includes('401'));
 
         if (isAuthError) {
-          logout();
+          setUser(null);
+          authService.logout();
+        } else {
+          // Si hay error pero no es de auth, mantener el usuario del storage
+          // pero marcar como no autenticado si no hay token válido
+          if (!authService.isAuthenticated()) {
+            setUser(null);
+          }
         }
       }
     } catch (error) {
@@ -67,10 +90,13 @@ export const AuthProvider = ({ children }) => {
         (error.message && error.message.includes('401'));
 
       if (isAuthError) {
-        logout();
+        setUser(null);
+        authService.logout();
       } else {
         setError(error.message);
+        setUser(null);
       }
+    } finally {
       setIsLoading(false);
     }
   };
@@ -83,8 +109,18 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.login(credentials);
 
       if (response.success && response.data) {
+        // Establecer usuario inicial
         setUser(response.data.user);
-        await updateProfile();
+        
+        // Actualizar perfil sin cambiar isLoading (se mantiene en true)
+        // para que el Layout muestre la carga mientras se actualiza
+        try {
+          await updateProfile();
+        } catch (profileError) {
+          // Si falla la actualización del perfil, mantener el usuario del login
+          console.warn('Error al actualizar perfil después del login:', profileError);
+        }
+        
         return response;
       } else {
         throw new Error(response.message || 'Error en el login');
@@ -101,6 +137,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       setError(errorMessage);
+      setUser(null);
       throw error;
     } finally {
       setIsLoading(false);
@@ -150,9 +187,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    setUser(null);
-    setError(null);
-    authService.logout();
+    setIsLoggingOut(true);
+    setIsLoading(true); // Mantener loading durante el logout para evitar flash
+    
+    // Pequeño delay para mostrar el mensaje de "Saliendo..."
+    setTimeout(() => {
+      setUser(null);
+      setError(null);
+      authService.logout();
+      setIsLoggingOut(false);
+      setIsLoading(false);
+    }, 800);
   };
 
   const clearError = () => {
@@ -162,6 +207,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     isLoading,
+    isLoggingOut,
     error,
     login,
     register,

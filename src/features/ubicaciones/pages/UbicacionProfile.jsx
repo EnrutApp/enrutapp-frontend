@@ -39,7 +39,7 @@ const UbicacionProfile = ({
           const rutas = response?.data?.rutas || response?.rutas || [];
           setRutasAsociadas(Array.isArray(rutas) ? rutas : []);
         } catch (err) {
-          
+
           setRutasAsociadas([]);
         } finally {
           setLoadingRutas(false);
@@ -81,7 +81,7 @@ const UbicacionProfile = ({
         setIsDeleteModalOpen(true);
       }
     } catch (err) {
-      
+
       // Si hay error, mostrar modal simple por defecto
       setIsDeleteModalOpen(true);
     }
@@ -119,7 +119,7 @@ const UbicacionProfile = ({
 
       handleClose();
     } catch (err) {
-      
+
 
       // Para errores, mostrar alerta
       let errorMessage = 'Error al eliminar ubicación';
@@ -167,7 +167,7 @@ const UbicacionProfile = ({
 
       handleClose();
     } catch (err) {
-      
+
 
       let errorMessage = 'Error al eliminar ubicación';
 
@@ -204,11 +204,11 @@ const UbicacionProfile = ({
   const ubicacionParaMapa =
     latitud && longitud
       ? {
-          nombreUbicacion: nombre,
-          direccion: direccion,
-          latitud: latitud,
-          longitud: longitud,
-        }
+        nombreUbicacion: nombre,
+        direccion: direccion,
+        latitud: latitud,
+        longitud: longitud,
+      }
       : null;
 
   return (
@@ -352,7 +352,7 @@ const UbicacionProfile = ({
                                 key={parada.idParada || idx}
                                 className="flex items-center gap-1"
                               >
-                                <md-icon className="text-xl text-secondary flex-shrink-0">
+                                <md-icon className="text-xl text-secondary shrink-0">
                                   arrow_right
                                 </md-icon>
                                 <span className="subtitle1 text-primary font-light truncate leading-6">
@@ -364,12 +364,12 @@ const UbicacionProfile = ({
                                 </span> */}
                               </div>
                             ))}
-                            <md-icon className="text-xl text-secondary flex-shrink-0">
+                            <md-icon className="text-xl text-secondary shrink-0">
                               arrow_right
                             </md-icon>
                           </>
                         ) : (
-                          <md-icon className="text-xl text-secondary flex-shrink-0">
+                          <md-icon className="text-xl text-secondary shrink-0">
                             arrow_right
                           </md-icon>
                         )}
@@ -381,52 +381,51 @@ const UbicacionProfile = ({
                       {(ruta.distancia ||
                         ruta.tiempoEstimado ||
                         ruta.precioBase) && (
-                        <div className="flex gap-2 mt-3 items-center content-box-outline-8-small">
-                          {ruta.distancia && (
-                            <span className="text-sm text-secondary flex items-center gap-1">
-                              <md-icon className="text-base text-secondary">
-                                distance
-                              </md-icon>
-                              <strong className="subtitle1 text-secondary">
-                                Distancia:
-                              </strong>{' '}
-                              {ruta.distancia} km
-                            </span>
-                          )}
-                          <span className="text-sm text-secondary">|</span>
-                          {ruta.tiempoEstimado && (
-                            <span className="text-sm text-secondary flex items-center gap-1">
-                              <md-icon className="text-base text-secondary">
-                                timer
-                              </md-icon>
-                              <strong className="subtitle1 text-secondary">
-                                Tiempo:
-                              </strong>{' '}
-                              {ruta.tiempoEstimado}
-                            </span>
-                          )}
-                          <span className="text-sm text-secondary">|</span>
-                          {ruta.precioBase && (
-                            <span className="text-sm text-secondary flex items-center gap-1">
-                              <md-icon className="text-base text-secondary">
-                                attach_money
-                              </md-icon>
-                              <strong className="subtitle1 text-secondary">
-                                Precio:
-                              </strong>{' '}
-                              ${ruta.precioBase}
-                            </span>
-                          )}
-                        </div>
-                      )}
+                          <div className="flex gap-2 mt-3 items-center content-box-outline-8-small">
+                            {ruta.distancia && (
+                              <span className="text-sm text-secondary flex items-center gap-1">
+                                <md-icon className="text-base text-secondary">
+                                  distance
+                                </md-icon>
+                                <strong className="subtitle1 text-secondary">
+                                  Distancia:
+                                </strong>{' '}
+                                {ruta.distancia} km
+                              </span>
+                            )}
+                            <span className="text-sm text-secondary">|</span>
+                            {ruta.tiempoEstimado && (
+                              <span className="text-sm text-secondary flex items-center gap-1">
+                                <md-icon className="text-base text-secondary">
+                                  timer
+                                </md-icon>
+                                <strong className="subtitle1 text-secondary">
+                                  Tiempo:
+                                </strong>{' '}
+                                {ruta.tiempoEstimado}
+                              </span>
+                            )}
+                            <span className="text-sm text-secondary">|</span>
+                            {ruta.precioBase && (
+                              <span className="text-sm text-secondary flex items-center gap-1">
+                                <md-icon className="text-base text-secondary">
+                                  attach_money
+                                </md-icon>
+                                <strong className="subtitle1 text-secondary">
+                                  Precio:
+                                </strong>{' '}
+                                ${ruta.precioBase}
+                              </span>
+                            )}
+                          </div>
+                        )}
                     </div>
                     <div className="flex items-center justify-center">
                       <span
-                        className={`btn font-medium btn-lg flex items-center ${
-                          ruta.estado === 'Activa' || ruta.estado === 'activo'
+                        className={`btn font-medium btn-lg flex items-center ${ruta.estado === 'Activa' || ruta.estado === 'activo'
                             ? 'btn-green text-text-green'
                             : 'btn-red'
-                        }`}
+                          }`}
                       >
                         {ruta.estado === 'Activa' || ruta.estado === 'activo'
                           ? 'Activa'

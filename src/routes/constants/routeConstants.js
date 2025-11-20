@@ -19,6 +19,7 @@ export const ROUTES = {
     FINANZAS: '/admin/finanzas',
     UBICACIONES: '/admin/ubicaciones',
     ROLES: '/admin/rol',
+    CONTRATOS: '/admin/contratos',
   },
 
   CONDUCTOR: {

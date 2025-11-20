@@ -292,8 +292,8 @@ const MapBoxMap = memo(
         {!isLoaded && (
           <div className="absolute top-4 right-4 z-30">
             <div className="content-box-outline-4-small rounded-lg px-3 py-2 flex items-center gap-2 shadow-lg">
-              <md-icon className="text-primary text-lg animate-spin">
-                sync
+              <md-icon className="text-primary text-lg">
+                map
               </md-icon>
               <p className="text-secondary text-xs font-medium">
                 Cargando mapa...

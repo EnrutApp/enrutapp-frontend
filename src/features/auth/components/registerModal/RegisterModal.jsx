@@ -311,7 +311,7 @@ const ModalRegister = ({ isOpen, onClose }) => {
                 <div className="flex justify-end items-center w-full mx-auto max-w-md">
                   <button
                     type="button"
-                    className="btn btn-secondary w-full flex items-center justify-center"
+                    className="btn btn-secondary w-full flex items-center justify-center gap-2"
                     disabled={step1Loading}
                     onClick={async () => {
                       setRegisterError('');
@@ -352,14 +352,10 @@ const ModalRegister = ({ isOpen, onClose }) => {
                       }
                     }}
                   >
-                    {step1Loading ? (
-                      <>
-                        <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Validando...
-                      </>
-                    ) : (
-                      'Siguiente'
+                    {step1Loading && (
+                      <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                     )}
+                    {step1Loading ? 'Validando...' : 'Siguiente'}
                   </button>
                 </div>
               </div>
@@ -611,16 +607,12 @@ const ModalRegister = ({ isOpen, onClose }) => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="btn btn-primary py-3 font-medium text-subtitle1 w-1/2 flex items-center justify-center"
+                    className="btn btn-primary py-3 font-medium text-subtitle1 w-1/2 flex items-center justify-center gap-2"
                   >
-                    {isLoading ? (
-                      <>
-                        <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Creando cuenta...
-                      </>
-                    ) : (
-                      'Crear cuenta'
+                    {isLoading && (
+                      <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                     )}
+                    {isLoading ? 'Creando cuenta...' : 'Crear cuenta'}
                   </button>
                 </div>
               </div>

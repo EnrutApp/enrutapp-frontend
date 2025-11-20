@@ -63,6 +63,11 @@ const Roles = withLazyLoading(
   'Cargando gestión de roles...'
 );
 
+const Contratos = withLazyLoading(
+  lazy(() => import('../../features/contratos/ContratosPage')),
+  'Cargando gestión de contratos...'
+);
+
 const AdminHomeWithErrorBoundary = withErrorBoundary(HomeAdmin, {
   title: 'Error en Dashboard',
   message: 'No se pudo cargar el dashboard de administrador',
@@ -192,6 +197,16 @@ export const adminRoutes = [
     })(),
     handle: {
       crumb: () => 'Roles',
+    },
+  },
+  {
+    path: ROUTES.ADMIN.CONTRATOS,
+    element: withErrorBoundary(Contratos, {
+      title: 'Error en Gestión de Contratos',
+      message: 'No se pudo cargar la gestión de contratos',
+    })(),
+    handle: {
+      crumb: () => 'Contratos',
     },
   },
 ];

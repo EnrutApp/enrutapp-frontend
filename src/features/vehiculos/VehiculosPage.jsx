@@ -92,6 +92,7 @@ const VehiculosPage = () => {
   const [sortBy, setSortBy] = useState('linea');
   const [sortOrder, setSortOrder] = useState('asc');
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState('list');
 
   // Estados para selección múltiple
   const [selectedVehicles, setSelectedVehicles] = useState([]);
@@ -325,7 +326,7 @@ const VehiculosPage = () => {
     handlePageChange,
     startIndex,
     totalItems,
-  } = usePagination(cards, 8);
+  } = usePagination(cards, viewMode === 'grid' ? 8 : 4);
 
   const handleOpenAdd = () => setIsAddOpen(true);
   const handleCloseAdd = () => setIsAddOpen(false);
@@ -580,11 +581,34 @@ const VehiculosPage = () => {
                     </span>
                   )}
                 </div>
-                {showPagination && (
-                  <span className="text-xs text-secondary">
-                    Página {currentPage} de {totalPages}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {showPagination && (
+                    <span className="text-xs text-secondary">
+                      Página {currentPage} de {totalPages}
+                    </span>
+                  )}
+
+                  <div className="flex bg-fill rounded-lg p-1 border border-border ml-2">
+                    <button
+                      className={`p-1 rounded-md transition-all ${viewMode === 'list'
+                          ? 'bg-background text-primary shadow-sm'
+                          : 'text-secondary hover:text-primary'
+                        }`}
+                      onClick={() => setViewMode('list')}
+                    >
+                      <md-icon className="text-xl">view_list</md-icon>
+                    </button>
+                    <button
+                      className={`p-1 rounded-md transition-all ${viewMode === 'grid'
+                          ? 'bg-background text-primary shadow-sm'
+                          : 'text-secondary hover:text-primary'
+                        }`}
+                      onClick={() => setViewMode('grid')}
+                    >
+                      <md-icon className="text-xl">grid_view</md-icon>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="mt-3">
@@ -608,7 +632,7 @@ const VehiculosPage = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
                     {currentVehicles.map((vehicle, index) => (
                       <div
                         key={index}
@@ -636,112 +660,187 @@ const VehiculosPage = () => {
                           </div>
                         )}
 
-                        <div className="flex flex-col gap-3">
-                          <div className="relative w-full h-40 rounded-xl overflow-hidden bg-surface border border-border">
-                            <img
-                              src={vehicle.image}
-                              alt={vehicle.name}
-                              className="w-full h-full object-cover"
-                              onError={e => {
-                                e.target.style.display = 'none';
-                                e.target.parentElement.innerHTML =
-                                  '<div class="w-full h-full flex items-center justify-center bg-fill text-secondary"><md-icon style="font-size: 48px;">broken_image</md-icon></div>';
-                              }}
-                            />
-                            <div
-                              className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center ${vehicle.status === 'Activo'
-                                ? 'btn-green'
-                                : vehicle.status === 'Mantenimiento'
-                                  ? 'btn-yellow'
-                                  : 'btn-red'
-                                }`}
-                            >
-                              <md-icon
-                                className={`text-sm font-bold ${vehicle.status === 'Activo'
-                                  ? 'text-text-green'
-                                  : vehicle.status === 'Mantenimiento'
-                                    ? 'text-text-yellow'
-                                    : 'text-text-red'
-                                  }`}
-                              >
-                                {vehicle.statusIcon}
-                              </md-icon>
+                        {viewMode === 'grid' ? (
+                          <div className="flex flex-col gap-3">
+                            <div className="relative w-full h-40 rounded-xl overflow-hidden bg-surface border border-border">
+                              <img
+                                src={vehicle.image}
+                                alt={vehicle.name}
+                                className="w-full h-full object-cover"
+                                onError={e => {
+                                  e.target.style.display = 'none';
+                                  e.target.parentElement.innerHTML =
+                                    '<div class="w-full h-full flex items-center justify-center bg-fill text-secondary"><md-icon style="font-size: 48px;">broken_image</md-icon></div>';
+                                }}
+                              />
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-start justify-between gap-2 pb-3">
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="text-h5 font-bold text-primary truncate mb-1">
+                                    {vehicle.name}
+                                  </h3>
+                                  <div className="flex items-center gap-2 text-body2">
+                                    <span className="text-secondary truncate">{vehicle.plate}</span>
+                                  </div>
+                                </div>
+                                <span
+                                  className={`btn font-medium btn-sm flex items-center ${vehicle.status === 'Activo' ? 'btn-green' : 'btn-red'
+                                    }`}
+                                >
+                                  {vehicle.status === 'Activo' ? 'Activo' : 'Inactivo'}
+                                </span>
+                              </div>
+
+                              <div className="flex-1 space-y-2 mb-3">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center">
+                                    <md-icon className="text-base text-primary">airline_seat_recline_normal</md-icon>
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="text-xs text-secondary">Capacidad</span>
+                                    <span className="text-sm font-semibold text-primary truncate">{vehicle.capacity}</span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center">
+                                    <md-icon className="text-base text-primary">calendar_today</md-icon>
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="text-xs text-secondary">Modelo</span>
+                                    <span className="text-sm font-semibold text-primary">{vehicle.model}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                              <div className="relative group flex-1">
+                                <button
+                                  className={`btn btn-sm-2 font-medium flex items-center gap-1 w-full justify-center ${vehicle.status === 'Activo' ? 'btn-outline' : 'btn-secondary'
+                                    }`}
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleSwitchClick(vehicle);
+                                  }}
+                                >
+                                  <md-icon className="text-sm">
+                                    {vehicle.status === 'Activo' ? 'block' : 'check'}
+                                  </md-icon>
+                                </button>
+                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
+                                    <p className="text-xs text-primary">
+                                      {vehicle.status === 'Activo' ? 'Deshabilitar' : 'Habilitar'}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="relative group flex-1">
+                                <button
+                                  className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleOpenEdit(vehicle);
+                                  }}
+                                >
+                                  <md-icon className="text-sm">edit</md-icon>
+                                </button>
+                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
+                                    <p className="text-xs text-primary">Editar</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="relative group flex-1">
+                                <button
+                                  className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleDeleteClick(vehicle);
+                                  }}
+                                >
+                                  <md-icon className="text-sm">delete</md-icon>
+                                </button>
+                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
+                                    <p className="text-xs text-primary">Eliminar</p>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
-
-                          <div className="flex flex-col gap-2">
-                            <h3 className="text-h5 font-bold text-primary truncate">
-                              {vehicle.name}
-                            </h3>
-
-                            <div className="flex flex-col gap-1.5">
-                              <div className="flex items-center gap-2 text-body2">
-                                <md-icon className="text-sm text-secondary">directions_car</md-icon>
-                                <span className="text-secondary">Placa:</span>
-                                <span className="font-semibold text-primary">{vehicle.plate}</span>
+                        ) : (
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-surface border border-border shrink-0">
+                                <img
+                                  src={vehicle.image}
+                                  alt={vehicle.name}
+                                  className="w-full h-full object-cover"
+                                  onError={e => {
+                                    e.target.style.display = 'none';
+                                    e.target.parentElement.innerHTML =
+                                      '<div class="w-full h-full flex items-center justify-center bg-fill text-secondary"><md-icon style="font-size: 24px;">broken_image</md-icon></div>';
+                                  }}
+                                />
                               </div>
-                              <div className="flex items-center gap-2 text-body2">
-                                <md-icon className="text-sm text-secondary">airline_seat_recline_normal</md-icon>
-                                <span className="text-secondary">Capacidad:</span>
-                                <span className="font-semibold text-primary">{vehicle.capacity}</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-body2">
-                                <md-icon className="text-sm text-secondary">calendar_today</md-icon>
-                                <span className="text-secondary">Modelo:</span>
-                                <span className="font-semibold text-primary">{vehicle.model}</span>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <h3 className="text-h5 font-bold text-primary truncate">
+                                    {vehicle.name}
+                                  </h3>
+                                  <span className="text-body2 text-secondary truncate border-l border-border pl-2">
+                                    {vehicle.plate}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span
+                                    className={`btn font-medium btn-sm flex items-center ${vehicle.status === 'Activo' ? 'btn-green' : 'btn-red'
+                                      }`}
+                                  >
+                                    {vehicle.status === 'Activo' ? 'Activo' : 'Inactivo'}
+                                  </span>
+                                  <div className="flex items-center gap-1 text-xs text-secondary bg-fill px-2 py-1 rounded-md">
+                                    <md-icon className="text-sm">airline_seat_recline_normal</md-icon>
+                                    <span>{vehicle.capacity}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1 text-xs text-secondary bg-fill px-2 py-1 rounded-md">
+                                    <md-icon className="text-sm">calendar_today</md-icon>
+                                    <span>{vehicle.model}</span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                          </div>
 
-                          <div className="flex gap-2 pt-2 border-t border-border">
-                            <div className="relative group flex-1">
+                            <div className="flex gap-2 items-center ml-4">
                               <button
-                                className={`btn btn-sm-2 font-medium flex items-center gap-1 w-full justify-center ${vehicle.status === 'Activo' ? 'btn-outline' : 'btn-secondary'
+                                className={`btn btn-lg font-medium flex items-center gap-1 ${vehicle.status === 'Activo' ? 'btn-outline' : 'btn-secondary'
                                   }`}
                                 onClick={e => {
                                   e.stopPropagation();
                                   handleSwitchClick(vehicle);
                                 }}
                               >
-                                <md-icon className="text-sm">
-                                  {vehicle.status === 'Activo' ? 'block' : 'check'}
-                                </md-icon>
+                                {vehicle.status === 'Activo' ? 'Deshabilitar' : 'Habilitar'}
                               </button>
-                              <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[9999] pointer-events-none">
-                                <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                  <p className="text-xs text-primary">
-                                    {vehicle.status === 'Activo' ? 'Deshabilitar' : 'Habilitar'}
-                                  </p>
-                                </div>
-                                <div className="tooltip-smart-arrow absolute left-1/2 transform -translate-x-1/2">
-                                  <div className="w-2 h-2 bg-surface border-b border-r border-border transform rotate-45"></div>
-                                </div>
-                              </div>
-                            </div>
 
-                            <div className="relative group flex-1">
                               <button
-                                className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
+                                className="btn btn-primary btn-lg font-medium flex items-center gap-1"
                                 onClick={e => {
                                   e.stopPropagation();
                                   handleOpenEdit(vehicle);
                                 }}
                               >
                                 <md-icon className="text-sm">edit</md-icon>
+                                Editar
                               </button>
-                              <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[9999] pointer-events-none">
-                                <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                  <p className="text-xs text-primary">Editar</p>
-                                </div>
-                                <div className="tooltip-smart-arrow absolute left-1/2 transform -translate-x-1/2">
-                                  <div className="w-2 h-2 bg-surface border-b border-r border-border transform rotate-45"></div>
-                                </div>
-                              </div>
-                            </div>
 
-                            <div className="relative group flex-1">
                               <button
-                                className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
+                                className="btn btn-secondary btn-lg font-medium flex items-center gap-1"
                                 onClick={e => {
                                   e.stopPropagation();
                                   handleDeleteClick(vehicle);
@@ -749,17 +848,9 @@ const VehiculosPage = () => {
                               >
                                 <md-icon className="text-sm">delete</md-icon>
                               </button>
-                              <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[9999] pointer-events-none">
-                                <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                  <p className="text-xs text-primary">Eliminar</p>
-                                </div>
-                                <div className="tooltip-smart-arrow absolute left-1/2 transform -translate-x-1/2">
-                                  <div className="w-2 h-2 bg-surface border-b border-r border-border transform rotate-45"></div>
-                                </div>
-                              </div>
                             </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     ))}
                   </div>

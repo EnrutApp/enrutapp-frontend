@@ -1,11 +1,11 @@
-import apiClient from "../../../shared/services/apiService";
+import apiClient from '../../../shared/services/apiService';
 
 export const turnoService = {
   /**
    * Obtener todos los turnos
    */
   async getTurnos() {
-    return await apiClient.get("/turnos");
+    return await apiClient.get('/turnos');
   },
 
   /**
@@ -19,12 +19,12 @@ export const turnoService = {
    * Crear un nuevo turno
    */
   async createTurno(data) {
-    return await apiClient.post("/turnos", {
+    return await apiClient.post('/turnos', {
       idConductor: data.idConductor,
       idVehiculo: data.idVehiculo,
       fecha: data.fecha,
       hora: data.hora,
-      estado: data.estado || "Programado",
+      estado: data.estado || 'Programado',
     });
   },
 

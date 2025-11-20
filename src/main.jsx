@@ -5,16 +5,19 @@ import './shared/styles/index.css';
 import Routes from './routes/Routes';
 import { AuthProvider } from './shared/context/AuthContext';
 import { ThemeProvider } from './shared/context/ThemeContext';
+import { LoadingProvider } from './shared/context/LoadingContext';
 import { MapProvider } from './shared/components/map';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider>
-      <AuthProvider>
-        <MapProvider>
-          <RouterProvider router={Routes} />
-        </MapProvider>
-      </AuthProvider>
+      <LoadingProvider>
+        <AuthProvider>
+          <MapProvider>
+            <RouterProvider router={Routes} />
+          </MapProvider>
+        </AuthProvider>
+      </LoadingProvider>
     </ThemeProvider>
   </StrictMode>
 );

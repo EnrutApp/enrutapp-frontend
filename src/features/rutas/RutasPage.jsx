@@ -51,6 +51,7 @@ const RutasPage = () => {
   const [statusFilter, setStatusFilter] = useState('Todos');
   const [sortBy, setSortBy] = useState('nombre');
   const [sortOrder, setSortOrder] = useState('asc');
+  const [viewMode, setViewMode] = useState('list');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -269,7 +270,7 @@ const RutasPage = () => {
     handlePageChange,
     startIndex,
     totalItems,
-  } = usePagination(sortedRutas, 4);
+  } = usePagination(sortedRutas, viewMode === 'grid' ? 8 : 4);
 
   if (error) {
     return (
@@ -484,15 +485,38 @@ const RutasPage = () => {
                     <span className="text-sm text-secondary">
                       {loading
                         ? 'Cargando rutas...'
-                        : `Mostrando ${totalItems > 0 ? startIndex + 1 : 0}-${Math.min(startIndex + 4, totalItems)} de ${totalItems} rutas`}
+                        : `Mostrando ${totalItems > 0 ? startIndex + 1 : 0}-${Math.min(startIndex + (viewMode === 'grid' ? 8 : 4), totalItems)} de ${totalItems} rutas`}
                     </span>
                   )}
                 </div>
-                {showPagination && (
-                  <span className="text-xs text-secondary">
-                    Página {currentPage} de {totalPages}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {showPagination && (
+                    <span className="text-xs text-secondary">
+                      Página {currentPage} de {totalPages}
+                    </span>
+                  )}
+
+                  <div className="flex bg-fill rounded-lg p-1 border border-border ml-2">
+                    <button
+                      className={`p-1 rounded-md transition-all ${viewMode === 'list'
+                          ? 'bg-background text-primary shadow-sm'
+                          : 'text-secondary hover:text-primary'
+                        }`}
+                      onClick={() => setViewMode('list')}
+                    >
+                      <md-icon className="text-xl">view_list</md-icon>
+                    </button>
+                    <button
+                      className={`p-1 rounded-md transition-all ${viewMode === 'grid'
+                          ? 'bg-background text-primary shadow-sm'
+                          : 'text-secondary hover:text-primary'
+                        }`}
+                      onClick={() => setViewMode('grid')}
+                    >
+                      <md-icon className="text-xl">grid_view</md-icon>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="mt-3">
@@ -514,178 +538,301 @@ const RutasPage = () => {
                     </div>
                   </div>
                 ) : (
-                  currentRutas.map(ruta => (
-                    <div
-                      key={ruta.idRuta}
-                      className={`content-box-outline-4-small cursor-pointer hover:border-primary transition-colors mb-3 ${ruta.estado !== 'Activa' ? 'opacity-60' : ''
-                        }`}
-                      onClick={() => handleOpenProfile(ruta)}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          {isSelectionMode && (
-                            <div
-                              style={{
-                                animation:
-                                  'checkboxAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                                transformOrigin: 'center',
+                  <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
+                    {currentRutas.map((ruta, index) => (
+                      <div
+                        key={ruta.idRuta || index}
+                        className={`content-box-outline-4-small cursor-pointer relative ${ruta.estado !== 'Activa' ? 'opacity-60' : ''}`}
+                        onClick={() => handleOpenProfile(ruta)}
+                      >
+                        {isSelectionMode && (
+                          <div
+                            className="absolute top-3 left-3 z-10"
+                            style={{
+                              animation:
+                                'checkboxAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                              transformOrigin: 'center',
+                            }}
+                          >
+                            <md-checkbox
+                              checked={selectedRutas.includes(ruta.idRuta)}
+                              onChange={e => {
+                                e.stopPropagation();
+                                handleSelectRuta(ruta.idRuta);
                               }}
-                            >
-                              <md-checkbox
-                                checked={selectedRutas.includes(ruta.idRuta)}
-                                onChange={e => {
-                                  e.stopPropagation();
-                                  handleSelectRuta(ruta.idRuta);
-                                }}
-                                onClick={e => e.stopPropagation()}
-                                touch-target="wrapper"
-                              />
+                              onClick={e => e.stopPropagation()}
+                              touch-target="wrapper"
+                            />
+                          </div>
+                        )}
+
+                        {viewMode === 'grid' ? (
+                          <div className="flex flex-col gap-3">
+                            <div className="relative w-full h-40 rounded-xl overflow-hidden bg-surface border border-border flex items-center justify-center">
+                              <md-icon style={{ fontSize: '48px' }} className="text-secondary">map</md-icon>
                             </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 relative">
-                              <h1 className="h4 font-bold truncate max-w-[200px]">
-                                {ruta.origen?.ubicacion?.nombreUbicacion ||
-                                  'Sin origen'}
-                              </h1>
-                              <md-icon className="text-xl text-secondary flex-shrink-0">
-                                arrow_right
-                              </md-icon>
-                              {ruta.paradas && ruta.paradas.length > 0 ? (
-                                <>
-                                  {ruta.paradas
-                                    .sort(
-                                      (a, b) => (a.orden || 0) - (b.orden || 0)
-                                    )
-                                    .slice(0, 2)
-                                    .map((parada, index) => (
-                                      <div
-                                        key={parada.idParada || index}
-                                        className="flex items-center gap-2 flex-shrink-0"
-                                      >
-                                        <span className="h4 font-bold truncate max-w-[150px]">
-                                          {parada.ubicacion?.nombreUbicacion ||
-                                            'Sin nombre'}
-                                        </span>
-                                        <md-icon className="text-xl text-secondary">
-                                          arrow_right
-                                        </md-icon>
-                                      </div>
-                                    ))}
-                                  {ruta.paradas.length > 2 && (
-                                    <div className="flex items-center gap-2 flex-shrink-0 relative group">
-                                      <span className="btn btn-secondary btn-sm font-medium cursor-help">
-                                        +{ruta.paradas.length - 2} más
-                                      </span>
-                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[9999] pointer-events-none">
-                                        <div className="bg-background border border-border rounded-lg shadow-2xl p-3 w-max max-w-xs">
-                                          <p className="text-xs font-medium text-secondary mb-2">
-                                            Paradas restantes:
-                                          </p>
-                                          <div className="flex flex-col gap-1">
-                                            {ruta.paradas
-                                              .sort(
-                                                (a, b) =>
-                                                  (a.orden || 0) -
-                                                  (b.orden || 0)
-                                              )
-                                              .slice(2)
-                                              .map((parada, index) => (
-                                                <div
-                                                  key={parada.idParada || index}
-                                                  className="flex items-center gap-2"
-                                                >
-                                                  <span className="text-xs font-medium text-secondary bg-primary/20 px-2 py-1 rounded">
-                                                    {parada.orden || index + 3}
-                                                  </span>
-                                                  <span className="text-xs text-primary">
-                                                    {parada.ubicacion
-                                                      ?.nombreUbicacion ||
-                                                      'Sin nombre'}
-                                                  </span>
-                                                </div>
-                                              ))}
-                                          </div>
-                                        </div>
-                                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
-                                          <div className="w-2 h-2 bg-surface border-b border-r border-border transform rotate-45"></div>
-                                        </div>
-                                      </div>
-                                      <md-icon className="text-xl text-secondary">
-                                        arrow_right
-                                      </md-icon>
-                                    </div>
-                                  )}
-                                </>
-                              ) : (
-                                <></>
-                              )}
-                              <h1 className="h4 font-bold truncate max-w-[200px] flex-shrink-0">
-                                {ruta.destino?.ubicacion?.nombreUbicacion ||
-                                  'Sin destino'}
-                              </h1>
+
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-start justify-between gap-2 pb-3">
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="text-h5 font-bold text-primary truncate mb-1">
+                                    {ruta.origen?.ubicacion?.nombreUbicacion || 'Sin origen'}
+                                  </h3>
+                                  <div className="flex items-center gap-2 text-body2">
+                                    <md-icon className="text-xs text-secondary">arrow_forward</md-icon>
+                                    <span className="text-secondary truncate">
+                                      {ruta.destino?.ubicacion?.nombreUbicacion || 'Sin destino'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <span
+                                  className={`btn font-medium btn-sm flex items-center ${ruta.estado === 'Activa' ? 'btn-green' : 'btn-red'
+                                    }`}
+                                >
+                                  {ruta.estado}
+                                </span>
+                              </div>
+
+                              <div className="flex-1 space-y-2 mb-3">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center">
+                                    <md-icon className="text-base text-primary">attach_money</md-icon>
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="text-xs text-secondary">Precio Base</span>
+                                    <span className="text-sm font-semibold text-primary truncate">
+                                      ${Number(ruta.precioBase)?.toLocaleString('es-CO') || '0'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center">
+                                    <md-icon className="text-base text-primary">place</md-icon>
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="text-xs text-secondary">Paradas</span>
+                                    <span className="text-sm font-semibold text-primary">
+                                      {ruta.paradas?.length || 0}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex gap-2 mt-2 items-center">
-                              <span
-                                className={`btn font-medium btn-lg flex items-center ${ruta.estado === 'Activa' ? 'btn-green' : 'btn-red'}`}
-                              >
-                                {ruta.estado}
-                              </span>
-                              <span className="btn btn-primary font-medium btn-lg flex items-center">
-                                $
-                                {Number(ruta.precioBase)?.toLocaleString(
-                                  'es-CO'
-                                ) || '0'}
-                              </span>
+
+                            <div className="flex gap-2">
+                              <div className="relative group flex-1">
+                                <button
+                                  className={`btn btn-sm-2 font-medium flex items-center gap-1 w-full justify-center ${ruta.estado === 'Activa' ? 'btn-outline' : 'btn-secondary'
+                                    }`}
+                                  onClick={e => handleToggleEstado(ruta, e)}
+                                >
+                                  <md-icon className="text-sm">
+                                    {ruta.estado === 'Activa' ? 'block' : 'check'}
+                                  </md-icon>
+                                </button>
+                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
+                                    <p className="text-xs text-primary">
+                                      {ruta.estado === 'Activa' ? 'Deshabilitar' : 'Habilitar'}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="relative group flex-1">
+                                <button
+                                  className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
+                                  onClick={async e => {
+                                    e.stopPropagation();
+                                    try {
+                                      const rutaCompleta = await apiClient.get(
+                                        `/rutas/${ruta.idRuta}`
+                                      );
+                                      setRutaToEdit(
+                                        rutaCompleta?.data || rutaCompleta || ruta
+                                      );
+                                      setIsAddModalOpen(true);
+                                    } catch (error) {
+                                      setRutaToEdit(ruta);
+                                      setIsAddModalOpen(true);
+                                    }
+                                  }}
+                                >
+                                  <md-icon className="text-sm">edit</md-icon>
+                                </button>
+                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
+                                    <p className="text-xs text-primary">Editar</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="relative group flex-1">
+                                <button
+                                  className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleDeleteClick(ruta);
+                                  }}
+                                >
+                                  <md-icon className="text-sm">delete</md-icon>
+                                </button>
+                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
+                                    <p className="text-xs text-primary">Eliminar</p>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="flex gap-2 items-center flex-shrink-0">
-                          <button
-                            className={`btn btn-lg font-medium flex items-center gap-1 ${ruta.estado === 'Activa' ? 'btn-outline' : 'btn-secondary'}`}
-                            onClick={e => handleToggleEstado(ruta, e)}
-                          >
-                            {ruta.estado === 'Activa'
-                              ? 'Deshabilitar'
-                              : 'Habilitar'}
-                          </button>
+                        ) : (
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 relative">
+                                  <h1 className="h4 font-bold truncate max-w-[200px]">
+                                    {ruta.origen?.ubicacion?.nombreUbicacion ||
+                                      'Sin origen'}
+                                  </h1>
+                                  <md-icon className="text-xl text-secondary shrink-0">
+                                    arrow_right
+                                  </md-icon>
+                                  {ruta.paradas && ruta.paradas.length > 0 ? (
+                                    <>
+                                      {ruta.paradas
+                                        .sort(
+                                          (a, b) => (a.orden || 0) - (b.orden || 0)
+                                        )
+                                        .slice(0, 2)
+                                        .map((parada, index) => (
+                                          <div
+                                            key={parada.idParada || index}
+                                            className="flex items-center gap-2 shrink-0"
+                                          >
+                                            <span className="h4 font-bold truncate max-w-[150px]">
+                                              {parada.ubicacion?.nombreUbicacion ||
+                                                'Sin nombre'}
+                                            </span>
+                                            <md-icon className="text-xl text-secondary">
+                                              arrow_right
+                                            </md-icon>
+                                          </div>
+                                        ))}
+                                      {ruta.paradas.length > 2 && (
+                                        <div className="flex items-center gap-2 shrink-0 relative group">
+                                          <span className="btn btn-secondary btn-sm font-medium cursor-help">
+                                            +{ruta.paradas.length - 2} más
+                                          </span>
+                                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                            <div className="bg-background border border-border rounded-lg shadow-2xl p-3 w-max max-w-xs">
+                                              <p className="text-xs font-medium text-secondary mb-2">
+                                                Paradas restantes:
+                                              </p>
+                                              <div className="flex flex-col gap-1">
+                                                {ruta.paradas
+                                                  .sort(
+                                                    (a, b) =>
+                                                      (a.orden || 0) -
+                                                      (b.orden || 0)
+                                                  )
+                                                  .slice(2)
+                                                  .map((parada, index) => (
+                                                    <div
+                                                      key={parada.idParada || index}
+                                                      className="flex items-center gap-2"
+                                                    >
+                                                      <span className="text-xs font-medium text-secondary bg-primary/20 px-2 py-1 rounded">
+                                                        {parada.orden || index + 3}
+                                                      </span>
+                                                      <span className="text-xs text-primary">
+                                                        {parada.ubicacion
+                                                          ?.nombreUbicacion ||
+                                                          'Sin nombre'}
+                                                      </span>
+                                                    </div>
+                                                  ))}
+                                              </div>
+                                            </div>
+                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
+                                              <div className="w-2 h-2 bg-surface border-b border-r border-border transform rotate-45"></div>
+                                            </div>
+                                          </div>
+                                          <md-icon className="text-xl text-secondary">
+                                            arrow_right
+                                          </md-icon>
+                                        </div>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <></>
+                                  )}
+                                  <h1 className="h4 font-bold truncate max-w-[200px] shrink-0">
+                                    {ruta.destino?.ubicacion?.nombreUbicacion ||
+                                      'Sin destino'}
+                                  </h1>
+                                </div>
+                                <div className="flex gap-2 mt-2 items-center">
+                                  <span
+                                    className={`btn font-medium btn-lg flex items-center ${ruta.estado === 'Activa' ? 'btn-green' : 'btn-red'}`}
+                                  >
+                                    {ruta.estado}
+                                  </span>
+                                  <span className="btn btn-primary font-medium btn-lg flex items-center">
+                                    $
+                                    {Number(ruta.precioBase)?.toLocaleString(
+                                      'es-CO'
+                                    ) || '0'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-2 items-center shrink-0">
+                              <button
+                                className={`btn btn-lg font-medium flex items-center gap-1 ${ruta.estado === 'Activa' ? 'btn-outline' : 'btn-secondary'}`}
+                                onClick={e => handleToggleEstado(ruta, e)}
+                              >
+                                {ruta.estado === 'Activa'
+                                  ? 'Deshabilitar'
+                                  : 'Habilitar'}
+                              </button>
 
-                          <button
-                            className="btn btn-primary btn-lg font-medium flex items-center gap-1"
-                            onClick={async e => {
-                              e.stopPropagation();
-                              try {
-                                const rutaCompleta = await apiClient.get(
-                                  `/rutas/${ruta.idRuta}`
-                                );
-                                setRutaToEdit(
-                                  rutaCompleta?.data || rutaCompleta || ruta
-                                );
-                                setIsAddModalOpen(true);
-                              } catch (error) {
+                              <button
+                                className="btn btn-primary btn-lg font-medium flex items-center gap-1"
+                                onClick={async e => {
+                                  e.stopPropagation();
+                                  try {
+                                    const rutaCompleta = await apiClient.get(
+                                      `/rutas/${ruta.idRuta}`
+                                    );
+                                    setRutaToEdit(
+                                      rutaCompleta?.data || rutaCompleta || ruta
+                                    );
+                                    setIsAddModalOpen(true);
+                                  } catch (error) {
+                                    setRutaToEdit(ruta);
+                                    setIsAddModalOpen(true);
+                                  }
+                                }}
+                              >
+                                <md-icon className="text-sm">edit</md-icon>
+                                Editar
+                              </button>
 
-                                setRutaToEdit(ruta);
-                                setIsAddModalOpen(true);
-                              }
-                            }}
-                          >
-                            <md-icon className="text-sm">edit</md-icon>
-                            Editar
-                          </button>
-
-                          <button
-                            className="btn btn-secondary btn-lg font-medium flex items-center gap-1"
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleDeleteClick(ruta);
-                            }}
-                          >
-                            <md-icon className="text-sm">delete</md-icon>
-                          </button>
-                        </div>
+                              <button
+                                className="btn btn-secondary btn-lg font-medium flex items-center gap-1"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleDeleteClick(ruta);
+                                }}
+                              >
+                                <md-icon className="text-sm">delete</md-icon>
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 )}
               </div>
             </div>

@@ -211,9 +211,12 @@ const ResetPasswordModal = ({ isOpen, onClose }) => {
               <div className="pt-1">
                 <button
                   type="submit"
-                  className="w-full btn btn-primary py-3 font-medium text-subtitle1"
+                  className="w-full btn btn-primary py-3 font-medium text-subtitle1 flex items-center justify-center gap-2"
                   disabled={enviando}
                 >
+                  {enviando && (
+                    <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  )}
                   {enviando ? 'Enviando...' : 'Enviar'}
                 </button>
               </div>
@@ -341,9 +344,12 @@ const ResetPasswordModal = ({ isOpen, onClose }) => {
               <div className="pt-1">
                 <button
                   type="submit"
-                  className="w-full btn btn-primary py-3 font-medium text-subtitle1"
+                  className="w-full btn btn-primary py-3 font-medium text-subtitle1 flex items-center justify-center gap-2"
                   disabled={enviandoCodigo}
                 >
+                  {enviandoCodigo && (
+                    <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  )}
                   {enviandoCodigo ? 'Restableciendo...' : 'Restablecer'}
                 </button>
               </div>

@@ -186,9 +186,12 @@ const UbicacionAddQuick = ({ isOpen, onClose, onConfirm }) => {
             </button>
             <md-filled-button
               type="submit"
-              className="btn-add w-full"
+              className="btn-add w-full flex items-center justify-center gap-2"
               disabled={loading}
             >
+              {loading && (
+                <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              )}
               {loading ? 'Guardando...' : 'Añadir ubicación'}
             </md-filled-button>
           </div>

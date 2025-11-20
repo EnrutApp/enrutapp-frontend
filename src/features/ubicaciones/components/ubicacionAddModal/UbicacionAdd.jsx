@@ -137,9 +137,13 @@ const UbicacionAdd = ({
     const data = {
       nombre: nombre.trim(),
       direccion: direccion.trim(),
-      latitud: latitud,
-      longitud: longitud,
     };
+
+    // Solo incluir coordenadas si tienen valores válidos
+    if (latitud !== null && longitud !== null) {
+      data.latitud = latitud;
+      data.longitud = longitud;
+    }
 
     try {
       if (isEditMode) {

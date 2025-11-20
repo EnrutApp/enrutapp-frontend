@@ -242,15 +242,13 @@ const EditRoleModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                 </button>
                 <button
                   type="submit"
-                  className="btn btn-primary py-3 font-medium text-subtitle1 w-1/2 flex items-center justify-center"
+                  className="btn btn-primary py-3 font-medium text-subtitle1 w-1/2 flex items-center justify-center gap-2"
                   disabled={loading || success || isAdminRole}
                 >
-                  {loading ? (
-                    <>
-                      <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Actualizando...
-                    </>
-                  ) : success ? (
+                  {loading && (
+                    <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  )}
+                  {loading ? 'Actualizando...' : success ? (
                     'Actualizado'
                   ) : (
                     'Actualizar rol'

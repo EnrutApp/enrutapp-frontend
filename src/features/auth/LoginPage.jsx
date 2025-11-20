@@ -1,11 +1,12 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/checkbox/checkbox.js';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuth } from '../../shared/context/AuthContext';
+import { useLoading } from '../../shared/context/LoadingContext';
 import { loginSchema } from '../../shared/utils/validationSchemas';
 import ModalRegister from './components/registerModal/RegisterModal';
 import ResetPasswordModal from './components/resetPasswordModal/ResetPasswordModal';
@@ -18,10 +19,17 @@ const Login = () => {
     }
   };
   const [showPassword, setShowPassword] = useState(false);
-  const { login, isLoading, error } = useAuth();
+  const { login, isLoading, error, isAuthenticated } = useAuth();
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const navigate = useNavigate();
+
+  // Navegar al dashboard cuando el login sea exitoso y todo esté listo
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isLoading, isAuthenticated, navigate]);
 
   const handleRegisterClick = () => {
     setIsRegisterModalOpen(true);
@@ -47,7 +55,8 @@ const Login = () => {
   const onSubmit = async data => {
     try {
       await login({ ...data, remember: data.remember || false });
-      navigate('/dashboard');
+      // No navegar aquí - el AuthContext y Layout manejarán la navegación
+      // cuando todo esté listo (incluyendo verificación de perfil)
     } catch {
       // Error handled by AuthContext
     }
@@ -164,16 +173,12 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={!isValid || isLoading}
-                className="w-full btn btn-primary font-medium text-subtitle1"
+                className="w-full btn btn-primary font-medium text-subtitle1 flex items-center justify-center gap-2"
               >
-                {isLoading ? (
-                  <>
-                    <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-border mr-2"></div>
-                    Iniciando sesión...
-                  </>
-                ) : (
-                  'Inicia sesión'
+                {isLoading && (
+                  <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                 )}
+                {isLoading ? 'Iniciando sesión...' : 'Inicia sesión'}
               </button>
             </div>
 

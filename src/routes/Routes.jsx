@@ -33,6 +33,13 @@ const RoleRedirect = withLazyLoading(
   'Redirigiendo...'
 );
 
+const CompletarPerfilPage = withLazyLoading(
+  lazy(() =>
+    import('../features/conductores/pages/CompletarPerfilPage')
+  ),
+  'Cargando...'
+);
+
 const LayoutWithErrorBoundary = withErrorBoundary(Layout, {
   title: 'Error de la Aplicación',
   message:
@@ -67,6 +74,15 @@ const Routes = createBrowserRouter([
     path: ROUTES.LOGIN,
     element: <LoginWithErrorBoundary />,
     errorElement: <div>Error cargando login</div>,
+  },
+
+  {
+    path: '/completar-perfil',
+    element: (
+      <ProtectedRoute allowedRoles={[USER_ROLES.CONDUCTOR]}>
+        <CompletarPerfilPage />
+      </ProtectedRoute>
+    ),
   },
 
   {

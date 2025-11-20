@@ -53,7 +53,7 @@ const InfoRutasActivasModal = ({
                           <span className="font-medium truncate">
                             {ruta.origen}
                           </span>
-                          <md-icon className="text-base text-secondary mx-1 flex-shrink-0">
+                          <md-icon className="text-base text-secondary mx-1 shrink-0">
                             arrow_right
                           </md-icon>
                           <span className="font-medium truncate">

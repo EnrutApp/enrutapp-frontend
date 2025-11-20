@@ -18,6 +18,11 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
   const [roles, setRoles] = useState([]);
   const [tiposDoc, setTiposDoc] = useState([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isConductor, setIsConductor] = useState(false);
+  const [showLicenseOptions, setShowLicenseOptions] = useState(false);
+  const [licenseCompletionMethod, setLicenseCompletionMethod] = useState(null);
+  const [categorias, setCategorias] = useState([]);
+  const [licenseForm, setLicenseForm] = useState({});
 
   const totalSteps = isClientMode ? 3 : 4;
 
@@ -30,6 +35,10 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
       setGeneratedPassword(null);
       setCurrentStep(1);
       setShowConfirmation(false);
+      setIsConductor(false);
+      setShowLicenseOptions(false);
+      setLicenseCompletionMethod(null);
+      setLicenseForm({});
     }
   }, [isOpen]);
 
@@ -63,12 +72,36 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
           }
         })
         .catch(() => setTiposDoc([]));
+
+      // Cargar categorías de licencia
+      apiClient
+        .get('/categorias-licencia')
+        .then(res => {
+          if (res.success && Array.isArray(res.data)) {
+            setCategorias(res.data);
+          }
+        })
+        .catch(() => setCategorias([]));
     }
   }, [isOpen]);
 
   const handleChange = e => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
+
+    // Si se cambia el rol, verificar si es conductor
+    if (name === 'idRol') {
+      const selectedRole = roles.find(r => r.idRol === value);
+      const esConductor = selectedRole?.nombreRol?.toLowerCase() === 'conductor';
+      setIsConductor(esConductor);
+
+      // Reset license options if changing from conductor to another role
+      if (!esConductor) {
+        setShowLicenseOptions(false);
+        setLicenseCompletionMethod(null);
+        setLicenseForm({});
+      }
+    }
 
     if (fieldErrors[name]) {
       setFieldErrors({ ...fieldErrors, [name]: null });
@@ -161,15 +194,77 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
     if (currentStep === 2) {
     }
 
+    // Si es paso 3 y es conductor, mostrar opciones de licencia
+    if (currentStep === 3 && !isClientMode && isConductor) {
+      setShowLicenseOptions(true);
+      setError(null);
+      setFieldErrors({});
+      return;
+    }
+
     setError(null);
     setFieldErrors({});
     setCurrentStep(prev => Math.min(prev + 1, totalSteps));
   };
 
   const handlePrevStep = () => {
+    // Si está en opciones de licencia, volver al paso 3
+    if (showLicenseOptions && !licenseCompletionMethod) {
+      setShowLicenseOptions(false);
+      return;
+    }
+
+    // Si está en formulario de licencia, volver a opciones
+    if (showLicenseOptions && licenseCompletionMethod === 'now') {
+      setLicenseCompletionMethod(null);
+      setLicenseForm({});
+      return;
+    }
+
     setError(null);
     setFieldErrors({});
     setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleLicenseMethodSelect = (method) => {
+    setLicenseCompletionMethod(method);
+
+    if (method === 'invite') {
+      // Si elige invitación, ir directo a confirmación
+      setCurrentStep(4);
+    }
+    // Si elige 'now', quedarse en el mismo paso para mostrar formulario
+  };
+
+  const handleLicenseFormChange = (e) => {
+    const { name, value } = e.target;
+    setLicenseForm({ ...licenseForm, [name]: value });
+
+    if (fieldErrors[name]) {
+      setFieldErrors({ ...fieldErrors, [name]: null });
+    }
+  };
+
+  const handleLicenseFormSubmit = () => {
+    const errors = {};
+
+    if (!licenseForm.idCategoriaLicencia) {
+      errors.idCategoriaLicencia = 'Selecciona una categoría';
+    }
+    if (!licenseForm.fechaVencimientoLicencia) {
+      errors.fechaVencimientoLicencia = 'Ingresa la fecha de vencimiento';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError('Por favor completa todos los campos de la licencia');
+      return;
+    }
+
+    // Ir a confirmación
+    setError(null);
+    setFieldErrors({});
+    setCurrentStep(4);
   };
 
   function generarPasswordAleatoria(length = 10) {
@@ -289,6 +384,19 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
       const response = await apiClient.post('/usuarios', payload);
       if (!response?.success)
         throw new Error(response?.message || 'Error al agregar usuario');
+
+      // Si es conductor y eligió completar ahora, crear el conductor
+      if (isConductor && licenseCompletionMethod === 'now') {
+        const conductorPayload = {
+          idUsuario: response.data.idUsuario,
+          numeroLicencia: form.numDocumento, // Usar el número de documento como licencia por defecto
+          idCategoriaLicencia: licenseForm.idCategoriaLicencia,
+          fechaVencimientoLicencia: licenseForm.fechaVencimientoLicencia,
+          observaciones: licenseForm.observaciones || null,
+        };
+
+        await apiClient.post('/conductores', conductorPayload);
+      }
 
       setSuccess(true);
       setShowConfirmation(true);
@@ -579,6 +687,158 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
     </div>
   );
 
+  const renderLicenseOptions = () => (
+    <div className="flex flex-col gap-6">
+      <div className="text-center mb-4">
+        <h3 className="h4 font-medium text-primary mb-1">
+          ¿Cómo deseas completar la información?
+        </h3>
+        <p className="subtitle2 text-secondary">
+          Selecciona cómo completar los datos de licencia del conductor
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <button
+          onClick={() => handleLicenseMethodSelect('now')}
+          className="p-6 content-box-outline-6-small hover:border-primary rounded-xl transition-all hover:shadow-md text-left group"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 flex items-center group-hover:bg-primary/20 transition-colors">
+              <md-icon className="text-blue text-xl">person_add</md-icon>
+            </div>
+            <div className="flex flex-col">
+              <h3 className="subtitle1 font-normal text-primary ">Crear nuevo usuario conductor</h3>
+              <p className="text-secondary text-sm">
+                Registra un nuevo usuario con rol de conductor y configura sus datos de licencia en un solo proceso
+              </p>
+            </div>
+            <md-icon className="text-secondary text-lg">call_made</md-icon>
+          </div>
+        </button>
+
+        <button
+          onClick={() => handleLicenseMethodSelect('invite')}
+          className="p-6 content-box-outline-6-small hover:border-primary rounded-xl transition-all hover:shadow-md text-left group"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 flex items-center group-hover:bg-primary/20 transition-colors">
+              <md-icon className="text-blue text-xl">mail</md-icon>
+            </div>
+            <div className="flex flex-col gap-4 justify-between">
+              <div className='flex-col'>
+                <h3 className="subtitle1 font-normal text-primary ">Enviar invitación al conductor</h3>
+                <p className="text-secondary text-sm">
+                  El conductor recibirá un correo con sus credenciales y podrá completar sus datos de licencia al iniciar sesión
+                </p>
+              </div>
+            </div>
+            <md-icon className="text-secondary text-lg">call_made</md-icon>
+          </div>
+        </button>
+      </div>
+
+      <button
+        onClick={() => setShowLicenseOptions(false)}
+        className="btn btn-secondary w-full mt-4"
+      >
+        Atrás
+      </button>
+    </div>
+  );
+
+  const renderLicenseForm = () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <label className="subtitle1 text-primary font-medium">
+          Categoría de licencia <span className="text-red">*</span>
+        </label>
+        <div className="select-wrapper w-full">
+          <md-icon className="text-sm">arrow_drop_down</md-icon>
+          <select
+            name="idCategoriaLicencia"
+            value={licenseForm.idCategoriaLicencia || ''}
+            onChange={handleLicenseFormChange}
+            className={`select-filter w-full px-4 input bg-fill border rounded-lg text-primary focus:outline-none focus:border-primary transition-colors ${fieldErrors.idCategoriaLicencia ? 'border-red-500' : 'border-border'}`}
+            disabled={loading}
+          >
+            <option value="">Selecciona una categoría</option>
+            {categorias.map(cat => (
+              <option key={cat.idCategoriaLicencia} value={cat.idCategoriaLicencia}>
+                {cat.nombreCategoria}
+              </option>
+            ))}
+          </select>
+        </div>
+        {fieldErrors.idCategoriaLicencia && (
+          <span className="text-red-500 text-sm mt-1">
+            {fieldErrors.idCategoriaLicencia}
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="subtitle1 text-primary font-medium">
+          Fecha de vencimiento <span className="text-red">*</span>
+        </label>
+        <input
+          type="date"
+          name="fechaVencimientoLicencia"
+          value={licenseForm.fechaVencimientoLicencia || ''}
+          onChange={handleLicenseFormChange}
+          className={`w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary ${fieldErrors.fechaVencimientoLicencia
+            ? 'border-red focus:ring-red/20 focus:border-red'
+            : 'border-border focus:ring-primary/20 focus:border-primary'
+            }`}
+          disabled={loading}
+        />
+        <span className="text-xs text-secondary mt-1">La fecha debe ser futura</span>
+        {fieldErrors.fechaVencimientoLicencia && (
+          <span className="text-red-500 text-sm mt-1">
+            {fieldErrors.fechaVencimientoLicencia}
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="subtitle1 text-primary font-medium">
+          Observaciones
+        </label>
+        <textarea
+          name="observaciones"
+          value={licenseForm.observaciones || ''}
+          onChange={handleLicenseFormChange}
+          placeholder="Información adicional sobre la licencia (opcional)"
+          rows="3"
+          className="w-full px-4 py-3 input bg-fill border border-border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+          disabled={loading}
+        />
+      </div>
+
+      <div className="flex justify-between items-center gap-2 pt-2 mt-4">
+        <button
+          type="button"
+          onClick={() => {
+            setLicenseCompletionMethod(null);
+            setLicenseForm({});
+          }}
+          className="btn btn-secondary w-1/2"
+          disabled={loading}
+        >
+          Atrás
+        </button>
+        <button
+          type="button"
+          onClick={handleLicenseFormSubmit}
+          className="btn btn-primary w-1/2"
+          disabled={loading}
+        >
+          Continuar
+        </button>
+      </div>
+    </div>
+  );
+
   const renderConfirmation = () => {
     const tipoDocSeleccionado = tiposDoc.find(
       t => t.idTipoDoc === form.tipoDoc
@@ -659,6 +919,70 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
               </div>
             </div>
           )}
+
+          {/* Mostrar información de licencia si es conductor y se completó */}
+          {isConductor && licenseCompletionMethod === 'now' && (
+            <>
+              <div className="flex items-start gap-3">
+                <md-icon className="text-primary mt-1">card_membership</md-icon>
+                <div className="flex-1">
+                  <p className="text-xs text-secondary font-medium mb-1">
+                    Categoría de licencia
+                  </p>
+                  <p className="text-primary font-medium">
+                    {categorias.find(c => c.idCategoriaLicencia === licenseForm.idCategoriaLicencia)?.nombreCategoria || '-'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <md-icon className="text-primary mt-1">event</md-icon>
+                <div className="flex-1">
+                  <p className="text-xs text-secondary font-medium mb-1">
+                    Vencimiento de licencia
+                  </p>
+                  <p className="text-primary font-medium">
+                    {licenseForm.fechaVencimientoLicencia
+                      ? new Date(licenseForm.fechaVencimientoLicencia).toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })
+                      : '-'}
+                  </p>
+                </div>
+              </div>
+
+              {licenseForm.observaciones && (
+                <div className="flex items-start gap-3">
+                  <md-icon className="text-primary mt-1">note</md-icon>
+                  <div className="flex-1">
+                    <p className="text-xs text-secondary font-medium mb-1">
+                      Observaciones
+                    </p>
+                    <p className="text-primary font-medium">
+                      {licenseForm.observaciones}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Indicador de invitación pendiente */}
+          {isConductor && licenseCompletionMethod === 'invite' && (
+            <div className="lex flex-col md:flex-row gap-6 mt-2 p-4 rounded-xl bg-background border border-border">
+              <md-icon className="text-blue mt-1">mail</md-icon>
+              <div className="flex-1">
+                <p className="text-xs text-blue font-medium mb-1">
+                  Invitación pendiente
+                </p>
+                <p className="text-secondary text-xs">
+                  El conductor completará sus datos de licencia al iniciar sesión por primera vez
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="rounded-lg content-box-outline-4-small p-4">
@@ -702,7 +1026,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
       </div>
 
       <div
-        className="content-box-outline-4-small p-4 max-w-md w-full mb-8 animate-slide-up"
+        className="content-box-outline-4-small p-4 max-w-md w-full mb-3 animate-slide-up"
         style={{ animationDelay: '0.2s' }}
       >
         <div className="flex items-start gap-3">
@@ -714,11 +1038,32 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
             <p className="text-xs text-secondary">
               Se ha enviado un correo a{' '}
               <span className="font-medium text-primary">{form.correo}</span>{' '}
-              con las credenciales de acceso.
+              con las credenciales de acceso
+              {isConductor && licenseCompletionMethod === 'invite' &&
+                ' y las instrucciones para completar su perfil de conductor'}.
             </p>
           </div>
         </div>
       </div>
+
+      {isConductor && licenseCompletionMethod === 'now' && (
+        <div
+          className="content-box-outline-4-small p-4 max-w-md w-full mb-8 animate-slide-up bg-green/10 border-green/30"
+          style={{ animationDelay: '0.3s' }}
+        >
+          <div className="flex items-start gap-3">
+            <md-icon className="text-green">check_circle</md-icon>
+            <div className="flex-1">
+              <p className="text-sm text-primary font-medium mb-1">
+                Perfil de conductor completo
+              </p>
+              <p className="text-xs text-secondary">
+                La información de licencia ha sido registrada exitosamente.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <button
         onClick={() => {
@@ -823,7 +1168,18 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
                     {currentStep === 2 && 'Información personal y contacto'}
                     {currentStep === 3 &&
                       !isClientMode &&
+                      !showLicenseOptions &&
                       'Asignar rol y permisos'}
+                    {currentStep === 3 &&
+                      !isClientMode &&
+                      showLicenseOptions &&
+                      !licenseCompletionMethod &&
+                      'Datos de Licencia'}
+                    {currentStep === 3 &&
+                      !isClientMode &&
+                      showLicenseOptions &&
+                      licenseCompletionMethod === 'now' &&
+                      'Información de licencia'}
                     {currentStep === 3 && isClientMode && 'Confirma los datos'}
                     {currentStep === 4 && !isClientMode && 'Confirma los datos'}
                   </p>
@@ -864,7 +1220,9 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
                 <div>
                   {currentStep === 1 && renderStep1()}
                   {currentStep === 2 && renderStep2()}
-                  {currentStep === 3 && !isClientMode && renderStep3()}
+                  {currentStep === 3 && !isClientMode && !showLicenseOptions && renderStep3()}
+                  {currentStep === 3 && !isClientMode && showLicenseOptions && !licenseCompletionMethod && renderLicenseOptions()}
+                  {currentStep === 3 && !isClientMode && showLicenseOptions && licenseCompletionMethod === 'now' && renderLicenseForm()}
                   {((currentStep === 3 && isClientMode) ||
                     (currentStep === 4 && !isClientMode)) &&
                     renderConfirmation()}
@@ -875,50 +1233,45 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
                     </div>
                   )}
 
-                  <div className="flex justify-between items-center gap-2 pt-2 mt-8">
-                    <button
-                      type="button"
-                      onClick={handlePrevStep}
-                      className={`btn btn-secondary w-1/2 ${currentStep === 1 ? 'invisible' : ''}`}
-                      disabled={loading || currentStep === 1}
-                    >
-                      Anterior
-                    </button>
+                  {/* Solo mostrar botones Anterior/Siguiente si no está en opciones de licencia o formulario de licencia */}
+                  {!(showLicenseOptions && currentStep === 3) && (
+                    <div className="flex justify-between items-center gap-2 pt-2 mt-8">
+                      <button
+                        type="button"
+                        onClick={handlePrevStep}
+                        className={`btn btn-secondary w-1/2 ${currentStep === 1 ? 'invisible' : ''}`}
+                        disabled={loading || currentStep === 1}
+                      >
+                        Anterior
+                      </button>
 
-                    {currentStep < totalSteps ? (
-                      <button
-                        type="button"
-                        onClick={handleNextStep}
-                        className="btn btn-primary py-3 font-medium text-subtitle1 w-1/2 flex items-center justify-center"
-                        disabled={loading}
-                      >
-                        {loading ? (
-                          <>
+                      {currentStep < totalSteps ? (
+                        <button
+                          type="button"
+                          onClick={handleNextStep}
+                          className="btn btn-primary py-3 font-medium text-subtitle1 w-1/2 flex items-center justify-center gap-2"
+                          disabled={loading}
+                        >
+                          {loading && (
                             <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Validando...
-                          </>
-                        ) : (
-                          'Siguiente'
-                        )}
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handleConfirmAndCreate}
-                        className="btn btn-primary py-3 font-medium text-subtitle1 w-1/2 flex items-center justify-center"
-                        disabled={loading}
-                      >
-                        {loading ? (
-                          <>
+                          )}
+                          {loading ? 'Validando...' : 'Siguiente'}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleConfirmAndCreate}
+                          className="btn btn-primary py-3 font-medium text-subtitle1 w-1/2 flex items-center justify-center gap-2"
+                          disabled={loading}
+                        >
+                          {loading && (
                             <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Creando...
-                          </>
-                        ) : (
-                          'Confirmar y crear'
-                        )}
-                      </button>
-                    )}
-                  </div>
+                          )}
+                          {loading ? 'Creando...' : 'Confirmar y crear'}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </>
             ) : (

@@ -210,7 +210,6 @@ export default function EditVehiculoModal({
                     alt="Foto del vehículo"
                     className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
                   {updatingFoto && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                       <div className="flex flex-col items-center gap-2">
@@ -526,17 +525,13 @@ export default function EditVehiculoModal({
               </button>
               <button
                 type="submit"
-                className="btn btn-primary py-3 font-medium text-subtitle1 w-1/2 flex items-center justify-center"
+                className="btn btn-primary py-3 font-medium text-subtitle1 w-1/2 flex items-center justify-center gap-2"
                 disabled={updating || loadingCatalogs}
               >
-                {updating ? (
-                  <>
-                    <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Actualizando...
-                  </>
-                ) : (
-                  'Actualizar vehículo'
+                {updating && (
+                  <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                 )}
+                {updating ? 'Actualizando...' : 'Actualizar vehículo'}
               </button>
             </div>
           </form>

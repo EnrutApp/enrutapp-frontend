@@ -1,6 +1,8 @@
 import Modal from '../../../../shared/components/modal/Modal';
 import apiClient from '../../../../shared/services/apiService';
 import catalogService from '../../../../shared/services/catalogService';
+import { conductorService } from '../../../conductores/api/conductorService';
+import EditConductorModal from '../../../conductores/components/editConductorModal/EditConductorModal';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
@@ -15,6 +17,9 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
   const [ciudades, setCiudades] = useState([]);
   const [roles, setRoles] = useState([]);
   const [tiposDoc, setTiposDoc] = useState([]);
+  const [conductorData, setConductorData] = useState(null);
+  const [loadingConductor, setLoadingConductor] = useState(false);
+  const [showEditConductorModal, setShowEditConductorModal] = useState(false);
   const isProfileEdit = !!user;
 
   useEffect(() => {
@@ -22,14 +27,39 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
       setForm({ ...data });
       setError(null);
       setFieldErrors({});
+
+      // Cargar datos del conductor si el usuario tiene rol de conductor
+      const isConductor = data?.rol?.nombreRol?.toLowerCase() === 'conductor';
+      if (isConductor && data.idUsuario) {
+        loadConductorData(data.idUsuario);
+      } else {
+        setConductorData(null);
+      }
     }
   }, [isOpen, data]);
+
+  const loadConductorData = async (idUsuario) => {
+    setLoadingConductor(true);
+    try {
+      const response = await conductorService.getConductores();
+      const conductores = response.data || response;
+      const conductor = conductores.find(c => c.usuario?.idUsuario === idUsuario);
+      setConductorData(conductor || null);
+    } catch (error) {
+      console.error('Error al cargar datos del conductor:', error);
+      setConductorData(null);
+    } finally {
+      setLoadingConductor(false);
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) {
       setForm({});
       setError(null);
       setFieldErrors({});
+      setConductorData(null);
+      setShowEditConductorModal(false);
     }
   }, [isOpen]);
 
@@ -69,6 +99,18 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
   const handleChange = e => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
+
+    // Si se cambia el rol, cargar datos del conductor si aplica
+    if (name === 'idRol' && data?.idUsuario) {
+      const selectedRole = roles.find(r => r.idRol === value);
+      const isConductor = selectedRole?.nombreRol?.toLowerCase() === 'conductor';
+
+      if (isConductor) {
+        loadConductorData(data.idUsuario);
+      } else {
+        setConductorData(null);
+      }
+    }
 
     if (fieldErrors[name]) {
       setFieldErrors({ ...fieldErrors, [name]: null });
@@ -459,6 +501,52 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
                         </p>
                       )}
                     </div>
+
+                    {/* Sección de información de conductor */}
+                    {!isProfileEdit && roles.find(r => r.idRol === form.idRol)?.nombreRol?.toLowerCase() === 'conductor' && (
+                      <div className="content-box-outline-4-small p-4 rounded-xl">
+                        <div className="flex items-start gap-3 mb-3">
+                          <md-icon className="text-primary">badge</md-icon>
+                          <div className="flex-1">
+                            <h4 className="subtitle1 font-medium text-primary mb-1">
+                              Información de conductor
+                            </h4>
+                            {loadingConductor ? (
+                              <p className="text-xs text-secondary">Cargando datos...</p>
+                            ) : conductorData ? (
+                              <div className="space-y-2">
+                                <p className="text-xs text-secondary">
+                                  <span className="font-medium">Categoría:</span>{' '}
+                                  {conductorData.categoriaLicencia?.nombreCategoria || 'Sin asignar'}
+                                </p>
+                                <p className="text-xs text-secondary">
+                                  <span className="font-medium">Vencimiento:</span>{' '}
+                                  {conductorData.fechaVencimientoLicencia
+                                    ? new Date(conductorData.fechaVencimientoLicencia).toLocaleDateString('es-ES')
+                                    : 'Sin fecha'}
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="text-xs text-secondary">
+                                Este usuario aún no tiene información de licencia registrada
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {conductorData && (
+                          <button
+                            type="button"
+                            onClick={() => setShowEditConductorModal(true)}
+                            className="btn btn-secondary w-full text-sm py-2"
+                            disabled={loading}
+                          >
+                            <md-icon className="text-sm mr-2">edit</md-icon>
+                            Editar información de conductor
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -480,23 +568,36 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
                 </button>
                 <button
                   type="submit"
-                  className="btn btn-primary py-3 font-medium text-subtitle1 w-1/2 flex items-center justify-center"
+                  className="btn btn-primary py-3 font-medium text-subtitle1 w-1/2 flex items-center justify-center gap-2"
                   disabled={loading}
                 >
-                  {loading ? (
-                    <>
-                      <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Actualizando...
-                    </>
-                  ) : (
-                    isProfileEdit ? 'Actualizar' : 'Actualizar usuario'
+                  {loading && (
+                    <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   )}
+                  {loading ? 'Actualizando...' : (isProfileEdit ? 'Actualizar' : 'Actualizar usuario')}
                 </button>
               </div>
             </form>
           </div>
         </div>
       </main>
+
+      {/* Modal de editar conductor */}
+      {conductorData && (
+        <EditConductorModal
+          isOpen={showEditConductorModal}
+          onClose={() => setShowEditConductorModal(false)}
+          conductor={conductorData}
+          onUpdateConductor={async (updatedConductor) => {
+            setConductorData(updatedConductor);
+            setShowEditConductorModal(false);
+            // Recargar datos del conductor
+            if (data?.idUsuario) {
+              await loadConductorData(data.idUsuario);
+            }
+          }}
+        />
+      )}
     </Modal>
   );
 };

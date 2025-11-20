@@ -21,11 +21,11 @@ const Pagination = ({
 
   return (
     <nav
-      className={`fixed bottom-6 left-[calc(50%+100px)] transform -translate-x-1/2 z-40 pagination ${className}`}
+      className={`sticky bottom-4 flex justify-center z-40 pagination ${className}`}
       role="navigation"
       aria-label="Navegación de páginas"
     >
-      <div className="bg-surface-container/80 backdrop-blur-xl border border-border rounded-full shadow-xl px-4 py-2">
+      <div className="bg-surface-container/90 backdrop-blur-xl border border-border rounded-full shadow-xl px-4 py-2">
         <div className="flex items-center gap-2">
           <button
             onClick={() => onPageChange(currentPage - 1)}
