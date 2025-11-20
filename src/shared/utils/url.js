@@ -1,5 +1,11 @@
 export function getApiOrigin() {
-  const raw = import.meta?.env?.VITE_API_URL || 'http://localhost:3000';
+  const rawEnv = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  let raw = rawEnv;
+
+  if (import.meta.env.DEV && rawEnv.includes('azurewebsites.net')) {
+    raw = '';
+  }
+
   return raw.replace(/\/api\/?$/, '');
 }
 

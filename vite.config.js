@@ -5,6 +5,15 @@ import tailwindcss from "@tailwindcss/vite";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://enrutapp-backend-g6gkdvavfmarhxdd.westus-01.azurewebsites.net',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   optimizeDeps: {
     include: [
       "@material/web/button/filled-button.js",
