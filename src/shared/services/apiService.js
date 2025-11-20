@@ -37,7 +37,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
+  timeout: 30000, // Aumentado a 30s para soportar "cold starts" de Azure
 });
 
 const isTokenValid = token => {
