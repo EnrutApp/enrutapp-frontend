@@ -40,6 +40,18 @@ const CompletarPerfilPage = withLazyLoading(
   'Cargando...'
 );
 
+// --- New Imports from Remote ---
+const Landing = withLazyLoading(
+    lazy(() => import('../features/landingPage/Landing')),
+    'Cargando landing...'
+);
+
+const ResultadosBusqueda = withLazyLoading(
+    lazy(() => import('../features/landingPage/ResultadosBusqueda')),
+    'Cargando resultados de búsqueda...'
+);
+// -----------------------------
+
 const LayoutWithErrorBoundary = withErrorBoundary(Layout, {
   title: 'Error de la Aplicación',
   message:
@@ -49,6 +61,16 @@ const LayoutWithErrorBoundary = withErrorBoundary(Layout, {
 const LoginWithErrorBoundary = withErrorBoundary(Login, {
   title: 'Error de Inicio de Sesión',
   message: 'No se pudo cargar el formulario de inicio de sesión.',
+});
+
+const LandingWithErrorBoundary = withErrorBoundary(Landing, {
+    title: 'Error de Landing',
+    message: 'No se pudo cargar la página principal.'
+});
+
+const ResultadosBusquedaWithErrorBoundary = withErrorBoundary(ResultadosBusqueda, {
+    title: 'Error de Resultados',
+    message: 'No se pudieron cargar los resultados de búsqueda.'
 });
 
 const createProtectedRoute = (element, allowedRoles) => {
@@ -85,24 +107,33 @@ const Routes = createBrowserRouter([
     ),
   },
 
+  // --- Landing Page (Root) ---
   {
     path: ROUTES.ROOT,
+    element: <LandingWithErrorBoundary />,
+    errorElement: <NotFound />
+  },
+
+  // --- Search Results ---
+  {
+    path: '/busqueda',
+    element: <ResultadosBusquedaWithErrorBoundary />,
+    errorElement: <NotFound />
+  },
+
+  // --- Main App (Protected/Layout) ---
+  {
     element: <LayoutWithErrorBoundary />,
     errorElement: <NotFound />,
     children: [
       {
-        index: true,
+        path: 'dashboard', // Was index, now dashboard
         element: <RoleRedirect />,
       },
-
-      {
-        path: 'dashboard',
-        element: (
-          <ProtectedRoute>
-            <RoleRedirect />
-          </ProtectedRoute>
-        ),
-      },
+      
+      // Also catch index if they manage to get here via some internal link? 
+      // Or maybe existing bookmarks to / will hit Landing now, which is defined above.
+      // If we want dashboard to be accessible, it needs a path.
 
       ...mapRoutesWithProtection(adminRoutes, ADMIN_REQUIRED_ROLE),
 

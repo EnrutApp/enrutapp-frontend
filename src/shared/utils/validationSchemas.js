@@ -121,10 +121,56 @@ export const changePasswordSchema = yup.object().shape({
     .required('Confirmar nueva contraseña es obligatorio'),
 });
 
+// Esquema de validación para crear/actualizar reserva
+export const reservaSchema = yup.object().shape({
+  origen: yup
+    .string()
+    .min(2, "El origen debe tener al menos 2 caracteres")
+    .required("El origen es obligatorio"),
+  destino: yup
+    .string()
+    .min(2, "El destino debe tener al menos 2 caracteres")
+    .required("El destino es obligatorio"),
+  fecha: yup
+    .date()
+    .min(new Date(), "La fecha debe ser igual o posterior a hoy")
+    .required("La fecha es obligatoria")
+    .typeError("La fecha debe ser válida"),
+  hora: yup
+    .string()
+    .required("La hora es obligatoria")
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "La hora debe estar en formato HH:mm"),
+  idConductor: yup
+    .mixed()
+    .test(
+      "is-valid-conductor",
+      "Debes seleccionar un conductor",
+      (value) => value !== undefined && value !== null && value !== ""
+    )
+    .required("El conductor es obligatorio"),
+  pasajeros: yup
+    .array()
+    .of(
+      yup.object().shape({
+        nombre: yup
+          .string()
+          .min(2, "El nombre del pasajero debe tener al menos 2 caracteres")
+          .required("El nombre del pasajero es obligatorio"),
+      })
+    )
+    .min(1, "Debe haber al menos un pasajero")
+    .required("Los pasajeros son obligatorios"),
+  estado: yup
+    .string()
+    .oneOf(["Pendiente", "Activo", "Completada", "Cancelada"])
+    .default("Pendiente"),
+});
+
 export default {
   loginSchema,
   registerSchema,
   userSchema,
   createUserSchema,
   changePasswordSchema,
+  reservaSchema,
 };
