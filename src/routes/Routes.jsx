@@ -44,6 +44,16 @@ const RoleRedirect = withLazyLoading(
     'Redirigiendo...'
 );
 
+const Landing = withLazyLoading(
+    lazy(() => import('../features/landingPage/Landing')),
+    'Cargando landing...'
+);
+
+const ResultadosBusqueda = withLazyLoading(
+    lazy(() => import('../features/landingPage/ResultadosBusqueda')),
+    'Cargando resultados de búsqueda...'
+);
+
 // Componentes con error boundary
 const LayoutWithErrorBoundary = withErrorBoundary(Layout, {
     title: 'Error de la Aplicación',
@@ -53,6 +63,16 @@ const LayoutWithErrorBoundary = withErrorBoundary(Layout, {
 const LoginWithErrorBoundary = withErrorBoundary(Login, {
     title: 'Error de Inicio de Sesión',
     message: 'No se pudo cargar el formulario de inicio de sesión.'
+});
+
+const LandingWithErrorBoundary = withErrorBoundary(Landing, {
+    title: 'Error de Landing',
+    message: 'No se pudo cargar la página principal.'
+});
+
+const ResultadosBusquedaWithErrorBoundary = withErrorBoundary(ResultadosBusqueda, {
+    title: 'Error de Resultados',
+    message: 'No se pudieron cargar los resultados de búsqueda.'
 });
 
 // Función helper para crear rutas protegidas con roles
@@ -89,21 +109,28 @@ const Routes = createBrowserRouter([
         errorElement: <div>Error cargando login</div>
     },
 
-    // Rutas principales con layout
+    // Ruta pública principal (landing) — fuera del layout para evitar el chrome del dashboard
     {
         path: ROUTES.ROOT,
+        element: <LandingWithErrorBoundary />,
+        errorElement: <NotFound />
+    },
+
+    // Ruta pública de resultados de búsqueda
+    {
+        path: '/busqueda',
+        element: <ResultadosBusquedaWithErrorBoundary />,
+        errorElement: <NotFound />
+    },
+
+    // Rutas principales con layout (layout sin path para envolver rutas que sí coincidan con su path)
+    {
         element: <LayoutWithErrorBoundary />,
         errorElement: <NotFound />,
         children: [
-            // Ruta raíz - redirige según el rol
+            // Dashboard genérico - redirige según el rol (ruta absoluta /dashboard)
             {
-                index: true,
-                element: <RoleRedirect />
-            },
-
-            // Dashboard genérico - redirige según el rol
-            {
-                path: "dashboard",
+                path: ROUTES.DASHBOARD,
                 element: (
                     <ProtectedRoute>
                         <RoleRedirect />

@@ -34,7 +34,9 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem("access_token");
       localStorage.removeItem("user");
-      window.location.href = "/login";
+      sessionStorage.removeItem("access_token");
+      sessionStorage.removeItem("user");
+      window.location.href = "/";
     }
 
     const formattedError = {

@@ -90,7 +90,7 @@ export const authService = {
     sessionStorage.removeItem("access_token");
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("token_expires_in");
-    window.location.href = "/login";
+    window.location.href = "/";
   },
 
   isAuthenticated: () => {

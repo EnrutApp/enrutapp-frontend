@@ -53,12 +53,14 @@ const ProtectedRoute = ({
       console.log('ProtectedRoute check:', {
         path: location.pathname,
         isAuthenticated,
+        user: user,
         userRole: user?.rol?.nombreRol,
         allowedRoles,
-        isLoading
+        isLoading,
+        fullUserData: JSON.stringify(user, null, 2)
       });
     }
-  }, [location.pathname, isAuthenticated, user?.rol?.nombreRol, allowedRoles, isLoading]);
+  }, [location.pathname, isAuthenticated, user, allowedRoles, isLoading]);
 
   // Mostrar loading mientras se verifica la autenticación
   if (isLoading) {

@@ -56,8 +56,21 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.login(credentials);
 
       if (response.success && response.data) {
+        // Guardar usuario inicial del login
         setUser(response.data.user);
-        await updateProfile();
+        
+        // Luego actualizar con perfil completo desde el servidor
+        try {
+          const profileData = await authService.getMe();
+          if (profileData.success && profileData.data) {
+            setUser(profileData.data);
+            localStorage.setItem('user', JSON.stringify(profileData.data));
+          }
+        } catch (profileError) {
+          console.warn('Error getting full profile, using login user:', profileError);
+          // Mantener el usuario del login si no podemos obtener el perfil completo
+        }
+        
         return response;
       } else {
         throw new Error(response.message || 'Error en el login');
