@@ -16,6 +16,7 @@ import apiClient from '../../../shared/services/apiService';
 import Avvvatars from 'avvvatars-react';
 import { resolveAssetUrl } from '../../../shared/utils/url';
 import Modal from '../../../shared/components/modal/Modal';
+import DriverTrackingModal from '../../tracking/components/DriverTrackingModal';
 
 const ConductorProfile = ({ conductor, isOpen, onClose, onConductorUpdated }) => {
     const [isClosing, setIsClosing] = useState(false);
@@ -31,6 +32,7 @@ const ConductorProfile = ({ conductor, isOpen, onClose, onConductorUpdated }) =>
     const [isContactoModalOpen, setIsContactoModalOpen] = useState(false);
     const [contactoForm, setContactoForm] = useState({ correo: '', telefono: '' });
     const [loadingContacto, setLoadingContacto] = useState(false);
+    const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
 
     useEffect(() => {
         if (isOpen && conductor?.idConductor) {
@@ -259,6 +261,17 @@ const ConductorProfile = ({ conductor, isOpen, onClose, onConductorUpdated }) =>
                     <h2 className="h4 font-medium text-primary">Perfil de Conductor</h2>
                 </div>
                 <div className="flex gap-2">
+                    <div>
+                        <md-filled-tonal-button
+                            className="px-4 py-2"
+                            onClick={() => setIsTrackingModalOpen(true)}
+                        >
+                            <md-icon slot="icon" className="text-sm">
+                                my_location
+                            </md-icon>
+                            Ver ubicación
+                        </md-filled-tonal-button>
+                    </div>
                     <div>
                         <md-filled-button
                             className="btn-add px-6 py-2"
@@ -718,6 +731,13 @@ const ConductorProfile = ({ conductor, isOpen, onClose, onConductorUpdated }) =>
                 isOpen={isAddModalOpen}
                 onClose={handleAddCancel}
                 onConductorCreated={handleAddConfirm}
+            />
+
+            <DriverTrackingModal
+                isOpen={isTrackingModalOpen}
+                onClose={() => setIsTrackingModalOpen(false)}
+                conductor={conductorData}
+                driverId={conductorData?.idConductor}
             />
         </div>
     );

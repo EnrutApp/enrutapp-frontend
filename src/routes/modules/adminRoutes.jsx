@@ -68,6 +68,11 @@ const Contratos = withLazyLoading(
   'Cargando gestión de contratos...'
 );
 
+const Tracking = withLazyLoading(
+  lazy(() => import('../../features/tracking/TrackingPage')),
+  'Cargando tracking de conductores...'
+);
+
 const AdminHomeWithErrorBoundary = withErrorBoundary(HomeAdmin, {
   title: 'Error en Dashboard',
   message: 'No se pudo cargar el dashboard de administrador',
@@ -207,6 +212,16 @@ export const adminRoutes = [
     })(),
     handle: {
       crumb: () => 'Contratos',
+    },
+  },
+  {
+    path: ROUTES.ADMIN.TRACKING,
+    element: withErrorBoundary(Tracking, {
+      title: 'Error en Tracking',
+      message: 'No se pudo cargar el tracking de conductores',
+    })(),
+    handle: {
+      crumb: () => 'Tracking',
     },
   },
 ];

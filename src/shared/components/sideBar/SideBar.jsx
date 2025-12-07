@@ -129,6 +129,11 @@ const SideBar = () => {
             icon: 'search_hands_free',
           },
           {
+            path: '/admin/tracking',
+            label: 'Tracking GPS',
+            icon: 'my_location',
+          },
+          {
             path: '/admin/encomiendas',
             label: 'Encomiendas',
             icon: 'inventory_2',
@@ -215,8 +220,8 @@ const SideBar = () => {
       <div className="flex gap-3 items-center p-4 border-b border-border mb-6">
         <div className="bg-blue bg-opacity-10 p-2 rounded-xl">
           <a href="/dashboard">
-          {isDark ? (
-            <img src="/logoPositivo.png" alt="logo" width={32} />
+            {isDark ? (
+              <img src="/logoPositivo.png" alt="logo" width={32} />
             ) : (
               <img src="/logoNegativo.png" alt="logo" width={32} />
             )}

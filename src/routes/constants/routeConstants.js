@@ -20,6 +20,7 @@ export const ROUTES = {
     UBICACIONES: '/admin/ubicaciones',
     ROLES: '/admin/rol',
     CONTRATOS: '/admin/contratos',
+    TRACKING: '/admin/tracking',
   },
 
   CONDUCTOR: {
