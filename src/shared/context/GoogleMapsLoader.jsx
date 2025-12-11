@@ -10,11 +10,11 @@ export const GoogleMapsLoader = ({ children }) => {
 
   if (!apiKey) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-gray-900 text-white p-4">
+      <div className="h-screen w-full flex items-center justify-center bg-primary text-primary p-4">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">Configuración Incompleta</h1>
           <p>La API Key de Google Maps no está configurada.</p>
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="mt-2 text-sm text-secondary">
             Por favor, reinicia el servidor de desarrollo para cargar las
             variables de entorno.
           </p>
@@ -34,11 +34,11 @@ export const GoogleMapsLoader = ({ children }) => {
 
   if (loadError) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-gray-900 text-white p-4">
+      <div className="h-screen w-full flex items-center justify-center bg-primary text-white p-4">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">Error de Google Maps</h1>
           <p>No se pudo cargar la librería de mapas.</p>
-          <p className="mt-2 text-sm text-red-400">{loadError.message}</p>
+          <p className="mt-2 text-sm text-red">{loadError.message}</p>
         </div>
       </div>
     );
