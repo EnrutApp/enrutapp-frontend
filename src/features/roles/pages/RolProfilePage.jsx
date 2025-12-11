@@ -7,11 +7,27 @@ import '@material/web/iconbutton/filled-tonal-icon-button.js';
 import '@material/web/switch/switch.js';
 import { useState } from 'react';
 import DeleteModal from '../../../shared/components/modal/deleteModal/DeleteModal';
+import DeleteWithDependenciesModal from '../../../shared/components/modal/deleteModal/DeleteWithDependenciesModal';
 
-const RolProfile = ({ role, isOpen, onClose, onAdd, onEdit, onDelete }) => {
+const RolProfile = ({
+  role,
+  isOpen,
+  onClose,
+  onAdd,
+  onEdit,
+  onDelete,
+  onManagePermissions,
+}) => {
   const [isClosing, setIsClosing] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [
+    isDeleteWithDependenciesModalOpen,
+    setIsDeleteWithDependenciesModalOpen,
+  ] = useState(false);
+  const [dependenciesList, setDependenciesList] = useState([]);
   const [roleToDelete, setRoleToDelete] = useState(null);
+
+  const PROTECTED_ROLES = ['Administrador', 'Conductor', 'Cliente', 'Usuario'];
 
   if (!isOpen || !role) return null;
 
@@ -25,15 +41,37 @@ const RolProfile = ({ role, isOpen, onClose, onAdd, onEdit, onDelete }) => {
 
   const handleDeleteClick = role => {
     const nombreRol = role.nombreRol || role.roleName;
-    if (nombreRol === 'Administrador') return;
+    if (PROTECTED_ROLES.includes(nombreRol)) return;
     setRoleToDelete(role);
-    setIsDeleteModalOpen(true);
+
+    if (role.usuarios && role.usuarios.length > 0) {
+      setDependenciesList(role.usuarios.map(u => u.nombre || u.correo));
+      setIsDeleteWithDependenciesModalOpen(true);
+    } else {
+      setIsDeleteModalOpen(true);
+    }
+  };
+
+  const handleDeleteWithDependenciesConfirm = async () => {
+    if (!roleToDelete) return;
+    try {
+      (await onDelete) && onDelete(roleToDelete, true);
+
+      setIsDeleteWithDependenciesModalOpen(false);
+      setRoleToDelete(null);
+      setDependenciesList([]);
+      handleClose();
+    } catch (err) {
+      setIsDeleteWithDependenciesModalOpen(false);
+      setRoleToDelete(null);
+      setDependenciesList([]);
+    }
   };
 
   const handleDeleteConfirm = async () => {
     if (!roleToDelete) return;
     try {
-      (await onDelete) && onDelete(roleToDelete);
+      (await onDelete) && onDelete(roleToDelete, false);
       setIsDeleteModalOpen(false);
       setRoleToDelete(null);
       handleClose();
@@ -47,10 +85,6 @@ const RolProfile = ({ role, isOpen, onClose, onAdd, onEdit, onDelete }) => {
     setIsDeleteModalOpen(false);
     setRoleToDelete(null);
   };
-
-  const isAdministrador =
-    role.nombreRol?.toLowerCase() === 'administrador' ||
-    role.roleName?.toLowerCase() === 'administrador';
 
   return (
     <div
@@ -75,7 +109,20 @@ const RolProfile = ({ role, isOpen, onClose, onAdd, onEdit, onDelete }) => {
           <h2 className="h4 font-medium text-primary">Roles</h2>
         </div>
         <div className="flex gap-2">
-          {!isAdministrador && (
+          {!PROTECTED_ROLES.includes(role.nombreRol) && onManagePermissions && (
+            <div>
+              <md-filled-button
+                className="btn-add px-6 py-2"
+                onClick={() => onManagePermissions(role)}
+              >
+                <md-icon slot="icon" className="text-sm text-on-primary">
+                  vpn_key
+                </md-icon>
+                Gestionar permisos
+              </md-filled-button>
+            </div>
+          )}
+          {!PROTECTED_ROLES.includes(role.nombreRol) && (
             <div>
               <md-filled-button
                 className="btn-add px-6 py-2"
@@ -126,36 +173,60 @@ const RolProfile = ({ role, isOpen, onClose, onAdd, onEdit, onDelete }) => {
           </div>
         </div>
 
-        <div className="flex flex-col">
+        {!PROTECTED_ROLES.includes(role.nombreRol) && (
+          <div className="flex flex-col">
+            <div className="content-box-outline-3-small">
+              <span className="subtitle1 text-primary font-light">
+                Descripción
+              </span>
+              <span className="subtitle1 text-secondary mt-1">
+                {role.descripcion || role.description}
+              </span>
+              <div className="flex mt-1">
+                <button
+                  className="btn btn-primary font-medium btn-lg flex items-center"
+                  onClick={() => onEdit && onEdit(role)}
+                >
+                  Editar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {PROTECTED_ROLES.includes(role.nombreRol) && (
+          <div className="flex flex-col">
+            <div className="content-box-outline-3-small">
+              <span className="subtitle1 text-primary font-light">
+                Descripción
+              </span>
+              <span className="subtitle1 text-secondary mt-1">
+                {role.descripcion || role.description}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {!PROTECTED_ROLES.includes(role.nombreRol) && (
           <div className="content-box-outline-3-small">
-            <span className="subtitle1 text-primary font-light">
-              Descripción
-            </span>
-            <span className="subtitle1 text-secondary mt-1">
-              {role.descripcion || role.description}
-            </span>
+            <span className="subtitle1 text-primary font-light">Permisos</span>
             <div className="flex mt-1">
-              <button className="btn btn-primary font-medium btn-lg flex items-center">
-                Editar
+              <button
+                className="btn btn-primary font-medium btn-lg flex items-center gap-2"
+                onClick={() => onManagePermissions && onManagePermissions(role)}
+              >
+                <md-icon className="text-sm">vpn_key</md-icon>
+                Gestionar permisos
               </button>
             </div>
           </div>
-        </div>
-
-        <div className="content-box-outline-3-small">
-          <span className="subtitle1 text-primary font-light">Permisos</span>
-          <div className="flex mt-1">
-            <button className="btn btn-primary font-medium btn-lg flex items-center">
-              Ver permisos
-            </button>
-          </div>
-        </div>
+        )}
 
         <div>
-          {isAdministrador ? (
+          {PROTECTED_ROLES.includes(role.nombreRol) ? (
             <button
               className="btn btn-secondary btn-disabled font-medium flex text-secondary items-center opacity-50"
-              title="No se puede eliminar el rol de administrador"
+              title="No se puede eliminar un rol del sistema"
             >
               <md-icon className="text-sm">delete</md-icon>
               Eliminar rol
@@ -180,6 +251,18 @@ const RolProfile = ({ role, isOpen, onClose, onAdd, onEdit, onDelete }) => {
         onConfirm={handleDeleteConfirm}
         itemType="rol"
         itemName={roleToDelete?.nombreRol || roleToDelete?.roleName}
+      />
+
+      <DeleteWithDependenciesModal
+        isOpen={isDeleteWithDependenciesModalOpen}
+        onClose={() => {
+          setIsDeleteWithDependenciesModalOpen(false);
+          setRoleToDelete(null);
+          setDependenciesList([]);
+        }}
+        onConfirm={handleDeleteWithDependenciesConfirm}
+        itemName={roleToDelete?.nombreRol || roleToDelete?.roleName}
+        dependencies={dependenciesList}
       />
     </div>
   );

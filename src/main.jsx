@@ -6,16 +6,19 @@ import Routes from './routes/Routes';
 import { AuthProvider } from './shared/context/AuthContext';
 import { ThemeProvider } from './shared/context/ThemeContext';
 import { LoadingProvider } from './shared/context/LoadingContext';
-import { MapProvider } from './shared/components/map';
+import { GoogleMapsLoader } from './shared/context/GoogleMapsLoader';
+import { MapProvider } from './shared/components/map/context/MapContext';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider>
       <LoadingProvider>
         <AuthProvider>
-          <MapProvider>
-            <RouterProvider router={Routes} />
-          </MapProvider>
+          <GoogleMapsLoader>
+            <MapProvider>
+              <RouterProvider router={Routes} />
+            </MapProvider>
+          </GoogleMapsLoader>
         </AuthProvider>
       </LoadingProvider>
     </ThemeProvider>

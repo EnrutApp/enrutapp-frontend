@@ -12,7 +12,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
     setSelectedTheme(theme);
   }, [theme]);
 
-  const handleThemeChange = (newTheme) => {
+  const handleThemeChange = newTheme => {
     setSelectedTheme(newTheme);
     setTheme(newTheme);
   };
@@ -68,32 +68,42 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 </h3>
 
                 <div className="space-y-3">
-                  {themeOptions.map((option) => (
+                  {themeOptions.map(option => (
                     <button
                       key={option.value}
                       onClick={() => handleThemeChange(option.value)}
-                      className={`content-box-outline-8-small w-full flex items-center justify-between p-4 transition-all duration-200 cursor-pointer ${selectedTheme === option.value
-                        ? 'border-border bg-blue bg-opacity-10 shadow-sm'
-                        : 'border-border bg-fill hover:border-blue hover:bg-blue hover:bg-opacity-5'
-                        }`}
+                      className={`content-box-outline-8-small w-full flex items-center justify-between p-4 transition-all duration-200 cursor-pointer ${
+                        selectedTheme === option.value
+                          ? 'border-border bg-blue bg-opacity-10 shadow-sm'
+                          : 'border-border bg-fill hover:border-blue hover:bg-blue hover:bg-opacity-5'
+                      }`}
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-lg bg-background flex  ${selectedTheme === option.value
-                          ? 'bg-blue bg-opacity-20'
-                          : 'bg-background'
-                          }`}>
-                          <md-icon className={`text-xl ${selectedTheme === option.value
-                            ? 'text-blue'
-                            : 'text-secondary'
-                            }`}>
+                        <div
+                          className={`p-2 rounded-lg bg-background flex  ${
+                            selectedTheme === option.value
+                              ? 'bg-blue bg-opacity-20'
+                              : 'bg-background'
+                          }`}
+                        >
+                          <md-icon
+                            className={`text-xl ${
+                              selectedTheme === option.value
+                                ? 'text-blue'
+                                : 'text-secondary'
+                            }`}
+                          >
                             {option.icon}
                           </md-icon>
                         </div>
                         <div className="flex flex-col items-start text-left">
-                          <span className={`font-semibold text-base ${selectedTheme === option.value
-                            ? 'text-blue'
-                            : 'text-primary'
-                            }`}>
+                          <span
+                            className={`font-semibold text-base ${
+                              selectedTheme === option.value
+                                ? 'text-blue'
+                                : 'text-primary'
+                            }`}
+                          >
                             {option.label}
                           </span>
                           <span className="text-sm text-secondary">
@@ -101,12 +111,17 @@ const SettingsModal = ({ isOpen, onClose }) => {
                           </span>
                         </div>
                       </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-1 ${selectedTheme === option.value
-                        ? 'border-border bg-blue'
-                        : 'border-border'
-                        }`}>
+                      <div
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-1 ${
+                          selectedTheme === option.value
+                            ? 'border-border bg-blue'
+                            : 'border-border'
+                        }`}
+                      >
                         {selectedTheme === option.value && (
-                          <md-icon className="text-secondary text-sm">check</md-icon>
+                          <md-icon className="text-secondary text-sm">
+                            check
+                          </md-icon>
                         )}
                       </div>
                     </button>
@@ -116,16 +131,18 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 {selectedTheme === 'auto' && (
                   <div className="mt-4 content-box-outline-8-small rounded-lg flex gap-2">
                     <div>
-                      <md-icon className={`text-xl ${isDark
-                        ? 'text-yellow-2'
-                        : 'text-yellow'
-                        }`}>
+                      <md-icon
+                        className={`text-xl ${
+                          isDark ? 'text-yellow-2' : 'text-yellow'
+                        }`}
+                      >
                         info
                       </md-icon>
                     </div>
                     <div>
                       <p className="text-sm text-secondary">
-                        El tema automático cambiará entre claro y oscuro según la configuración de tu sistema operativo.
+                        El tema automático cambiará entre claro y oscuro según
+                        la configuración de tu sistema operativo.
                       </p>
                     </div>
                   </div>
@@ -138,7 +155,8 @@ const SettingsModal = ({ isOpen, onClose }) => {
                     </div>
                     <div>
                       <p className="text-sm text-secondary">
-                        El tema claro mantendrá siempre los colores claros, sin importar la configuración del sistema.
+                        El tema claro mantendrá siempre los colores claros, sin
+                        importar la configuración del sistema.
                       </p>
                     </div>
                   </div>
@@ -151,7 +169,8 @@ const SettingsModal = ({ isOpen, onClose }) => {
                     </div>
                     <div>
                       <p className="text-sm text-secondary">
-                        El tema oscuro mantendrá siempre los colores oscuros, sin importar la configuración del sistema.
+                        El tema oscuro mantendrá siempre los colores oscuros,
+                        sin importar la configuración del sistema.
                       </p>
                     </div>
                   </div>
@@ -160,10 +179,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
             </div>
 
             <div className="flex justify-end pt-4">
-              <button
-                onClick={onClose}
-                className="btn btn-primary px-6"
-              >
+              <button onClick={onClose} className="btn btn-primary px-6">
                 Cerrar
               </button>
             </div>

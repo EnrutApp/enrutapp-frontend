@@ -3,7 +3,7 @@ import '@material/web/button/filled-button.js';
 import DeleteModal from '../../../shared/components/modal/deleteModal/DeleteModal';
 import apiClient from '../../../shared/services/apiService';
 import { useState } from 'react';
-import { LazyMapBoxMap } from '../../../shared/components/map';
+import GoogleMapComponent from '../../../shared/components/map/components/GoogleMapComponent';
 
 const RutaProfilePage = ({
   ruta,
@@ -40,7 +40,6 @@ const RutaProfilePage = ({
       handleClose();
       if (onDeleted) onDeleted();
     } catch (error) {
-
       alert('Error al eliminar la ruta');
     }
   };
@@ -179,7 +178,12 @@ const RutaProfilePage = ({
                   <p className="subtitle1 text-secondary font-light">
                     Distancia estimada
                   </p>
-                  <p className="h3 font-normal">{ruta.distancia || '0'}km</p>
+                  <p className="h3 font-normal">
+                    {(Number(ruta.distancia) / 1000).toLocaleString('es-CO', {
+                      maximumFractionDigits: 1,
+                    })}{' '}
+                    km
+                  </p>
                 </div>
               </div>
 
@@ -219,7 +223,7 @@ const RutaProfilePage = ({
 
         <div className="flex-1 py-4 min-h-0">
           <div className="h-full min-h-[500px] overflow-hidden rounded-xl">
-            <LazyMapBoxMap
+            <GoogleMapComponent
               origen={origen}
               destino={destino}
               paradas={

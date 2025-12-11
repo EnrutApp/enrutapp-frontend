@@ -1,9 +1,9 @@
-import apiClient from "./apiService";
+import apiClient from './apiService';
 
 function buildConductorFormData(data, file) {
   const formData = new FormData();
-  if (file) formData.append("foto", file);
-  
+  if (file) formData.append('foto', file);
+
   const fields = {
     idConductor: data.idConductor,
     nombre: data.nombre,
@@ -12,21 +12,22 @@ function buildConductorFormData(data, file) {
     telefono: data.telefono,
     correo: data.correo,
     licencia: data.licencia,
-    estado: typeof data.estado === "boolean" ? String(data.estado) : data.estado,
+    estado:
+      typeof data.estado === 'boolean' ? String(data.estado) : data.estado,
   };
-  
+
   Object.entries(fields).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && v !== "") {
+    if (v !== undefined && v !== null && v !== '') {
       formData.append(k, String(v));
     }
   });
-  
+
   return formData;
 }
 
 export const conductorService = {
   async getConductores() {
-    return await apiClient.get("/conductores");
+    return await apiClient.get('/conductores');
   },
 
   async getConductorById(idConductor) {
@@ -38,8 +39,8 @@ export const conductorService = {
       { ...data, estado: data?.estado ?? true },
       file
     );
-    return await apiClient.post("/conductores", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+    return await apiClient.post('/conductores', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
 
@@ -48,11 +49,11 @@ export const conductorService = {
   },
 
   async updateFoto(idConductor, file) {
-    if (!file) throw new Error("Archivo de foto requerido");
+    if (!file) throw new Error('Archivo de foto requerido');
     const formData = new FormData();
-    formData.append("foto", file);
+    formData.append('foto', file);
     return await apiClient.post(`/conductores/${idConductor}/foto`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
 

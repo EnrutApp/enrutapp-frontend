@@ -36,7 +36,6 @@ export const useRoutes = () => {
     if (canAccessRoute(path)) {
       navigate(path, options);
     } else {
-      
       goToDashboard();
     }
   };

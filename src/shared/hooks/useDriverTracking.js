@@ -145,7 +145,6 @@ export function useDriverTracking(driverId = null) {
     }
   }, []);
 
-  // Efecto para manejar la conexión
   useEffect(() => {
     let timeoutId = null;
 
@@ -161,22 +160,20 @@ export function useDriverTracking(driverId = null) {
       if (connected && !isSubscribed.current) {
         isSubscribed.current = true;
 
-        // Suscribirse a actualizaciones
         if (driverId) {
           cleanupRef.current = socketService.subscribeToDriver(
             driverId,
             handleLocationUpdate
           );
-          // Obtener ubicación inicial
+
           fetchDriverLocation(driverId);
         } else {
           cleanupRef.current =
             socketService.onLocationUpdate(handleLocationUpdate);
-          // Obtener todos los conductores online
+
           fetchOnlineDrivers();
         }
 
-        // Escuchar eventos de conexión/desconexión de conductores
         const offOnline = socketService.onDriverOnline(handleDriverOnline);
         const offOffline = socketService.onDriverOffline(handleDriverOffline);
 
@@ -191,18 +188,17 @@ export function useDriverTracking(driverId = null) {
 
     socketService.addListener('connectionChange', handleConnectionChange);
 
-    // Conectar
     connect();
 
-    // Verificar si ya está conectado
     if (socketService.isConnected()) {
       handleConnectionChange(true);
     } else {
-      // Timeout para evitar quedarse en "Conectando..." indefinidamente
       timeoutId = setTimeout(() => {
         setIsLoading(false);
         if (!socketService.isConnected()) {
-          setError('No se pudo conectar al servidor de tracking. Verifica tu conexión.');
+          setError(
+            'No se pudo conectar al servidor de tracking. Verifica tu conexión.'
+          );
         }
       }, 5000);
     }
@@ -229,20 +225,17 @@ export function useDriverTracking(driverId = null) {
   ]);
 
   return {
-    // Estado
     location,
     allLocations: Array.from(allLocations.values()),
     isConnected,
     isLoading,
     error,
 
-    // Funciones
     connect,
     disconnect,
     fetchDriverLocation,
     fetchOnlineDrivers,
 
-    // Helpers
     getDriverLocation: id => allLocations.get(id) || null,
     isDriverOnline: id => allLocations.get(id)?.isOnline ?? false,
   };

@@ -24,19 +24,49 @@ const roleFields = [
 
 const AddRoleModal = ({ isOpen, onClose, onConfirm }) => {
   const [form, setForm] = useState({});
+  const [permissions, setPermissions] = useState({});
+  const [selectedPermissions, setSelectedPermissions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingPermissions, setLoadingPermissions] = useState(false);
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      loadPermissions();
+    } else {
       setForm({});
+      setSelectedPermissions([]);
       setError(null);
       setFieldErrors({});
       setSuccess(false);
     }
   }, [isOpen]);
+
+  const loadPermissions = async () => {
+    setLoadingPermissions(true);
+    try {
+      const res = await roleService.getAllPermissions();
+      if (res.success) {
+        setPermissions(res.data);
+      }
+    } catch (err) {
+      console.error('Error loading permissions', err);
+    } finally {
+      setLoadingPermissions(false);
+    }
+  };
+
+  const handleTogglePermission = idPermiso => {
+    setSelectedPermissions(prev => {
+      if (prev.includes(idPermiso)) {
+        return prev.filter(id => id !== idPermiso);
+      } else {
+        return [...prev, idPermiso];
+      }
+    });
+  };
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -77,6 +107,7 @@ const AddRoleModal = ({ isOpen, onClose, onConfirm }) => {
         nombreRol: form.nombreRol.trim(),
         descripcion: form.descripcion?.trim() || null,
         estado: true,
+        permissions: selectedPermissions,
       };
 
       const response = await roleService.createRole(payload);
@@ -98,7 +129,9 @@ const AddRoleModal = ({ isOpen, onClose, onConfirm }) => {
         <div className="absolute inset-0 bg-green/20 rounded-full animate-ping"></div>
 
         <div className="flex items-center justify-center mb-4 mt-3 animate-scale-in">
-          <md-icon className="text-green text-3xl">admin_panel_settings</md-icon>
+          <md-icon className="text-green text-3xl">
+            admin_panel_settings
+          </md-icon>
         </div>
       </div>
 
@@ -107,7 +140,9 @@ const AddRoleModal = ({ isOpen, onClose, onConfirm }) => {
           ¡Rol creado exitosamente!
         </h2>
         <p className="text-secondary subtitle1 font-light animate-slide-up mt-2">
-          El rol <span className="font-semibold text-primary">{form.nombreRol}</span> ha sido registrado correctamente.
+          El rol{' '}
+          <span className="font-semibold text-primary">{form.nombreRol}</span>{' '}
+          ha sido registrado correctamente.
         </p>
       </div>
 
@@ -139,7 +174,6 @@ const AddRoleModal = ({ isOpen, onClose, onConfirm }) => {
         Finalizar
       </button>
 
-      {/* Estilos inline solo para las animaciones */}
       <style
         dangerouslySetInnerHTML={{
           __html: `
@@ -231,14 +265,17 @@ const AddRoleModal = ({ isOpen, onClose, onConfirm }) => {
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                  <div className="flex flex-col gap-4 mb-6">
+                  <div className="flex flex-col gap-4 mb-4">
                     {roleFields.map(field => (
                       <div key={field.name} className="flex flex-col gap-1">
                         <label
                           className="subtitle1 text-primary font-medium"
                           htmlFor={field.name}
                         >
-                          {field.label} {field.required && <span className="text-red">*</span>}
+                          {field.label}{' '}
+                          {field.required && (
+                            <span className="text-red">*</span>
+                          )}
                         </label>
                         {field.type === 'textarea' ? (
                           <textarea
@@ -249,10 +286,11 @@ const AddRoleModal = ({ isOpen, onClose, onConfirm }) => {
                             value={form[field.name] || ''}
                             onChange={handleChange}
                             rows={3}
-                            className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all resize-none ${fieldErrors[field.name]
+                            className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all resize-none ${
+                              fieldErrors[field.name]
                                 ? 'border-red focus:ring-red/20 focus:border-red'
                                 : 'border-border focus:ring-primary/20 focus:border-primary'
-                              }`}
+                            }`}
                             disabled={loading}
                           />
                         ) : (
@@ -264,10 +302,11 @@ const AddRoleModal = ({ isOpen, onClose, onConfirm }) => {
                             placeholder={field.placeholder}
                             value={form[field.name] || ''}
                             onChange={handleChange}
-                            className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${fieldErrors[field.name]
+                            className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
+                              fieldErrors[field.name]
                                 ? 'border-red focus:ring-red/20 focus:border-red'
                                 : 'border-border focus:ring-primary/20 focus:border-primary'
-                              }`}
+                            }`}
                             disabled={loading}
                           />
                         )}
@@ -278,6 +317,48 @@ const AddRoleModal = ({ isOpen, onClose, onConfirm }) => {
                         )}
                       </div>
                     ))}
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="subtitle1 text-primary font-medium">
+                      Asignar Permisos
+                    </label>
+                    {loadingPermissions ? (
+                      <div className="flex justify-center py-4">
+                        <md-linear-progress indeterminate></md-linear-progress>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-4 max-h-60 overflow-y-auto border border-border bg-fill rounded-xl p-2 mt-1">
+                        {Object.entries(permissions).map(([modulo, perms]) => (
+                          <div key={modulo}>
+                            <label className="subtitle2 text-secondary font-medium">
+                              {modulo}
+                            </label>
+                            <div className="grid grid-cols-1 gap-2">
+                              {perms.map(perm => (
+                                <div
+                                  key={perm.idPermiso}
+                                  className="flex items-center justify-between p-2 hover:bg-fill rounded-lg cursor-pointer"
+                                  onClick={() =>
+                                    handleTogglePermission(perm.idPermiso)
+                                  }
+                                >
+                                  <span className="subtitle1 text-primary">
+                                    {perm.nombre}
+                                  </span>
+                                  <md-switch
+                                    selected={selectedPermissions.includes(
+                                      perm.idPermiso
+                                    )}
+                                    touch-target="wrapper"
+                                  ></md-switch>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {error && (

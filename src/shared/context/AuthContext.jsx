@@ -23,7 +23,6 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
-      // Verificación rápida primero
       if (!authService.isAuthenticated()) {
         setUser(null);
         setIsLoading(false);
@@ -37,11 +36,8 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      // Establecer el usuario desde el storage temporalmente
       setUser(storedUser);
 
-      // Verificar con el servidor ANTES de establecer isLoading = false
-      // Agregar timeout de 5 segundos para evitar bloqueo indefinido
       try {
         const profileDataPromise = authService.getMe();
         const timeoutPromise = new Promise((_, reject) =>
@@ -62,7 +58,6 @@ export const AuthProvider = ({ children }) => {
             : sessionStorage;
           storage.setItem('user', JSON.stringify(updatedUser));
         } else {
-          // Si no hay datos válidos, limpiar
           setUser(null);
           authService.logout();
         }
@@ -76,8 +71,6 @@ export const AuthProvider = ({ children }) => {
           setUser(null);
           authService.logout();
         } else {
-          // Si hay error pero no es de auth, mantener el usuario del storage
-          // pero marcar como no autenticado si no hay token válido
           if (!authService.isAuthenticated()) {
             setUser(null);
           }
@@ -109,18 +102,17 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.login(credentials);
 
       if (response.success && response.data) {
-        // Establecer usuario inicial
         setUser(response.data.user);
-        
-        // Actualizar perfil sin cambiar isLoading (se mantiene en true)
-        // para que el Layout muestre la carga mientras se actualiza
+
         try {
           await updateProfile();
         } catch (profileError) {
-          // Si falla la actualización del perfil, mantener el usuario del login
-          console.warn('Error al actualizar perfil después del login:', profileError);
+          console.warn(
+            'Error al actualizar perfil después del login:',
+            profileError
+          );
         }
-        
+
         return response;
       } else {
         throw new Error(response.message || 'Error en el login');
@@ -181,16 +173,14 @@ export const AuthProvider = ({ children }) => {
         return updatedUser;
       }
     } catch (error) {
-
       throw error;
     }
   };
 
   const logout = () => {
     setIsLoggingOut(true);
-    setIsLoading(true); // Mantener loading durante el logout para evitar flash
-    
-    // Pequeño delay para mostrar el mensaje de "Saliendo..."
+    setIsLoading(true);
+
     setTimeout(() => {
       setUser(null);
       setError(null);

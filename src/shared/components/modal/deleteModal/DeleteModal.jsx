@@ -9,7 +9,6 @@ const DeleteModal = ({
   itemType = 'elemento',
   isPlural = false,
 }) => {
-
   const getPronoun = () => {
     const feminineSingular = ['ubicación', 'ruta', 'encomienda', 'reserva'];
     const femininePlural = ['ubicaciones', 'rutas', 'encomiendas', 'reservas'];

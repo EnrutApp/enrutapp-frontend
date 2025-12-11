@@ -16,8 +16,6 @@ class RouteErrorBoundary extends Component {
       error,
       errorInfo,
     });
-
-    
   }
 
   render() {

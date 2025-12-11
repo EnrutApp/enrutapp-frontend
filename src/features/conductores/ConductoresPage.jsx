@@ -2,6 +2,7 @@ import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/switch/switch.js';
 import '@material/web/checkbox/checkbox.js';
+import '@material/web/progress/linear-progress.js';
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import ConductorProfile from './pages/ConductorProfile';
@@ -15,7 +16,6 @@ import { useState, useEffect } from 'react';
 import Avvvatars from 'avvvatars-react';
 import resolveAssetUrl from '../../shared/utils/url';
 
-// Estilos para animación de checkbox
 const styles = `
   @keyframes checkboxAppear {
     0% {
@@ -62,9 +62,9 @@ const ConductoresPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  // Estados para selección múltiple
   const [selectedConductores, setSelectedConductores] = useState([]);
-  const [isDeleteMultipleModalOpen, setIsDeleteMultipleModalOpen] = useState(false);
+  const [isDeleteMultipleModalOpen, setIsDeleteMultipleModalOpen] =
+    useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   useEffect(() => {
@@ -112,7 +112,6 @@ const ConductoresPage = () => {
 
   const handleDeleteConfirm = async () => {
     try {
-      // Eliminar el usuario, no el conductor
       await userService.deleteUser(conductorToDelete.idUsuario);
       await loadConductores();
       setIsDeleteModalOpen(false);
@@ -165,7 +164,7 @@ const ConductoresPage = () => {
     setIsAddModalOpen(true);
   };
 
-  const handleAddConductor = async (data) => {
+  const handleAddConductor = async data => {
     try {
       await conductorService.createConductor(data);
       await loadConductores();
@@ -184,7 +183,20 @@ const ConductoresPage = () => {
 
   const handleUpdateConductor = async (id, data) => {
     try {
-      await conductorService.updateConductor(id, data);
+      if (id) {
+        await conductorService.updateConductor(id, data);
+      } else {
+        if (conductorToEdit && conductorToEdit.idUsuario) {
+          await conductorService.createConductor({
+            idUsuario: conductorToEdit.idUsuario,
+            ...data,
+          });
+        } else {
+          throw new Error(
+            'No se pudo identificar el usuario para crear el conductor'
+          );
+        }
+      }
       await loadConductores();
       setIsEditModalOpen(false);
       setConductorToEdit(null);
@@ -194,7 +206,6 @@ const ConductoresPage = () => {
     }
   };
 
-  // Funciones para selección múltiple
   const handleToggleSelectionMode = () => {
     setIsSelectionMode(!isSelectionMode);
     setSelectedConductores([]);
@@ -243,13 +254,17 @@ const ConductoresPage = () => {
 
     const deletePromises = selectedConductores.map(async conductorId => {
       try {
-        // Encontrar el conductor para obtener su idUsuario
-        const conductor = allConductores.find(c => c.idConductor === conductorId);
+        const conductor = allConductores.find(
+          c => c.idConductor === conductorId
+        );
         if (!conductor) {
-          return { success: false, id: conductorId, error: 'Conductor no encontrado' };
+          return {
+            success: false,
+            id: conductorId,
+            error: 'Conductor no encontrado',
+          };
         }
 
-        // Eliminar el usuario, no el conductor
         await userService.deleteUser(conductor.idUsuario);
         return { success: true, id: conductorId };
       } catch (err) {
@@ -264,7 +279,9 @@ const ConductoresPage = () => {
     if (failedCount === 0) {
       alert(`Se eliminaron ${successCount} conductores exitosamente`);
     } else {
-      alert(`Se eliminaron ${successCount} conductores. ${failedCount} fallaron`);
+      alert(
+        `Se eliminaron ${successCount} conductores. ${failedCount} fallaron`
+      );
     }
 
     setSelectedConductores([]);
@@ -277,18 +294,26 @@ const ConductoresPage = () => {
     setIsSelectionMode(false);
   };
 
-  // Filtrado y ordenamiento
   const filteredConductores = allConductores.filter(conductor => {
     const matchesStatus =
       statusFilter === 'Todos' ||
       (statusFilter === 'Activos' && conductor.estado) ||
       (statusFilter === 'Inactivos' && !conductor.estado);
 
-    const matchesSearch = searchQuery === '' ||
-      conductor.usuario?.nombre?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conductor.usuario?.numDocumento?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conductor.numeroLicencia?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conductor.categoriaLicencia?.nombreCategoria?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch =
+      searchQuery === '' ||
+      conductor.usuario?.nombre
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      conductor.usuario?.numDocumento
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      conductor.numeroLicencia
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      conductor.categoriaLicencia?.nombreCategoria
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase());
 
     return matchesStatus && matchesSearch;
   });
@@ -513,54 +538,76 @@ const ConductoresPage = () => {
                 )}
               </div>
 
-              <div className="flex justify-between items-center mt-6 mb-4">
-                <div className="flex items-center gap-3">
-                  {selectedConductores.length > 0 ? (
-                    <>
+              <div className="flex justify-between items-center mt-4 mb-4">
+                <div className="flex gap-3">
+                  <div className="flex gap-1 bg-fill border border-border rounded-full p-1">
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`px-2 py-1 rounded-full transition-all ${
+                        viewMode === 'list'
+                          ? 'bg-primary text-on-primary'
+                          : 'text-secondary hover:text-primary'
+                      }`}
+                      title="Vista de lista"
+                    >
+                      <md-icon className="text-sm">view_list</md-icon>
+                    </button>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`px-2 py-1 rounded-full transition-all ${
+                        viewMode === 'grid'
+                          ? 'bg-primary text-on-primary'
+                          : 'text-secondary hover:text-primary'
+                      }`}
+                      title="Vista de tarjetas"
+                    >
+                      <md-icon className="text-sm">grid_view</md-icon>
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {selectedConductores.length > 0 ? (
                       <span className="text-sm text-secondary">
                         {selectedConductores.length} Seleccionados
                       </span>
-                    </>
-                  ) : (
-                    <span className="text-sm text-secondary">
-                      {loading
-                        ? 'Cargando conductores...'
-                        : `Mostrando ${totalItems > 0 ? startIndex + 1 : 0}-${Math.min(startIndex + (viewMode === 'grid' ? 8 : 4), totalItems)} de ${totalItems} conductores`}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {showPagination && (
-                    <span className="text-xs text-secondary">
-                      Página {currentPage} de {totalPages}
-                    </span>
-                  )}
-
-                  <div className="flex bg-fill rounded-lg p-1 border border-border ml-2">
-                    <button
-                      className={`p-1 rounded-md transition-all ${viewMode === 'list'
-                          ? 'bg-background text-primary shadow-sm'
-                          : 'text-secondary hover:text-primary'
-                        }`}
-                      onClick={() => setViewMode('list')}
-                    >
-                      <md-icon className="text-xl">view_list</md-icon>
-                    </button>
-                    <button
-                      className={`p-1 rounded-md transition-all ${viewMode === 'grid'
-                          ? 'bg-background text-primary shadow-sm'
-                          : 'text-secondary hover:text-primary'
-                        }`}
-                      onClick={() => setViewMode('grid')}
-                    >
-                      <md-icon className="text-xl">grid_view</md-icon>
-                    </button>
+                    ) : (
+                      !loading && (
+                        <span className="text-sm text-secondary">
+                          {`Mostrando ${
+                            totalItems > 0 ? startIndex + 1 : 0
+                          }-${Math.min(
+                            startIndex + (viewMode === 'grid' ? 8 : 4),
+                            totalItems
+                          )} de ${totalItems} conductores`}
+                        </span>
+                      )
+                    )}
                   </div>
                 </div>
+                {showPagination && (
+                  <span className="text-xs text-secondary">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                )}
               </div>
 
               <div className="mt-3">
-                {currentCondutores.length === 0 ? (
+                {loading ? (
+                  <div
+                    className="flex items-center justify-center w-full list-enter text-center content-box-outline-2-small"
+                    style={{ height: 'calc(60vh - 0px)' }}
+                  >
+                    <div
+                      className="flex flex-col items-center gap-3"
+                      style={{ width: '200px' }}
+                    >
+                      <md-icon className="text-secondary mb-4">person</md-icon>
+                      <span className="text-secondary">
+                        Cargando conductores...
+                      </span>
+                      <md-linear-progress indeterminate></md-linear-progress>
+                    </div>
+                  </div>
+                ) : currentCondutores.length === 0 ? (
                   <div
                     className="flex items-center justify-center w-full list-enter text-center content-box-outline-2-small"
                     style={{ height: 'calc(60vh - 0px)' }}
@@ -573,34 +620,54 @@ const ConductoresPage = () => {
                         person_off
                       </md-icon>
                       <p className="text-secondary">
-                        {loading
-                          ? 'Cargando conductores...'
-                          : searchQuery || statusFilter !== 'Todos'
-                            ? 'No se encontraron conductores que coincidan con los filtros'
-                            : 'No hay conductores registrados'}
+                        {searchQuery || statusFilter !== 'Todos'
+                          ? 'No se encontraron conductores que coincidan con los filtros'
+                          : 'No hay conductores registrados'}
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
+                  <div
+                    className={
+                      viewMode === 'grid'
+                        ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+                        : 'flex flex-col gap-3'
+                    }
+                  >
                     {currentCondutores.map((conductor, index) => {
-                      // Calcular estado de licencia
-                      const fechaVencimiento = conductor.fechaVencimientoLicencia ? new Date(conductor.fechaVencimientoLicencia) : null;
+                      const fechaVencimiento =
+                        conductor.fechaVencimientoLicencia
+                          ? new Date(conductor.fechaVencimientoLicencia)
+                          : null;
                       const hoy = new Date();
                       hoy.setHours(0, 0, 0, 0);
-                      const diasRestantes = fechaVencimiento ? Math.ceil((fechaVencimiento - hoy) / (1000 * 60 * 60 * 24)) : null;
-                      const licenciaVencida = diasRestantes !== null && diasRestantes < 0;
-                      const licenciaProximaAVencer = diasRestantes !== null && diasRestantes >= 0 && diasRestantes <= 30;
+                      const diasRestantes = fechaVencimiento
+                        ? Math.ceil(
+                            (fechaVencimiento - hoy) / (1000 * 60 * 60 * 24)
+                          )
+                        : null;
+                      const licenciaVencida =
+                        diasRestantes !== null && diasRestantes < 0;
+                      const licenciaProximaAVencer =
+                        diasRestantes !== null &&
+                        diasRestantes >= 0 &&
+                        diasRestantes <= 30;
 
-                      // Verificar si el conductor tiene información incompleta
-                      const informacionIncompleta = !conductor.numeroLicencia || !conductor.idCategoriaLicencia || !conductor.fechaVencimientoLicencia;
+                      const informacionIncompleta =
+                        !conductor.numeroLicencia ||
+                        !conductor.idCategoriaLicencia ||
+                        !conductor.fechaVencimientoLicencia;
 
                       return (
                         <div
                           key={conductor.idConductor || index}
                           className={`content-box-outline-4-small ${!conductor.estado ? 'opacity-60' : ''} cursor-pointer hover:shadow-md transition-shadow relative`}
                           onClick={e => {
-                            if (e.target.closest('md-switch') || e.target.closest('button')) return;
+                            if (
+                              e.target.closest('md-switch') ||
+                              e.target.closest('button')
+                            )
+                              return;
                             handleOpenProfile(conductor);
                           }}
                         >
@@ -608,12 +675,15 @@ const ConductoresPage = () => {
                             <div
                               className="absolute top-3 left-3 z-10"
                               style={{
-                                animation: 'checkboxAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                animation:
+                                  'checkboxAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
                                 transformOrigin: 'center',
                               }}
                             >
                               <md-checkbox
-                                checked={selectedConductores.includes(conductor.idConductor)}
+                                checked={selectedConductores.includes(
+                                  conductor.idConductor
+                                )}
                                 onChange={e => {
                                   e.stopPropagation();
                                   handleSelectConductor(conductor.idConductor);
@@ -625,115 +695,184 @@ const ConductoresPage = () => {
                           )}
 
                           {viewMode === 'grid' ? (
-                            <div className="flex flex-col gap-3 items-center text-center pt-2">
-                              <div className="relative w-24 h-24">
-                                {conductor.usuario?.foto ? (
-                                  <img
-                                    src={resolveAssetUrl(conductor.usuario.foto)}
-                                    alt={conductor.usuario?.nombre || 'Conductor'}
-                                    className="rounded-full w-24 h-24 object-cover shadow-lg border-2 border-surface"
-                                    onError={(e) => {
-                                      e.target.onerror = null;
-                                      e.target.style.display = 'none';
-                                    }}
-                                  />
-                                ) : (
-                                  <Avvvatars
-                                    value={conductor.usuario?.nombre || 'Conductor'}
-                                    size={96}
-                                    radius={50}
-                                  />
-                                )}
-                                <div className={`absolute bottom-0 right-0 w-6 h-6 rounded-full border-2 border-white ${conductor.estado ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                            <div className="flex flex-col h-full">
+                              <div
+                                className="flex items-start justify-between gap-2 pb-3 cursor-pointer flex-1"
+                                onClick={e => {
+                                  if (
+                                    !e.target.closest('button') &&
+                                    !e.target.closest('md-checkbox') &&
+                                    !e.target.closest('.action-buttons')
+                                  ) {
+                                    handleOpenProfile(conductor);
+                                  }
+                                }}
+                              >
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <div className="flex items-center justify-center w-12 h-12 shrink-0">
+                                    {conductor.usuario?.foto ? (
+                                      <img
+                                        src={resolveAssetUrl(
+                                          conductor.usuario.foto
+                                        )}
+                                        alt="Foto de perfil"
+                                        className="rounded-lg w-12 h-12 object-cover shadow-lg"
+                                      />
+                                    ) : (
+                                      <Avvvatars
+                                        value={
+                                          conductor.usuario?.nombre ||
+                                          'Conductor'
+                                        }
+                                        size={48}
+                                        radius={8}
+                                      />
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-h5 font-bold text-primary truncate group-hover:text-primary/80 transition-colors">
+                                      {conductor.usuario?.nombre ||
+                                        'Sin nombre'}
+                                    </h3>
+                                    <div className="flex items-center gap-1 text-body2">
+                                      <span className="text-secondary truncate text-xs">
+                                        {conductor.usuario?.numDocumento ||
+                                          'Sin documento'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <span
+                                  className={`btn font-medium btn-sm flex items-center shrink-0 ${
+                                    conductor.estado ? 'btn-green' : 'btn-red'
+                                  }`}
+                                >
+                                  {conductor.estado ? 'Activo' : 'Inactivo'}
+                                </span>
                               </div>
 
-                              <div className="flex flex-col gap-1 w-full">
-                                <h3 className="text-h5 font-bold text-primary truncate w-full">
-                                  {conductor.usuario?.nombre || 'Sin nombre'}
-                                </h3>
-                                <p className="text-sm text-secondary truncate w-full">
-                                  {conductor.usuario?.numDocumento || 'Sin documento'}
-                                </p>
-                                {conductor.categoriaLicencia?.nombreCategoria && (
-                                  <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mt-1 mx-auto">
-                                    Licencia {conductor.categoriaLicencia.nombreCategoria}
-                                  </span>
-                                )}
-                              </div>
-
-                              <div className="flex gap-2 w-full mt-2">
-                                <div className="relative group flex-1">
-                                  <button
-                                    className={`btn btn-sm-2 font-medium flex items-center gap-1 w-full justify-center ${conductor.estado ? 'btn-outline' : 'btn-secondary'
-                                      }`}
-                                    onClick={e => {
-                                      e.stopPropagation();
-                                      handleSwitchClick(conductor);
-                                    }}
-                                  >
-                                    <md-icon className="text-sm">
-                                      {conductor.estado ? 'block' : 'check'}
+                              <div
+                                className="flex-1 space-y-2 mb-3 cursor-pointer"
+                                onClick={e => {
+                                  if (
+                                    !e.target.closest('button') &&
+                                    !e.target.closest('md-checkbox') &&
+                                    !e.target.closest('.action-buttons')
+                                  ) {
+                                    handleOpenProfile(conductor);
+                                  }
+                                }}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center shrink-0">
+                                    <md-icon className="text-base text-primary">
+                                      drive_eta
                                     </md-icon>
-                                  </button>
-                                  <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                                    <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                      <p className="text-xs text-primary">
-                                        {conductor.estado ? 'Deshabilitar' : 'Habilitar'}
-                                      </p>
-                                    </div>
+                                  </div>
+                                  <div className="flex flex-col min-w-0 flex-1">
+                                    <span className="text-xs text-secondary">
+                                      Licencia
+                                    </span>
+                                    <span className="text-sm font-semibold text-primary truncate">
+                                      {conductor.numeroLicencia || 'N/A'}
+                                    </span>
                                   </div>
                                 </div>
 
-                                <div className="relative group flex-1">
-                                  <button
-                                    className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
-                                    onClick={e => handleEditClick(e, conductor)}
-                                  >
-                                    <md-icon className="text-sm">edit</md-icon>
-                                  </button>
-                                  <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                                    <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                      <p className="text-xs text-primary">Editar</p>
-                                    </div>
+                                {conductor.categoriaLicencia
+                                  ?.nombreCategoria && (
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    <span className="btn btn-outline btn-sm font-medium flex items-center text-xs px-2 py-1">
+                                      {
+                                        conductor.categoriaLicencia
+                                          .nombreCategoria
+                                      }
+                                    </span>
+                                    {licenciaVencida && (
+                                      <span className="btn btn-sm font-medium flex items-center bg-red-100 text-red-700 border border-red-300 text-xs px-2 py-1">
+                                        <md-icon className="text-xs">
+                                          error
+                                        </md-icon>
+                                        Vencida
+                                      </span>
+                                    )}
+                                    {licenciaProximaAVencer && (
+                                      <span className="btn btn-sm font-medium flex items-center btn-yellow text-xs px-2 py-1">
+                                        <md-icon className="text-xs">
+                                          warning
+                                        </md-icon>
+                                        Próx. Vencer
+                                      </span>
+                                    )}
                                   </div>
-                                </div>
+                                )}
+                              </div>
 
-                                <div className="relative group flex-1">
-                                  <button
-                                    className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
-                                    onClick={e => {
-                                      e.stopPropagation();
-                                      handleDeleteClick(conductor);
-                                    }}
-                                  >
-                                    <md-icon className="text-sm">delete</md-icon>
-                                  </button>
-                                  <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                                    <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                      <p className="text-xs text-primary">Eliminar</p>
-                                    </div>
-                                  </div>
-                                </div>
+                              <div className="flex gap-2 mt-auto action-buttons">
+                                <button
+                                  className={`btn btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95 ${
+                                    conductor.estado
+                                      ? 'btn-outline'
+                                      : 'btn-secondary'
+                                  }`}
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleSwitchClick(conductor);
+                                  }}
+                                  title={
+                                    conductor.estado
+                                      ? 'Deshabilitar conductor'
+                                      : 'Habilitar conductor'
+                                  }
+                                >
+                                  <md-icon className="text-sm">
+                                    {conductor.estado ? 'block' : 'check'}
+                                  </md-icon>
+                                </button>
+
+                                <button
+                                  className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95"
+                                  onClick={e => handleEditClick(e, conductor)}
+                                  title="Editar conductor"
+                                >
+                                  <md-icon className="text-sm">edit</md-icon>
+                                </button>
+
+                                <button
+                                  className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95 hover:bg-red-500/20 hover:text-red-500"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleDeleteClick(conductor);
+                                  }}
+                                  title="Eliminar conductor"
+                                >
+                                  <md-icon className="text-sm">delete</md-icon>
+                                </button>
                               </div>
                             </div>
                           ) : (
                             <div className="flex justify-between items-center">
                               <div className="flex items-center gap-3">
-                                {/* Foto del conductor */}
                                 <div className="flex items-center justify-center w-16 h-16">
                                   {conductor.usuario?.foto ? (
                                     <img
-                                      src={resolveAssetUrl(conductor.usuario.foto)}
-                                      alt={conductor.usuario?.nombre || 'Conductor'}
+                                      src={resolveAssetUrl(
+                                        conductor.usuario.foto
+                                      )}
+                                      alt={
+                                        conductor.usuario?.nombre || 'Conductor'
+                                      }
                                       className="rounded-lg w-16 h-16 object-cover shadow-2xl"
-                                      onError={(e) => {
+                                      onError={e => {
                                         e.target.onerror = null;
                                         e.target.style.display = 'none';
                                       }}
                                     />
                                   ) : (
                                     <Avvvatars
-                                      value={conductor.usuario?.nombre || 'Conductor'}
+                                      value={
+                                        conductor.usuario?.nombre || 'Conductor'
+                                      }
                                       size={64}
                                       radius={11}
                                     />
@@ -742,11 +881,20 @@ const ConductoresPage = () => {
 
                                 <div className="flex-1">
                                   <div className="leading-tight">
-                                    <h1 className="h4 font-bold">{conductor.usuario?.nombre || 'Sin nombre'}</h1>
+                                    <h1 className="h4 font-bold">
+                                      {conductor.usuario?.nombre ||
+                                        'Sin nombre'}
+                                    </h1>
                                     <div className="flex gap-2 text-secondary">
-                                      <span>{conductor.usuario?.correo || 'Sin email'}</span>
+                                      <span>
+                                        {conductor.usuario?.correo ||
+                                          'Sin email'}
+                                      </span>
                                       <span>|</span>
-                                      <span>{conductor.usuario?.numDocumento || 'Sin documento'}</span>
+                                      <span>
+                                        {conductor.usuario?.numDocumento ||
+                                          'Sin documento'}
+                                      </span>
                                     </div>
                                   </div>
 
@@ -758,33 +906,47 @@ const ConductoresPage = () => {
                                       {conductor.estado ? 'Activo' : 'Inactivo'}
                                     </button>
 
-                                    {conductor.categoriaLicencia?.nombreCategoria && (
+                                    {conductor.categoriaLicencia
+                                      ?.nombreCategoria && (
                                       <button className="btn btn-outline btn-lg font-medium flex items-center">
-                                        <md-icon className="text-sm">badge</md-icon>
-                                        {conductor.categoriaLicencia.nombreCategoria}
+                                        <md-icon className="text-sm">
+                                          badge
+                                        </md-icon>
+                                        {
+                                          conductor.categoriaLicencia
+                                            .nombreCategoria
+                                        }
                                       </button>
                                     )}
 
                                     {informacionIncompleta && (
                                       <button className="btn btn-lg font-medium flex items-center btn-red">
-                                        <md-icon className="text-sm">warning</md-icon>
+                                        <md-icon className="text-sm">
+                                          warning
+                                        </md-icon>
                                         <span>Información Incompleta</span>
                                       </button>
                                     )}
 
-                                    {!informacionIncompleta && licenciaVencida && (
-                                      <button className="btn btn-lg font-medium flex items-center bg-red-100 text-red-700 border border-red-300">
-                                        <md-icon className="text-sm">error</md-icon>
-                                        <span>Licencia Vencida</span>
-                                      </button>
-                                    )}
+                                    {!informacionIncompleta &&
+                                      licenciaVencida && (
+                                        <button className="btn btn-lg font-medium flex items-center bg-red-100 text-red-700 border border-red-300">
+                                          <md-icon className="text-sm">
+                                            error
+                                          </md-icon>
+                                          <span>Licencia Vencida</span>
+                                        </button>
+                                      )}
 
-                                    {!informacionIncompleta && licenciaProximaAVencer && (
-                                      <button className="btn btn-lg font-medium flex items-center btn-yellow">
-                                        <md-icon className="text-sm">warning</md-icon>
-                                        <span>Próxima a Vencer</span>
-                                      </button>
-                                    )}
+                                    {!informacionIncompleta &&
+                                      licenciaProximaAVencer && (
+                                        <button className="btn btn-lg font-medium flex items-center btn-yellow">
+                                          <md-icon className="text-sm">
+                                            warning
+                                          </md-icon>
+                                          <span>Próxima a Vencer</span>
+                                        </button>
+                                      )}
                                   </div>
                                 </div>
                               </div>
@@ -797,7 +959,9 @@ const ConductoresPage = () => {
                                     handleSwitchClick(conductor);
                                   }}
                                 >
-                                  {conductor.estado ? 'Deshabilitar' : 'Habilitar'}
+                                  {conductor.estado
+                                    ? 'Deshabilitar'
+                                    : 'Habilitar'}
                                 </button>
 
                                 <button
@@ -865,7 +1029,11 @@ const ConductoresPage = () => {
           onClose={handleSwitchCancel}
           onConfirm={handleSwitchConfirm}
           itemType="conductor"
-          itemName={conductorToSwitch ? conductorToSwitch.usuario?.nombre || 'Sin nombre' : ''}
+          itemName={
+            conductorToSwitch
+              ? conductorToSwitch.usuario?.nombre || 'Sin nombre'
+              : ''
+          }
           isCurrentlyActive={conductorToSwitch?.estado === true}
         />
 

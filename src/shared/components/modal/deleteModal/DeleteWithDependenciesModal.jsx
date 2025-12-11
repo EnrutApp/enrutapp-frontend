@@ -1,16 +1,14 @@
-import Modal from '../../../../shared/components/modal/Modal';
+import Modal from '../Modal';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 
-const ForceDeleteUbicacionModal = ({
+const DeleteWithDependenciesModal = ({
   isOpen,
   onClose,
   onConfirm,
-  ubicacionNombre,
-  rutasInfo,
+  itemName,
+  dependencies = [],
 }) => {
-  if (!isOpen || !rutasInfo) return null;
-
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="md">
       <div className="p-6">
@@ -21,42 +19,33 @@ const ForceDeleteUbicacionModal = ({
         <div className="text-center mb-6">
           <h2 className="h4 font-medium text-primary">Eliminar</h2>
           <p className="text-secondary h5 font-light">
-            Esta ubicación tiene{' '}
+            Este rol tiene{' '}
             <span className="font-medium text-primary">
-              {rutasInfo.totalRutas}ruta(s) <br />
-              activa(s)
+              {dependencies.length} usuario(s)
             </span>{' '}
-            asociadas.
+            asignados.
           </p>
         </div>
 
         <div className="mb-6">
           <div className="mb-4">
-            {rutasInfo.rutas && rutasInfo.rutas.length > 0 ? (
+            {dependencies.length > 0 ? (
               <div className="mb-4">
                 <div className="content-box-outline-7-small max-h-48 overflow-y-auto">
                   <p className="text-xs text-secondary mb-3 ml-2 ">
-                    Se eliminarán las siguientes {rutasInfo.totalRutas} ruta(s):
+                    Se eliminarán los siguientes usuario(s):
                   </p>
                   <ul className="flex flex-col gap-1.5">
-                    {rutasInfo.rutas.map((ruta, index) => (
+                    {dependencies.map((dep, index) => (
                       <li
-                        key={ruta.idRuta || index}
+                        key={index}
                         className="content-box-outline-4-small p-2"
                       >
                         <div className="text-xs text-secondary flex items-center">
                           <span className="font-medium text-primary mr-2 min-w-[60px]">
-                            Ruta {index + 1}:
+                            Usuario {index + 1}:
                           </span>
-                          <span className="font-medium truncate">
-                            {ruta.origen}
-                          </span>
-                          <md-icon className="text-base text-secondary mx-1 shrink-0">
-                            arrow_right
-                          </md-icon>
-                          <span className="font-medium truncate">
-                            {ruta.destino}
-                          </span>
+                          <span className="font-medium truncate">{dep}</span>
                         </div>
                       </li>
                     ))}
@@ -65,12 +54,12 @@ const ForceDeleteUbicacionModal = ({
               </div>
             ) : (
               <p className="text-sm text-secondary">
-                {rutasInfo.totalRutas} ruta(s) activa(s)
+                {dependencies.length} usuario(s) asignados
               </p>
             )}
             <p className="text-secondary text-center subtitle2 font-light">
-              Si eliminas esta ubicación, se eliminarán también todas las rutas
-              asociadas a esta ubicación.
+              Si eliminas este rol, se eliminarán también todos los usuarios
+              asignados.
             </p>
           </div>
         </div>
@@ -88,4 +77,4 @@ const ForceDeleteUbicacionModal = ({
   );
 };
 
-export default ForceDeleteUbicacionModal;
+export default DeleteWithDependenciesModal;

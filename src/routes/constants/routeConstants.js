@@ -21,6 +21,8 @@ export const ROUTES = {
     ROLES: '/admin/rol',
     CONTRATOS: '/admin/contratos',
     TRACKING: '/admin/tracking',
+    VIAJES: '/admin/viajes',
+    VIAJE_DETALLE: '/admin/viajes/:id',
   },
 
   CONDUCTOR: {

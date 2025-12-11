@@ -26,12 +26,12 @@ const SideBar = () => {
     return saved
       ? JSON.parse(saved)
       : {
-        0: false,
-        1: true,
-        2: true,
-        3: true,
-        4: true,
-      };
+          0: false,
+          1: true,
+          2: true,
+          3: true,
+          4: true,
+        };
   });
 
   const isActive = path => {
@@ -99,6 +99,148 @@ const SideBar = () => {
     return resolveAssetUrl(foto);
   };
 
+  const buildDynamicMenu = user => {
+    if (!user?.rol?.rolesPermisos) return [];
+
+    const permissions = user.rol.rolesPermisos.map(rp => rp.permiso.codigo);
+    const sections = [];
+
+    if (permissions.includes('VER_DASHBOARD')) {
+      sections.push({
+        title: 'Dashboard',
+        path: '/dashboard',
+        items: [],
+      });
+    }
+
+    const configItems = [];
+    if (permissions.includes('VER_ROLES'))
+      configItems.push({
+        path: '/admin/rol',
+        label: 'Roles',
+        icon: 'admin_panel_settings',
+      });
+    if (permissions.includes('VER_USUARIOS'))
+      configItems.push({
+        path: '/admin/usuarios',
+        label: 'Usuarios',
+        icon: 'person',
+      });
+
+    if (configItems.length > 0) {
+      sections.push({
+        title: 'Configuración',
+        items: configItems,
+      });
+    }
+
+    const transporteItems = [];
+    if (permissions.includes('VER_VEHICULOS'))
+      transporteItems.push({
+        path: '/admin/vehiculos',
+        label: 'Vehículos',
+        icon: 'drive_eta',
+      });
+    if (permissions.includes('VER_RUTAS'))
+      transporteItems.push({
+        path: '/admin/rutas',
+        label: 'Rutas',
+        icon: 'route',
+      });
+
+    if (permissions.includes('VER_VIAJES') || permissions.includes('VER_RUTAS'))
+      transporteItems.push({
+        path: '/admin/viajes',
+        label: 'Viajes',
+        icon: 'map',
+      });
+    if (permissions.includes('VER_UBICACIONES'))
+      transporteItems.push({
+        path: '/admin/ubicaciones',
+        label: 'Ubicaciones',
+        icon: 'location_on',
+      });
+    if (permissions.includes('VER_CONDUCTORES'))
+      transporteItems.push({
+        path: '/admin/conductores',
+        label: 'Conductores',
+        icon: 'search_hands_free',
+      });
+
+    if (
+      permissions.includes('VER_TRACKING') ||
+      permissions.includes('VER_VEHICULOS')
+    )
+      transporteItems.push({
+        path: '/admin/tracking',
+        label: 'Tracking GPS',
+        icon: 'my_location',
+      });
+    if (permissions.includes('VER_ENCOMIENDAS'))
+      transporteItems.push({
+        path: '/admin/encomiendas',
+        label: 'Encomiendas',
+        icon: 'inventory_2',
+      });
+    if (permissions.includes('VER_TURNOS'))
+      transporteItems.push({
+        path: '/admin/turnos',
+        label: 'Turnos',
+        icon: 'schedule',
+      });
+    if (permissions.includes('VER_CONTRATOS'))
+      transporteItems.push({
+        path: '/admin/contratos',
+        label: 'Contratos',
+        icon: 'file_present',
+      });
+
+    if (transporteItems.length > 0) {
+      sections.push({
+        title: 'Transporte',
+        items: transporteItems,
+      });
+    }
+
+    const ventasItems = [];
+    if (permissions.includes('VER_CLIENTES'))
+      ventasItems.push({
+        path: '/admin/clientes',
+        label: 'Clientes',
+        icon: 'people',
+      });
+    if (permissions.includes('VER_RESERVAS'))
+      ventasItems.push({
+        path: '/admin/reservas',
+        label: 'Reservas',
+        icon: 'event_seat',
+      });
+
+    if (ventasItems.length > 0) {
+      sections.push({
+        title: 'Ventas',
+        items: ventasItems,
+      });
+    }
+
+    const reportesItems = [];
+    if (permissions.includes('VER_FINANZAS'))
+      reportesItems.push({
+        path: '/admin/finanzas',
+        label: 'Finanzas',
+        icon: 'payments',
+      });
+
+    if (reportesItems.length > 0) {
+      sections.push({
+        title: 'Reportes',
+        items: reportesItems,
+      });
+    }
+
+    return sections;
+  };
+
   const roleMenus = {
     Administrador: [
       {
@@ -118,6 +260,7 @@ const SideBar = () => {
         items: [
           { path: '/admin/vehiculos', label: 'Vehículos', icon: 'drive_eta' },
           { path: '/admin/rutas', label: 'Rutas', icon: 'route' },
+          { path: '/admin/viajes', label: 'Viajes', icon: 'map' },
           {
             path: '/admin/ubicaciones',
             label: 'Ubicaciones',
@@ -139,7 +282,11 @@ const SideBar = () => {
             icon: 'inventory_2',
           },
           { path: '/admin/turnos', label: 'Turnos', icon: 'schedule' },
-          { path: '/admin/contratos', label: 'Contratos', icon: 'file_present' },
+          {
+            path: '/admin/contratos',
+            label: 'Contratos',
+            icon: 'file_present',
+          },
         ],
       },
       {
@@ -213,7 +360,8 @@ const SideBar = () => {
     ],
   };
 
-  const menuSections = roleMenus[user?.rol?.nombreRol] || [];
+  const menuSections =
+    roleMenus[user?.rol?.nombreRol] || buildDynamicMenu(user);
 
   return (
     <nav className="h-full flex flex-col sidebar">
@@ -275,10 +423,11 @@ const SideBar = () => {
               </div>
             )}
             <ul
-              className={`space-y-1 transition-all duration-500 ease-in-out overflow-hidden ${section.title && collapsedSections[sectionIndex]
-                ? 'max-h-0 blur-md opacity-0'
-                : 'max-h-[1000px] blur-0 opacity-100'
-                }`}
+              className={`space-y-1 transition-all duration-500 ease-in-out overflow-hidden ${
+                section.title && collapsedSections[sectionIndex]
+                  ? 'max-h-0 blur-md opacity-0'
+                  : 'max-h-[1000px] blur-0 opacity-100'
+              }`}
             >
               {section.items.map(({ path, label, icon }) => (
                 <li key={path}>
@@ -286,9 +435,10 @@ const SideBar = () => {
                     to={path}
                     className={`
                       sidebar-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ml-2
-                      ${isActive(path)
-                        ? 'bg-blue bg-opacity-10 text-blue  scale-105'
-                        : 'text-secondary hover:bg-blue hover:bg-opacity-5 hover:scale-[1.02] hover:text-primary'
+                      ${
+                        isActive(path)
+                          ? 'bg-blue bg-opacity-10 text-blue  scale-105'
+                          : 'text-secondary hover:bg-blue hover:bg-opacity-5 hover:scale-[1.02] hover:text-primary'
                       }
                     `}
                     style={{ transformOrigin: 'left' }}
@@ -374,15 +524,24 @@ const SideBar = () => {
                 </button>
               </div>
               <div className="py-1">
-                <md-menu-item onClick={handleSettingsClick} className="hover:bg-blue hover:bg-opacity-5">
+                <md-menu-item
+                  onClick={handleSettingsClick}
+                  className="hover:bg-blue hover:bg-opacity-5"
+                >
                   <md-icon slot="start" className="text-xl text-secondary">
                     settings
                   </md-icon>
-                  <div slot="headline" className="text-sm font-medium text-primary">
+                  <div
+                    slot="headline"
+                    className="text-sm font-medium text-primary"
+                  >
                     Configuración
                   </div>
                 </md-menu-item>
-                <md-menu-item onClick={handleLogoutClick} className="hover:bg-red hover:bg-opacity-5">
+                <md-menu-item
+                  onClick={handleLogoutClick}
+                  className="hover:bg-red hover:bg-opacity-5"
+                >
                   <md-icon slot="start" className="text-xl text-red">
                     logout
                   </md-icon>

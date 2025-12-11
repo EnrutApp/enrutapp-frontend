@@ -32,8 +32,7 @@ export const useRouteCalculation = (map, isLoaded) => {
       if (map.getSource('route')) {
         map.removeSource('route');
       }
-    } catch (err) {
-    }
+    } catch (err) {}
   }, [map, isLoaded]);
 
   const calculateRoute = useCallback(
@@ -119,8 +118,8 @@ export const useRouteCalculation = (map, isLoaded) => {
 
           map.fitBounds(bounds, {
             padding: { top: 100, bottom: 100, left: 100, right: 100 },
-            duration: 800, 
-            pitch: 0, 
+            duration: 800,
+            pitch: 0,
             bearing: 0,
             maxZoom: 16,
           });
@@ -128,8 +127,7 @@ export const useRouteCalculation = (map, isLoaded) => {
           if (onRouteCalculated && !isUnmountedRef.current) {
             onRouteCalculated(cachedData.info);
           }
-        } catch (err) {
-        }
+        } catch (err) {}
 
         return cachedData.info;
       }
@@ -143,7 +141,7 @@ export const useRouteCalculation = (map, isLoaded) => {
         }
         waypoints += `;${destinoLng},${destinoLat}`;
 
-        const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
+        const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints}?geometries=geojson&steps=true&access_token=${MAPBOX_TOKEN}`;
 
         const response = await fetch(url, {
           signal: abortControllerRef.current.signal,
@@ -173,7 +171,7 @@ export const useRouteCalculation = (map, isLoaded) => {
 
         const geometryData = {
           type: 'Feature',
-          geometry: route.geometry, 
+          geometry: route.geometry,
         };
 
         routeCalculationCache.current.set(cacheKey, {
@@ -201,7 +199,7 @@ export const useRouteCalculation = (map, isLoaded) => {
             },
             paint: {
               'line-color': '#1e1b4b',
-              'line-width': 10, 
+              'line-width': 10,
               'line-opacity': 0.2,
             },
           });
@@ -238,7 +236,7 @@ export const useRouteCalculation = (map, isLoaded) => {
 
           map.fitBounds(bounds, {
             padding: { top: 100, bottom: 100, left: 100, right: 100 },
-            duration: 800, 
+            duration: 800,
             pitch: 0,
             bearing: 0,
             maxZoom: 16,
@@ -247,8 +245,7 @@ export const useRouteCalculation = (map, isLoaded) => {
           if (onRouteCalculated && !isUnmountedRef.current) {
             onRouteCalculated(routeInfo);
           }
-        } catch (err) {
-        }
+        } catch (err) {}
 
         return routeInfo;
       } catch (err) {

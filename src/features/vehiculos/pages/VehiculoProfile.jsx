@@ -17,7 +17,7 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
 
   if (!isOpen || !vehicle) return null;
 
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     if (!dateString) return null;
     let dateToFormat;
     if (typeof dateString === 'string' && dateString.includes('T')) {
@@ -30,11 +30,11 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
     return date.toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
-  const isExpired = (dateString) => {
+  const isExpired = dateString => {
     if (!dateString) return false;
     const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
     const date = new Date(year, month - 1, day);
@@ -63,7 +63,6 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
       });
       setVehicleData({ ...vehicleData, estado: nuevoEstado });
     } catch (error) {
-
       alert('Error al cambiar el estado del vehículo');
     }
   };
@@ -79,10 +78,9 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
       onClose();
       window.location.reload();
     } catch (error) {
-
       alert(
         'Error al eliminar el vehículo: ' +
-        (error.message || 'Error desconocido')
+          (error.message || 'Error desconocido')
       );
       setIsDeleteModalOpen(false);
     }
@@ -132,15 +130,15 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
       <div className="bg-primary text-on-primary content-box-small flex justify-between gap-4">
         <div>
           <h1 className="h3 text-on-primary">{vehicleData.linea}</h1>
-          <span className="subtitle1 text-on-primary">
-            {vehicleData.placa}
-          </span>
+          <span className="subtitle1 text-on-primary">{vehicleData.placa}</span>
         </div>
       </div>
 
       <div className="flex flex-col gap-3 flex-1">
         <div className="content-box-outline-3-small">
-          <span className="subtitle1 text-primary font-light">Estado del vehículo</span>
+          <span className="subtitle1 text-primary font-light">
+            Estado del vehículo
+          </span>
           <div className="flex mt-1">
             <button
               className={`btn font-medium btn-lg flex items-center ${vehicleData.estado ? 'btn-primary' : 'btn-secondary'}`}
@@ -156,18 +154,14 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
           </span>
           <div className="grid grid-cols-2 gap-2 mt-2">
             <div className="p-4 content-box-outline-3-small rounded-lg">
-              <span className="text-xs text-secondary font-medium">
-                Tipo
-              </span>
+              <span className="text-xs text-secondary font-medium">Tipo</span>
               <p className="text-sm font-semibold text-primary mt-1">
                 {vehicleData.tipoVehiculo?.nombreTipoVehiculo || '-'}
               </p>
             </div>
 
             <div className="p-4 content-box-outline-3-small rounded-lg">
-              <span className="text-xs text-secondary font-medium">
-                Marca
-              </span>
+              <span className="text-xs text-secondary font-medium">Marca</span>
               <p className="text-sm font-semibold text-primary mt-1">
                 {vehicleData.marcaVehiculo?.nombreMarca || '-'}
               </p>
@@ -183,9 +177,7 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
             </div>
 
             <div className="p-4 content-box-outline-3-small rounded-lg">
-              <span className="text-xs text-secondary font-medium">
-                Color
-              </span>
+              <span className="text-xs text-secondary font-medium">Color</span>
               <p className="text-sm font-semibold text-primary mt-1">
                 {vehicleData.color || '-'}
               </p>
@@ -205,6 +197,70 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
         </div>
 
         <div className="content-box-outline-3-small">
+          <span className="subtitle1 text-primary font-light">
+            Información del Propietario
+          </span>
+          <div className="mt-2">
+            {vehicleData.idPropietario && vehicleData.propietario ? (
+              <div className="p-4 content-box-outline-3-small rounded-lg">
+                <span className="text-xs text-secondary font-medium">
+                  Conductor Propietario
+                </span>
+                <p className="text-sm font-semibold text-primary mt-1">
+                  {vehicleData.propietario.nombre}{' '}
+                  {vehicleData.propietario.apellido || ''}
+                </p>
+                <div className="flex flex-col gap-0.5 mt-1">
+                  {vehicleData.propietario.email && (
+                    <p className="text-xs text-secondary">
+                      {vehicleData.propietario.email}
+                    </p>
+                  )}
+                  {vehicleData.propietario.telefono && (
+                    <p className="text-xs text-secondary">
+                      {vehicleData.propietario.telefono}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ) : vehicleData.propietarioExternoNombre ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="p-4 content-box-outline-3-small rounded-lg">
+                  <span className="text-xs text-secondary font-medium">
+                    Nombre (Externo)
+                  </span>
+                  <p className="text-sm font-semibold text-primary mt-1">
+                    {vehicleData.propietarioExternoNombre}
+                  </p>
+                </div>
+                <div className="p-4 content-box-outline-3-small rounded-lg">
+                  <span className="text-xs text-secondary font-medium">
+                    Documento
+                  </span>
+                  <p className="text-sm font-semibold text-primary mt-1">
+                    {vehicleData.propietarioExternoDocumento}
+                  </p>
+                </div>
+                <div className="p-4 content-box-outline-3-small rounded-lg">
+                  <span className="text-xs text-secondary font-medium">
+                    Teléfono
+                  </span>
+                  <p className="text-sm font-semibold text-primary mt-1">
+                    {vehicleData.propietarioExternoTelefono}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 content-box-outline-3-small rounded-lg">
+                <p className="text-sm text-secondary">
+                  Sin información de propietario
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="content-box-outline-3-small">
           <span className="subtitle1 text-primary font-light">Capacidades</span>
           <div className="grid grid-cols-2 gap-2 mt-2">
             <div className="p-4 content-box-outline-3-small rounded-lg">
@@ -217,9 +273,7 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
             </div>
 
             <div className="p-4 content-box-outline-3-small rounded-lg">
-              <span className="text-xs text-secondary font-medium">
-                Carga
-              </span>
+              <span className="text-xs text-secondary font-medium">Carga</span>
               <p className="text-2xl font-bold text-primary mt-1">
                 {vehicleData.capacidadCarga
                   ? `${vehicleData.capacidadCarga} kg`
@@ -236,9 +290,7 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
           <div className="flex flex-col gap-2 mt-2">
             <div className="flex justify-between items-center content-box-outline-8-small">
               <div className="flex items-center gap-2">
-                <md-icon className="text-lg text-primary">
-                  description
-                </md-icon>
+                <md-icon className="text-lg text-primary">description</md-icon>
                 <div>
                   <span className="text-sm font-semibold text-primary">
                     SOAT
@@ -266,9 +318,7 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
 
             <div className="flex justify-between items-center content-box-outline-8-small">
               <div className="flex items-center gap-2">
-                <md-icon className="text-lg text-primary">
-                  build_circle
-                </md-icon>
+                <md-icon className="text-lg text-primary">build_circle</md-icon>
                 <div>
                   <span className="text-sm font-semibold text-primary">
                     Tecnomecánica
@@ -337,7 +387,7 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
           </div>
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {vehicleData.createdAt && (
             <div className="content-box-outline-3-small">
               <span className="subtitle1 text-primary font-light">

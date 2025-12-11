@@ -4,29 +4,26 @@ import authService from '../../features/auth/api/authService.js';
 const RAW_ENV = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 let RAW = RAW_ENV;
 
-// Si estamos en desarrollo y apuntando a Azure, usar el proxy para evitar CORS
 if (import.meta.env.DEV && RAW_ENV.includes('azurewebsites.net')) {
   console.log('🔀 Usando Proxy para backend en Azure (evitando CORS)');
-  RAW = ''; // Usar path relativo que será interceptado por el proxy de Vite
+  RAW = '';
 }
 
 console.log('🔌 Configuración de API:', {
   VITE_API_URL: import.meta.env.VITE_API_URL,
   Original: RAW_ENV,
   Final: RAW || '(Proxy/Relativo)',
-  Mode: import.meta.env.MODE
+  Mode: import.meta.env.MODE,
 });
 
 const API_ORIGIN = RAW.replace(/\/api\/?$/, '');
 const API_BASE_URL = `${API_ORIGIN}/api`;
 
-// Callbacks para manejar el estado de carga global
 let loadingCallbacks = {
   startLoading: null,
   stopLoading: null,
 };
 
-// Función para registrar los callbacks de loading desde el contexto
 export const setLoadingCallbacks = (startCallback, stopCallback) => {
   loadingCallbacks.startLoading = startCallback;
   loadingCallbacks.stopLoading = stopCallback;
@@ -37,7 +34,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // Aumentado a 30s para soportar "cold starts" de Azure
+  timeout: 30000,
 });
 
 const isTokenValid = token => {
@@ -99,12 +96,9 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Generar un ID único para esta petición
     const requestId = `${Date.now()}-${Math.random()}`;
     config._requestId = requestId;
 
-    // Iniciar el indicador de carga si hay callbacks registrados
-    // Solo para peticiones que no sean de refresh token (para evitar loops)
     const isRefreshTokenRequest = config.url?.includes('/auth/refresh');
     if (!isRefreshTokenRequest && loadingCallbacks.startLoading) {
       loadingCallbacks.startLoading(requestId);
@@ -113,7 +107,6 @@ apiClient.interceptors.request.use(
     return config;
   },
   error => {
-    // Si hay error en la petición, asegurarse de detener el loading
     const requestId = error.config?._requestId;
     if (requestId && loadingCallbacks.stopLoading) {
       loadingCallbacks.stopLoading(requestId);
@@ -139,9 +132,9 @@ const processQueue = (error, token = null) => {
 
 apiClient.interceptors.response.use(
   response => {
-    // Detener el indicador de carga al recibir la respuesta
     const requestId = response.config?._requestId;
-    const isRefreshTokenRequest = response.config?.url?.includes('/auth/refresh');
+    const isRefreshTokenRequest =
+      response.config?.url?.includes('/auth/refresh');
     if (requestId && !isRefreshTokenRequest && loadingCallbacks.stopLoading) {
       loadingCallbacks.stopLoading(requestId);
     }
@@ -232,7 +225,6 @@ apiClient.interceptors.response.use(
           }
         }
 
-        // Rechazar el error original del backend, no el de refresh
         return Promise.reject(error);
       }
     }
@@ -247,7 +239,6 @@ apiClient.interceptors.response.use(
       return Promise.reject(formattedError);
     }
 
-    // Manejar error 429 (Too Many Requests - Rate Limiting)
     if (error.response?.status === 429) {
       const retryAfter = error.response.headers['retry-after'] || 60;
       const formattedError = {
@@ -292,8 +283,8 @@ apiClient.interceptors.response.use(
       data: error.response?.data,
     };
 
-    // Detener el indicador de carga al finalizar (incluso si hay error)
-    const isRefreshTokenRequest = originalRequest?.url?.includes('/auth/refresh');
+    const isRefreshTokenRequest =
+      originalRequest?.url?.includes('/auth/refresh');
     if (requestId && !isRefreshTokenRequest && loadingCallbacks.stopLoading) {
       loadingCallbacks.stopLoading(requestId);
     }

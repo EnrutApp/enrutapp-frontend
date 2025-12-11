@@ -1,260 +1,16 @@
-/**
- * Componente de mapa para tracking de conductores en tiempo real
- * Usa Mapbox GL para mostrar la ubicación de conductores
- */
-
-import { useRef, useEffect, useState, useCallback, memo } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
+import { useCallback, useEffect, useState, useMemo, useRef, memo } from 'react';
 import '@material/web/icon/icon.js';
-import '@material/web/button/filled-button.js';
-import '@material/web/button/filled-tonal-button.js';
-import '@material/web/progress/circular-progress.js';
+import { useGoogleMaps } from '../../../shared/context/GoogleMapsLoader';
 
-const MAPBOX_TOKEN =
-    import.meta.env.VITE_MAPBOX_TOKEN ||
-    'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+const mapContainerStyle = {
+  width: '100%',
+  height: '100%',
+  borderRadius: '12px',
+};
 
-mapboxgl.accessToken = MAPBOX_TOKEN;
-
-// Estilos CSS del componente
-const styles = `
-  .tracking-map-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    min-height: 400px;
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  .tracking-map {
-    width: 100%;
-    height: 100%;
-  }
-
-  .tracking-status-panel {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    right: 12px;
-    background: var(--fill);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    z-index: 10;
-    backdrop-filter: blur(10px);
-  }
-
-  .tracking-status-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .tracking-status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-  }
-
-  .tracking-status-dot.online {
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-  }
-
-  .tracking-status-dot.offline {
-    background: var(--red);
-  }
-
-  .tracking-status-text {
-    font-size: 13px;
-    color: var(--text-secondary);
-  }
-
-  .tracking-coords {
-    font-family: 'SF Mono', 'Menlo', monospace;
-    font-size: 12px;
-    color: var(--text-primary);
-    background: var(--background);
-    padding: 4px 8px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-  }
-
-  .tracking-speed {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--primary);
-  }
-
-  .tracking-controls {
-    position: absolute;
-    right: 12px;
-    bottom: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    z-index: 10;
-  }
-
-  .tracking-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--fill);
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .tracking-btn:hover {
-    background: var(--secondary);
-    transform: scale(1.05);
-  }
-
-  .tracking-btn md-icon {
-    color: var(--text-primary);
-    font-size: 20px;
-  }
-
-  .tracking-btn.active md-icon {
-    color: var(--primary);
-  }
-
-  .tracking-loading {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    background: var(--fill);
-    padding: 24px 32px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    z-index: 20;
-  }
-
-  .tracking-loading-text {
-    font-size: 14px;
-    color: var(--text-secondary);
-  }
-
-  .tracking-no-data {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    padding: 24px;
-    background: var(--fill);
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    z-index: 10;
-  }
-
-  .tracking-no-data md-icon {
-    font-size: 48px;
-    color: var(--text-secondary);
-    margin-bottom: 12px;
-  }
-
-  .tracking-no-data-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-  }
-
-  .tracking-no-data-text {
-    font-size: 14px;
-    color: var(--text-secondary);
-  }
-
-  .driver-marker {
-    width: 40px;
-    height: 40px;
-    background: var(--primary);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 3px solid white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-    transition: transform 0.2s ease;
-  }
-
-  .driver-marker:hover {
-    transform: scale(1.1);
-  }
-
-  .driver-marker md-icon {
-    color: white;
-    font-size: 20px;
-  }
-
-  .driver-marker.offline {
-    background: var(--text-secondary);
-    opacity: 0.7;
-  }
-
-  .driver-popup {
-    padding: 4px;
-  }
-
-  .driver-popup-name {
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-  }
-
-  .driver-popup-info {
-    font-size: 12px;
-    color: var(--text-secondary);
-  }
-
-  .driver-popup-status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid var(--border);
-  }
-
-  .driver-popup-status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-  }
-
-  .mapboxgl-popup-content {
-    background: var(--fill) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    padding: 12px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  }
-
-  .mapboxgl-popup-tip {
-    border-top-color: var(--fill) !important;
-  }
-`;
-
-const DriverTrackingMap = memo(({
+const DriverTrackingMap = memo(
+  ({
     locations = [],
     selectedDriverId = null,
     driverInfo = null,
@@ -266,274 +22,234 @@ const DriverTrackingMap = memo(({
     className = '',
     showControls = true,
     showStatusPanel = true,
-    initialCenter = [-75.5658, 6.2476], // Colombia
+    initialCenter = { lat: 6.2476, lng: -75.5658 },
     initialZoom = 12,
-}) => {
-    const mapContainer = useRef(null);
-    const map = useRef(null);
-    const markers = useRef(new Map());
-    const [isMapLoaded, setIsMapLoaded] = useState(false);
+  }) => {
+    const { isLoaded } = useGoogleMaps();
+    const [map, setMap] = useState(null);
+    const [selectedMarker, setSelectedMarker] = useState(null);
+    const [center, setCenter] = useState(initialCenter);
     const [isFollowing, setIsFollowing] = useState(true);
 
-    // Obtener la ubicación del conductor seleccionado
-    const selectedLocation = locations.find(l => l.driverId === selectedDriverId);
-
-    // Inicializar el mapa
-    useEffect(() => {
-        if (!mapContainer.current || map.current) return;
-
-        map.current = new mapboxgl.Map({
-            container: mapContainer.current,
-            style: 'mapbox://styles/mapbox/streets-v12',
-            center: initialCenter,
-            zoom: initialZoom,
-        });
-
-        map.current.on('load', () => {
-            setIsMapLoaded(true);
-        });
-
-        // Añadir controles de navegación
-        map.current.addControl(
-            new mapboxgl.NavigationControl({ showCompass: true }),
-            'bottom-right'
-        );
-
-        return () => {
-            // Limpiar markers
-            markers.current.forEach(marker => marker.remove());
-            markers.current.clear();
-
-            if (map.current) {
-                map.current.remove();
-                map.current = null;
-            }
-        };
+    const onLoad = useCallback(map => {
+      setMap(map);
     }, []);
 
-    // Actualizar markers cuando cambien las ubicaciones
+    const onUnmount = useCallback(() => {
+      setMap(null);
+    }, []);
+
     useEffect(() => {
-        if (!map.current || !isMapLoaded) return;
-
-        // Crear/actualizar markers para cada conductor
-        locations.forEach(location => {
-            const existingMarker = markers.current.get(location.driverId);
-
-            if (existingMarker) {
-                // Actualizar posición existente con animación
-                existingMarker.setLngLat([location.longitude, location.latitude]);
-
-                // Actualizar rotación si hay heading
-                if (location.heading !== undefined) {
-                    const el = existingMarker.getElement();
-                    el.style.transform = `rotate(${location.heading}deg)`;
-                }
-
-                // Actualizar clase de online/offline
-                const el = existingMarker.getElement();
-                el.classList.toggle('offline', !location.isOnline);
-            } else {
-                // Crear nuevo marker
-                const el = document.createElement('div');
-                el.className = `driver-marker ${!location.isOnline ? 'offline' : ''}`;
-                el.innerHTML = '<md-icon>directions_car</md-icon>';
-
-                if (location.heading !== undefined) {
-                    el.style.transform = `rotate(${location.heading}deg)`;
-                }
-
-                const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
-                    .setLngLat([location.longitude, location.latitude])
-                    .addTo(map.current);
-
-                // Añadir popup
-                const popup = new mapboxgl.Popup({ offset: 25, closeButton: false })
-                    .setHTML(`
-            <div class="driver-popup">
-              <div class="driver-popup-name">Conductor #${location.driverId}</div>
-              <div class="driver-popup-info">
-                ${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}
-              </div>
-              ${location.speed ? `<div class="driver-popup-info">🚗 ${(location.speed * 3.6).toFixed(1)} km/h</div>` : ''}
-              <div class="driver-popup-status">
-                <div class="driver-popup-status-dot" style="background: ${location.isOnline ? 'var(--green)' : 'var(--red)'}"></div>
-                <span class="driver-popup-info">${location.isOnline ? 'En línea' : 'Desconectado'}</span>
-              </div>
-            </div>
-          `);
-
-                marker.setPopup(popup);
-
-                // Click handler
-                el.addEventListener('click', () => {
-                    if (onDriverSelect) {
-                        onDriverSelect(location.driverId);
-                    }
-                });
-
-                markers.current.set(location.driverId, marker);
-            }
-        });
-
-        // Remover markers de conductores que ya no están en la lista
-        markers.current.forEach((marker, driverId) => {
-            if (!locations.find(l => l.driverId === driverId)) {
-                marker.remove();
-                markers.current.delete(driverId);
-            }
-        });
-    }, [locations, isMapLoaded, onDriverSelect]);
-
-    // Centrar en el conductor seleccionado
-    useEffect(() => {
-        if (!map.current || !isMapLoaded || !selectedLocation || !isFollowing) return;
-
-        map.current.flyTo({
-            center: [selectedLocation.longitude, selectedLocation.latitude],
-            zoom: 15,
-            duration: 1000,
-        });
-    }, [selectedLocation?.latitude, selectedLocation?.longitude, isMapLoaded, isFollowing]);
-
-    // Centrar en el primer conductor disponible al cargar
-    useEffect(() => {
-        if (!map.current || !isMapLoaded || locations.length === 0) return;
-
-        const firstLocation = selectedLocation || locations[0];
-        if (firstLocation) {
-            map.current.flyTo({
-                center: [firstLocation.longitude, firstLocation.latitude],
-                zoom: 14,
-                duration: 1500,
-            });
+      if (selectedDriverId && locations.length > 0 && isFollowing) {
+        const driverLocation = locations.find(
+          l => l.driverId === selectedDriverId
+        );
+        if (driverLocation) {
+          setCenter({
+            lat: driverLocation.latitude,
+            lng: driverLocation.longitude,
+          });
+          setSelectedMarker(driverLocation);
         }
-    }, [isMapLoaded, locations.length > 0]);
+      }
+    }, [selectedDriverId, locations, isFollowing]);
 
-    const handleCenterOnDriver = useCallback(() => {
-        if (!map.current || !selectedLocation) return;
+    useEffect(() => {
+      if (map && locations.length > 1 && !selectedDriverId && !isFollowing) {
+        const bounds = new window.google.maps.LatLngBounds();
+        locations.forEach(loc => {
+          bounds.extend({ lat: loc.latitude, lng: loc.longitude });
+        });
+        map.fitBounds(bounds);
+      }
 
-        map.current.flyTo({
-            center: [selectedLocation.longitude, selectedLocation.latitude],
-            zoom: 15,
-            duration: 1000,
+      if (locations.length === 1 && !selectedDriverId) {
+        setCenter({ lat: locations[0].latitude, lng: locations[0].longitude });
+      }
+    }, [map, locations, selectedDriverId, isFollowing]);
+
+    const handleMarkerClick = location => {
+      setSelectedMarker(location);
+      if (onDriverSelect) {
+        onDriverSelect(location.driverId);
+      }
+      setIsFollowing(true);
+      setCenter({ lat: location.latitude, lng: location.longitude });
+    };
+
+    const handleCenterOnDriver = () => {
+      if (selectedMarker) {
+        setCenter({
+          lat: selectedMarker.latitude,
+          lng: selectedMarker.longitude,
         });
         setIsFollowing(true);
-    }, [selectedLocation]);
+        if (map) map.setZoom(15);
+      }
+    };
 
-    const handleFitAllDrivers = useCallback(() => {
-        if (!map.current || locations.length === 0) return;
-
-        const bounds = new mapboxgl.LngLatBounds();
-        locations.forEach(location => {
-            bounds.extend([location.longitude, location.latitude]);
+    const handleFitAll = () => {
+      if (map && locations.length > 0) {
+        const bounds = new window.google.maps.LatLngBounds();
+        locations.forEach(loc => {
+          bounds.extend({ lat: loc.latitude, lng: loc.longitude });
         });
-
-        map.current.fitBounds(bounds, {
-            padding: 100,
-            duration: 1000,
-        });
+        map.fitBounds(bounds);
         setIsFollowing(false);
-    }, [locations]);
+      }
+    };
+
+    if (!isLoaded) {
+      return (
+        <div className={`relative ${className}`} style={{ height }}>
+          <div className="w-full h-full bg-fill animate-pulse flex items-center justify-center rounded-xl border border-border">
+            <p className="text-secondary">Cargando mapa...</p>
+          </div>
+        </div>
+      );
+    }
 
     return (
-        <>
-            <style>{styles}</style>
-            <div
-                className={`tracking-map-container ${className}`}
-                style={{ height }}
+      <div className={`relative ${className}`} style={{ height }}>
+        <GoogleMap
+          mapContainerStyle={mapContainerStyle}
+          center={center}
+          zoom={initialZoom}
+          onLoad={onLoad}
+          onUnmount={onUnmount}
+          options={{
+            disableDefaultUI: !showControls,
+            zoomControl: showControls,
+            streetViewControl: false,
+            mapTypeControl: false,
+            styles: [
+              {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [{ visibility: 'off' }],
+              },
+            ],
+          }}
+        >
+          {locations.map(location => (
+            <Marker
+              key={location.driverId}
+              position={{ lat: location.latitude, lng: location.longitude }}
+              onClick={() => handleMarkerClick(location)}
+              icon={{
+                path: window.google.maps.SymbolPath.CIRCLE,
+                scale: 10,
+                fillColor: location.isOnline ? '#22c55e' : '#ef4444',
+                fillOpacity: 1,
+                strokeColor: '#ffffff',
+                strokeWeight: 2,
+              }}
+            />
+          ))}
+
+          {selectedMarker && (
+            <InfoWindow
+              position={{
+                lat: selectedMarker.latitude,
+                lng: selectedMarker.longitude,
+              }}
+              onCloseClick={() => setSelectedMarker(null)}
             >
-                <div ref={mapContainer} className="tracking-map" />
-
-                {/* Panel de estado */}
-                {showStatusPanel && (
-                    <div className="tracking-status-panel">
-                        <div className="tracking-status-item">
-                            <div className={`tracking-status-dot ${isConnected ? 'online' : 'offline'}`} />
-                            <span className="tracking-status-text">
-                                {isConnected ? 'Conectado' : 'Desconectado'}
-                            </span>
-                        </div>
-
-                        <div className="tracking-status-item">
-                            <md-icon style={{ fontSize: '16px', color: 'var(--primary)' }}>
-                                local_taxi
-                            </md-icon>
-                            <span className="tracking-status-text">
-                                {locations.filter(l => l.isOnline).length} en línea
-                            </span>
-                        </div>
-
-                        {selectedLocation && (
-                            <>
-                                <span className="tracking-coords">
-                                    {selectedLocation.latitude.toFixed(6)}, {selectedLocation.longitude.toFixed(6)}
-                                </span>
-                                {selectedLocation.speed !== undefined && selectedLocation.speed > 0 && (
-                                    <span className="tracking-speed">
-                                        🚗 {(selectedLocation.speed * 3.6).toFixed(1)} km/h
-                                    </span>
-                                )}
-                            </>
-                        )}
-                    </div>
+              <div className="p-2 min-w-[200px]">
+                <div className="font-semibold text-gray-900 mb-1">
+                  Conductor #{selectedMarker.driverId}
+                </div>
+                <div className="text-xs text-gray-600 mb-2">
+                  {selectedMarker.latitude.toFixed(6)},{' '}
+                  {selectedMarker.longitude.toFixed(6)}
+                </div>
+                {selectedMarker.speed > 0 && (
+                  <div className="text-xs font-medium text-blue-600 mb-2">
+                    {(selectedMarker.speed * 3.6).toFixed(1)} km/h
+                  </div>
                 )}
+                <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
+                  <div
+                    className={`w-2 h-2 rounded-full ${selectedMarker.isOnline ? 'bg-green' : 'bg-red'}`}
+                  ></div>
+                  <span className="text-xs text-gray-700">
+                    {selectedMarker.isOnline ? 'En línea' : 'Desconectado'}
+                  </span>
+                </div>
+              </div>
+            </InfoWindow>
+          )}
+        </GoogleMap>
 
-                {/* Controles */}
-                {showControls && (
-                    <div className="tracking-controls">
-                        {selectedLocation && (
-                            <button
-                                className={`tracking-btn ${isFollowing ? 'active' : ''}`}
-                                onClick={handleCenterOnDriver}
-                                title="Centrar en conductor"
-                            >
-                                <md-icon>{isFollowing ? 'my_location' : 'location_searching'}</md-icon>
-                            </button>
-                        )}
-                        {locations.length > 1 && (
-                            <button
-                                className="tracking-btn"
-                                onClick={handleFitAllDrivers}
-                                title="Ver todos los conductores"
-                            >
-                                <md-icon>zoom_out_map</md-icon>
-                            </button>
-                        )}
-                    </div>
-                )}
-
-                {/* Loading */}
-                {isLoading && (
-                    <div className="tracking-loading">
-                        <md-circular-progress indeterminate></md-circular-progress>
-                        <span className="tracking-loading-text">Conectando al servidor de tracking...</span>
-                    </div>
-                )}
-
-                {/* Error */}
-                {error && !isLoading && (
-                    <div className="tracking-no-data">
-                        <md-icon style={{ color: 'var(--red)' }}>error</md-icon>
-                        <div className="tracking-no-data-title">Error de conexión</div>
-                        <div className="tracking-no-data-text">{error}</div>
-                    </div>
-                )}
-
-                {/* Sin datos */}
-                {!isLoading && !error && isMapLoaded && locations.length === 0 && (
-                    <div className="tracking-no-data">
-                        <md-icon>location_off</md-icon>
-                        <div className="tracking-no-data-title">Sin conductores activos</div>
-                        <div className="tracking-no-data-text">
-                            No hay conductores compartiendo su ubicación en este momento
-                        </div>
-                    </div>
-                )}
+        {showStatusPanel && (
+          <div className="absolute top-3 left-3 right-3 bg-fill border border-border rounded-xl p-3 flex items-center justify-between gap-4 z-10 shadow-lg">
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-red'}`}
+              />
+              <span className="text-sm text-secondary">
+                {isConnected ? 'Conectado' : 'Desconectado'}
+              </span>
             </div>
-        </>
-    );
-});
+            <div className="flex items-center gap-2">
+              <md-icon style={{ fontSize: '16px', color: 'var(--primary)' }}>
+                local_taxi
+              </md-icon>
+              <span className="text-sm text-secondary">
+                {locations.filter(l => l.isOnline).length} en línea
+              </span>
+            </div>
+          </div>
+        )}
 
-DriverTrackingMap.displayName = 'DriverTrackingMap';
+        {showControls && (
+          <div className="absolute right-3 bottom-6 flex flex-col gap-2 z-10">
+            {selectedMarker && (
+              <button
+                className={`w-11 h-11 rounded-full bg-fill border border-border flex items-center justify-center cursor-pointer shadow-lg hover:bg-secondary/10 transition-colors ${isFollowing ? 'text-primary' : 'text-secondary'}`}
+                onClick={handleCenterOnDriver}
+                title="Centrar en conductor"
+              >
+                <md-icon>my_location</md-icon>
+              </button>
+            )}
+            {locations.length > 1 && (
+              <button
+                className="w-11 h-11 rounded-full bg-fill border border-border flex items-center justify-center cursor-pointer shadow-lg hover:bg-secondary/10 transition-colors text-secondary"
+                onClick={handleFitAll}
+                title="Ver todos los conductores"
+              >
+                <md-icon>zoom_out_map</md-icon>
+              </button>
+            )}
+          </div>
+        )}
+
+        {isLoading && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 bg-fill p-6 rounded-xl border border-border z-20 shadow-xl">
+            <md-circular-progress indeterminate></md-circular-progress>
+            <span className="text-sm text-secondary">
+              Conectando al servidor...
+            </span>
+          </div>
+        )}
+
+        {!isLoading && !error && locations.length === 0 && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center p-6 bg-fill rounded-xl border border-border z-10 shadow-xl">
+            <md-icon className="text-2xl text-secondary mb-3">
+              location_off
+            </md-icon>
+            <div className="font-semibold text-primary mb-1">
+              Sin conductores activos
+            </div>
+            <div className="text-sm text-secondary">
+              No hay conductores compartiendo ubicación
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+);
 
 export default DriverTrackingMap;

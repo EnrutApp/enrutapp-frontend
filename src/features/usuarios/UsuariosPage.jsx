@@ -2,6 +2,7 @@ import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/switch/switch.js';
 import '@material/web/checkbox/checkbox.js';
+import '@material/web/progress/linear-progress.js';
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import UserProfile from './pages/UsuarioProfilePage';
@@ -17,7 +18,6 @@ import useApi from '../../shared/hooks/useApi';
 import Avvvatars from 'avvvatars-react';
 import resolveAssetUrl from '../../shared/utils/url';
 
-// Estilos para animación de checkbox
 const styles = `
   @keyframes checkboxAppear {
     0% {
@@ -61,11 +61,11 @@ const UsuariosPage = () => {
   const [userToEdit, setUserToEdit] = useState(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [conductores, setConductores] = useState([]);
-  const [isEditConductorModalOpen, setIsEditConductorModalOpen] = useState(false);
+  const [isEditConductorModalOpen, setIsEditConductorModalOpen] =
+    useState(false);
   const [conductorToEdit, setConductorToEdit] = useState(null);
-  const [viewMode, setViewMode] = useState('list'); // 'list' o 'grid'
+  const [viewMode, setViewMode] = useState('list');
 
-  // Estados para selección múltiple
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [isDeleteMultipleModalOpen, setIsDeleteMultipleModalOpen] =
     useState(false);
@@ -79,7 +79,6 @@ const UsuariosPage = () => {
     setData: setUsers,
   } = useApi(userService.getUsers, []);
 
-  // Cargar conductores para mostrar información de licencias
   useEffect(() => {
     const loadConductores = async () => {
       try {
@@ -98,18 +97,18 @@ const UsuariosPage = () => {
 
   const filteredUsers = users
     ? users.filter(user => {
-      const matchesSearch =
-        user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.numDocumento.includes(searchTerm);
+        const matchesSearch =
+          user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.numDocumento.includes(searchTerm);
 
-      const matchesStatus =
-        statusFilter === 'Todos' ||
-        (statusFilter === 'Activos' && user.estado) ||
-        (statusFilter === 'Inactivos' && !user.estado);
+        const matchesStatus =
+          statusFilter === 'Todos' ||
+          (statusFilter === 'Activos' && user.estado) ||
+          (statusFilter === 'Inactivos' && !user.estado);
 
-      return matchesSearch && matchesStatus;
-    })
+        return matchesSearch && matchesStatus;
+      })
     : [];
 
   const sortedUsers = filteredUsers.sort((a, b) => {
@@ -166,7 +165,6 @@ const UsuariosPage = () => {
       setIsDeleteModalOpen(false);
       setUserToDelete(null);
     } catch (error) {
-
       alert('Error al eliminar el usuario: ' + error.message);
     }
   };
@@ -214,20 +212,17 @@ const UsuariosPage = () => {
   };
 
   const handleEditClick = user => {
-    // Si el usuario es conductor, abrir modal de editar conductor
     if (user.rol?.nombreRol?.toLowerCase() === 'conductor') {
       const conductor = getConductorByUserId(user.idUsuario);
       if (conductor) {
         setConductorToEdit(conductor);
         setIsEditConductorModalOpen(true);
       } else {
-        // Si no tiene datos de conductor, abrir modal normal
         alert('Este conductor aún no tiene información de licencia registrada');
         setUserToEdit(user);
         setIsEditModalOpen(true);
       }
     } else {
-      // Para otros roles, abrir modal normal
       setUserToEdit(user);
       setIsEditModalOpen(true);
     }
@@ -246,10 +241,8 @@ const UsuariosPage = () => {
 
   const handleEditConductorConfirm = async (idConductor, conductorData) => {
     try {
-      // Actualizar el conductor en el backend
       await conductorService.updateConductor(idConductor, conductorData);
 
-      // Recargar conductores y usuarios
       await fetchUsers();
       const response = await conductorService.getConductores();
       setConductores(response.data || response || []);
@@ -257,7 +250,7 @@ const UsuariosPage = () => {
       setConductorToEdit(null);
     } catch (error) {
       console.error('Error al actualizar conductor:', error);
-      throw error; // Re-lanzar el error para que el modal lo maneje
+      throw error;
     }
   };
 
@@ -266,14 +259,12 @@ const UsuariosPage = () => {
     setConductorToEdit(null);
   };
 
-  // Funciones para selección múltiple
   const handleToggleSelectionMode = () => {
     setIsSelectionMode(!isSelectionMode);
     setSelectedUsers([]);
   };
 
   const handleSelectAll = () => {
-    // Excluir usuarios con rol "Administrador"
     const currentPageIds = currentUsers
       .filter(u => u.rol?.nombreRol !== 'Administrador')
       .map(u => u.idUsuario);
@@ -319,7 +310,6 @@ const UsuariosPage = () => {
         await userService.deleteUser(userId);
         return { success: true, id: userId };
       } catch (err) {
-
         return { success: false, id: userId, error: err };
       }
     });
@@ -344,21 +334,18 @@ const UsuariosPage = () => {
     setIsSelectionMode(false);
   };
 
-  // Función para obtener el conductor asociado a un usuario
-  const getConductorByUserId = (userId) => {
+  const getConductorByUserId = userId => {
     return conductores.find(c => c.usuario?.idUsuario === userId);
   };
 
-  // Función para verificar si la licencia está vencida
-  const isLicenciaVencida = (fechaVencimiento) => {
+  const isLicenciaVencida = fechaVencimiento => {
     if (!fechaVencimiento) return false;
     const hoy = new Date();
     const fechaVenc = new Date(fechaVencimiento);
     return fechaVenc < hoy;
   };
 
-  // Función para verificar si la licencia está próxima a vencer (30 días)
-  const isLicenciaProximaAVencer = (fechaVencimiento) => {
+  const isLicenciaProximaAVencer = fechaVencimiento => {
     if (!fechaVencimiento) return false;
     const hoy = new Date();
     const fechaVenc = new Date(fechaVencimiento);
@@ -367,10 +354,11 @@ const UsuariosPage = () => {
     return diferencia > 0 && diferencia <= treintaDias;
   };
 
-  // Función para verificar si la información del conductor está incompleta
-  const isInformacionIncompleta = (conductor) => {
+  const isInformacionIncompleta = conductor => {
     if (!conductor) return true;
-    return !conductor.idCategoriaLicencia || !conductor.fechaVencimientoLicencia;
+    return (
+      !conductor.idCategoriaLicencia || !conductor.fechaVencimientoLicencia
+    );
   };
 
   const itemsPerPage = viewMode === 'grid' ? 8 : 4;
@@ -595,24 +583,26 @@ const UsuariosPage = () => {
               </div>
 
               <div className="flex justify-between items-center mt-4 mb-4">
-                <div className='flex gap-3'>
+                <div className="flex gap-3">
                   <div className="flex gap-1 bg-fill border border-border rounded-full p-1">
                     <button
                       onClick={() => setViewMode('list')}
-                      className={`px-2 py-1 rounded-full transition-all ${viewMode === 'list'
-                        ? 'bg-primary text-on-primary'
-                        : 'text-secondary hover:text-primary'
-                        }`}
+                      className={`px-2 py-1 rounded-full transition-all ${
+                        viewMode === 'list'
+                          ? 'bg-primary text-on-primary'
+                          : 'text-secondary hover:text-primary'
+                      }`}
                       title="Vista de lista"
                     >
                       <md-icon className="text-sm">view_list</md-icon>
                     </button>
                     <button
                       onClick={() => setViewMode('grid')}
-                      className={`px-2 py-1 rounded-full transition-all ${viewMode === 'grid'
-                        ? 'bg-primary text-on-primary'
-                        : 'text-secondary hover:text-primary'
-                        }`}
+                      className={`px-2 py-1 rounded-full transition-all ${
+                        viewMode === 'grid'
+                          ? 'bg-primary text-on-primary'
+                          : 'text-secondary hover:text-primary'
+                      }`}
                       title="Vista de tarjetas"
                     >
                       <md-icon className="text-sm">grid_view</md-icon>
@@ -624,11 +614,11 @@ const UsuariosPage = () => {
                         {selectedUsers.length} Seleccionados
                       </span>
                     ) : (
-                      <span className="text-sm text-secondary">
-                        {isLoading
-                          ? 'Cargando usuarios...'
-                          : `Mostrando ${startIndex + 1}-${Math.min(startIndex + (viewMode === 'grid' ? 8 : 4), totalItems)} de ${totalItems} usuarios`}
-                      </span>
+                      !isLoading && (
+                        <span className="text-sm text-secondary">
+                          {`Mostrando ${startIndex + 1}-${Math.min(startIndex + (viewMode === 'grid' ? 8 : 4), totalItems)} de ${totalItems} usuarios`}
+                        </span>
+                      )
                     )}
                   </div>
                 </div>
@@ -641,7 +631,6 @@ const UsuariosPage = () => {
 
               <div className="mt-3">
                 {viewMode === 'list' ? (
-                  // Vista de lista (actual)
                   <>
                     {currentUsers.map((user, index) => (
                       <div
@@ -664,7 +653,9 @@ const UsuariosPage = () => {
                                   }}
                                 >
                                   <md-checkbox
-                                    checked={selectedUsers.includes(user.idUsuario)}
+                                    checked={selectedUsers.includes(
+                                      user.idUsuario
+                                    )}
                                     onChange={e => {
                                       e.stopPropagation();
                                       handleSelectUser(user.idUsuario);
@@ -709,51 +700,79 @@ const UsuariosPage = () => {
                                   {user.rol?.nombreRol || 'Sin rol'}
                                 </button>
 
-                                {/* Información específica para conductores */}
-                                {user.rol?.nombreRol?.toLowerCase() === 'conductor' && (() => {
-                                  const conductor = getConductorByUserId(user.idUsuario);
-                                  const informacionIncompleta = isInformacionIncompleta(conductor);
-                                  const licenciaVencida = conductor && !informacionIncompleta && isLicenciaVencida(conductor.fechaVencimientoLicencia);
-                                  const licenciaProximaAVencer = conductor && !informacionIncompleta && isLicenciaProximaAVencer(conductor.fechaVencimientoLicencia);
+                                {user.rol?.nombreRol?.toLowerCase() ===
+                                  'conductor' &&
+                                  (() => {
+                                    const conductor = getConductorByUserId(
+                                      user.idUsuario
+                                    );
+                                    const informacionIncompleta =
+                                      isInformacionIncompleta(conductor);
+                                    const licenciaVencida =
+                                      conductor &&
+                                      !informacionIncompleta &&
+                                      isLicenciaVencida(
+                                        conductor.fechaVencimientoLicencia
+                                      );
+                                    const licenciaProximaAVencer =
+                                      conductor &&
+                                      !informacionIncompleta &&
+                                      isLicenciaProximaAVencer(
+                                        conductor.fechaVencimientoLicencia
+                                      );
 
-                                  return (
-                                    <>
-                                      {conductor?.categoriaLicencia?.nombreCategoria && (
-                                        <button className="btn btn-outline btn-lg font-medium flex items-center">
-                                          <md-icon className="text-sm">badge</md-icon>
-                                          {conductor.categoriaLicencia.nombreCategoria}
-                                        </button>
-                                      )}
+                                    return (
+                                      <>
+                                        {conductor?.categoriaLicencia
+                                          ?.nombreCategoria && (
+                                          <button className="btn btn-outline btn-lg font-medium flex items-center">
+                                            <md-icon className="text-sm">
+                                              badge
+                                            </md-icon>
+                                            {
+                                              conductor.categoriaLicencia
+                                                .nombreCategoria
+                                            }
+                                          </button>
+                                        )}
 
-                                      {informacionIncompleta && (
-                                        <button className="btn btn-lg font-medium flex items-center btn-red">
-                                          <md-icon className="text-sm">warning</md-icon>
-                                          <span>Información Incompleta</span>
-                                        </button>
-                                      )}
+                                        {informacionIncompleta && (
+                                          <button className="btn btn-lg font-medium flex items-center btn-red">
+                                            <md-icon className="text-sm">
+                                              warning
+                                            </md-icon>
+                                            <span>Información Incompleta</span>
+                                          </button>
+                                        )}
 
-                                      {!informacionIncompleta && licenciaVencida && (
-                                        <button className="btn btn-lg font-medium flex items-center bg-red-100 text-red-700 border border-red-300">
-                                          <md-icon className="text-sm">error</md-icon>
-                                          <span>Licencia Vencida</span>
-                                        </button>
-                                      )}
+                                        {!informacionIncompleta &&
+                                          licenciaVencida && (
+                                            <button className="btn btn-lg font-medium flex items-center bg-red-100 text-red-700 border border-red-300">
+                                              <md-icon className="text-sm">
+                                                error
+                                              </md-icon>
+                                              <span>Licencia Vencida</span>
+                                            </button>
+                                          )}
 
-                                      {!informacionIncompleta && licenciaProximaAVencer && (
-                                        <button className="btn btn-lg font-medium flex items-center btn-yellow">
-                                          <md-icon className="text-sm">warning</md-icon>
-                                          <span>Próxima a Vencer</span>
-                                        </button>
-                                      )}
-                                    </>
-                                  );
-                                })()}
+                                        {!informacionIncompleta &&
+                                          licenciaProximaAVencer && (
+                                            <button className="btn btn-lg font-medium flex items-center btn-yellow">
+                                              <md-icon className="text-sm">
+                                                warning
+                                              </md-icon>
+                                              <span>Próxima a Vencer</span>
+                                            </button>
+                                          )}
+                                      </>
+                                    );
+                                  })()}
                               </div>
                             </div>
                           </div>
                           <div className="flex gap-2 items-center">
                             {user.rol?.nombreRol?.toLowerCase() ===
-                              'administrador' ? (
+                            'administrador' ? (
                               <div
                                 className="btn btn-secondary btn-lg font-medium flex items-center gap-1 opacity-50 btn-disabled"
                                 title="No se puede deshabilitar un administrador"
@@ -784,7 +803,7 @@ const UsuariosPage = () => {
                             </button>
 
                             {user.rol?.nombreRol?.toLowerCase() ===
-                              'administrador' ? (
+                            'administrador' ? (
                               <div
                                 className="btn btn-secondary btn-lg font-medium flex items-center gap-1 opacity-50 btn-disabled"
                                 title="No se puede eliminar un administrador"
@@ -808,50 +827,67 @@ const UsuariosPage = () => {
                     ))}
                   </>
                 ) : (
-                  // Vista de grid (tarjetas) - 4 columnas (2 filas x 4 = 8 cards por página)
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pb-[17px]">
                     {currentUsers.map((user, index) => {
-                      const isConductor = user.rol?.nombreRol?.toLowerCase() === 'conductor';
-                      const conductor = isConductor ? getConductorByUserId(user.idUsuario) : null;
-                      const informacionIncompleta = isConductor ? isInformacionIncompleta(conductor) : false;
-                      const licenciaVencida = conductor && !informacionIncompleta && isLicenciaVencida(conductor.fechaVencimientoLicencia);
-                      const licenciaProximaAVencer = conductor && !informacionIncompleta && isLicenciaProximaAVencer(conductor.fechaVencimientoLicencia);
+                      const isConductor =
+                        user.rol?.nombreRol?.toLowerCase() === 'conductor';
+                      const conductor = isConductor
+                        ? getConductorByUserId(user.idUsuario)
+                        : null;
+                      const informacionIncompleta = isConductor
+                        ? isInformacionIncompleta(conductor)
+                        : false;
+                      const licenciaVencida =
+                        conductor &&
+                        !informacionIncompleta &&
+                        isLicenciaVencida(conductor.fechaVencimientoLicencia);
+                      const licenciaProximaAVencer =
+                        conductor &&
+                        !informacionIncompleta &&
+                        isLicenciaProximaAVencer(
+                          conductor.fechaVencimientoLicencia
+                        );
 
                       return (
                         <div
                           key={user.idUsuario}
-                          className={`content-box-outline-4-small relative group ${!user.estado ? 'opacity-60' : ''
-                            } hover:shadow-lg transition-all duration-200 hover:-translate-y-1`}
+                          className={`content-box-outline-4-small relative group ${
+                            !user.estado ? 'opacity-60' : ''
+                          } hover:shadow-lg transition-all duration-200 hover:-translate-y-1`}
                         >
-                          {isSelectionMode && user.rol?.nombreRol !== 'Administrador' && (
-                            <div
-                              className="absolute top-3 left-3 z-10"
-                              style={{
-                                animation: 'checkboxAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                                transformOrigin: 'center',
-                              }}
-                            >
-                              <md-checkbox
-                                checked={selectedUsers.includes(user.idUsuario)}
-                                onChange={e => {
-                                  e.stopPropagation();
-                                  handleSelectUser(user.idUsuario);
+                          {isSelectionMode &&
+                            user.rol?.nombreRol !== 'Administrador' && (
+                              <div
+                                className="absolute top-3 left-3 z-10"
+                                style={{
+                                  animation:
+                                    'checkboxAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                  transformOrigin: 'center',
                                 }}
-                                onClick={e => e.stopPropagation()}
-                                touch-target="wrapper"
-                              />
-                            </div>
-                          )}
+                              >
+                                <md-checkbox
+                                  checked={selectedUsers.includes(
+                                    user.idUsuario
+                                  )}
+                                  onChange={e => {
+                                    e.stopPropagation();
+                                    handleSelectUser(user.idUsuario);
+                                  }}
+                                  onClick={e => e.stopPropagation()}
+                                  touch-target="wrapper"
+                                />
+                              </div>
+                            )}
 
                           <div className="flex flex-col h-full">
-                            {/* Área clickeable para abrir perfil - excluye botones */}
                             <div
                               className="flex items-start justify-between gap-2 pb-3 cursor-pointer flex-1"
                               onClick={e => {
-                                // Solo abrir perfil si no se clickeó en un botón o checkbox
-                                if (!e.target.closest('button') &&
+                                if (
+                                  !e.target.closest('button') &&
                                   !e.target.closest('md-checkbox') &&
-                                  !e.target.closest('.action-buttons')) {
+                                  !e.target.closest('.action-buttons')
+                                ) {
                                   handleOpenProfile(user);
                                 }
                               }}
@@ -877,13 +913,16 @@ const UsuariosPage = () => {
                                     {user.nombre}
                                   </h3>
                                   <div className="flex items-center gap-1 text-body2">
-                                    <span className="text-secondary truncate text-xs">{user.correo}</span>
+                                    <span className="text-secondary truncate text-xs">
+                                      {user.correo}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
                               <span
-                                className={`btn font-medium btn-sm flex items-center shrink-0 ${user.estado ? 'btn-green' : 'btn-red'
-                                  }`}
+                                className={`btn font-medium btn-sm flex items-center shrink-0 ${
+                                  user.estado ? 'btn-green' : 'btn-red'
+                                }`}
                               >
                                 {user.estado ? 'Activo' : 'Inactivo'}
                               </span>
@@ -892,19 +931,25 @@ const UsuariosPage = () => {
                             <div
                               className="flex-1 space-y-2 mb-3 cursor-pointer"
                               onClick={e => {
-                                if (!e.target.closest('button') &&
+                                if (
+                                  !e.target.closest('button') &&
                                   !e.target.closest('md-checkbox') &&
-                                  !e.target.closest('.action-buttons')) {
+                                  !e.target.closest('.action-buttons')
+                                ) {
                                   handleOpenProfile(user);
                                 }
                               }}
                             >
                               <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center shrink-0">
-                                  <md-icon className="text-base text-primary">badge</md-icon>
+                                  <md-icon className="text-base text-primary">
+                                    badge
+                                  </md-icon>
                                 </div>
                                 <div className="flex flex-col min-w-0 flex-1">
-                                  <span className="text-xs text-secondary">Documento</span>
+                                  <span className="text-xs text-secondary">
+                                    Documento
+                                  </span>
                                   <span className="text-sm font-semibold text-primary truncate">
                                     {user.numDocumento}
                                   </span>
@@ -913,50 +958,67 @@ const UsuariosPage = () => {
 
                               <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center shrink-0">
-                                  <md-icon className="text-base text-primary">person</md-icon>
+                                  <md-icon className="text-base text-primary">
+                                    person
+                                  </md-icon>
                                 </div>
                                 <div className="flex flex-col min-w-0 flex-1">
-                                  <span className="text-xs text-secondary">Rol</span>
+                                  <span className="text-xs text-secondary">
+                                    Rol
+                                  </span>
                                   <span className="text-sm font-semibold text-primary truncate">
                                     {user.rol?.nombreRol || 'Sin rol'}
                                   </span>
                                 </div>
                               </div>
 
-                              {/* Información de conductor */}
                               {isConductor && conductor && (
                                 <div className="flex flex-wrap gap-1 mt-2">
-                                  {conductor?.categoriaLicencia?.nombreCategoria && (
+                                  {conductor?.categoriaLicencia
+                                    ?.nombreCategoria && (
                                     <span className="btn btn-outline btn-sm font-medium flex items-center text-xs px-2 py-1">
-                                      <md-icon className="text-xs">drive_eta</md-icon>
-                                      {conductor.categoriaLicencia.nombreCategoria}
+                                      <md-icon className="text-xs">
+                                        drive_eta
+                                      </md-icon>
+                                      {
+                                        conductor.categoriaLicencia
+                                          .nombreCategoria
+                                      }
                                     </span>
                                   )}
                                   {informacionIncompleta && (
                                     <span className="btn btn-sm font-medium flex items-center btn-red text-xs px-2 py-1">
-                                      <md-icon className="text-xs">warning</md-icon>
+                                      <md-icon className="text-xs">
+                                        warning
+                                      </md-icon>
                                       Incompleto
                                     </span>
                                   )}
-                                  {!informacionIncompleta && licenciaVencida && (
-                                    <span className="btn btn-sm font-medium flex items-center bg-red-100 text-red-700 border border-red-300 text-xs px-2 py-1">
-                                      <md-icon className="text-xs">error</md-icon>
-                                      Vencida
-                                    </span>
-                                  )}
-                                  {!informacionIncompleta && licenciaProximaAVencer && (
-                                    <span className="btn btn-sm font-medium flex items-center btn-yellow text-xs px-2 py-1">
-                                      <md-icon className="text-xs">warning</md-icon>
-                                      Próx. Vencer
-                                    </span>
-                                  )}
+                                  {!informacionIncompleta &&
+                                    licenciaVencida && (
+                                      <span className="btn btn-sm font-medium flex items-center bg-red-100 text-red-700 border border-red-300 text-xs px-2 py-1">
+                                        <md-icon className="text-xs">
+                                          error
+                                        </md-icon>
+                                        Vencida
+                                      </span>
+                                    )}
+                                  {!informacionIncompleta &&
+                                    licenciaProximaAVencer && (
+                                      <span className="btn btn-sm font-medium flex items-center btn-yellow text-xs px-2 py-1">
+                                        <md-icon className="text-xs">
+                                          warning
+                                        </md-icon>
+                                        Próx. Vencer
+                                      </span>
+                                    )}
                                 </div>
                               )}
                             </div>
 
-                            {/* Botones de acción - no clickeables para abrir perfil */}
                             <div className="flex gap-2 mt-auto action-buttons">
-                              {user.rol?.nombreRol?.toLowerCase() === 'administrador' ? (
+                              {user.rol?.nombreRol?.toLowerCase() ===
+                              'administrador' ? (
                                 <div
                                   className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 flex-1 opacity-50 btn-disabled justify-center"
                                   title="No se puede deshabilitar un administrador"
@@ -965,13 +1027,20 @@ const UsuariosPage = () => {
                                 </div>
                               ) : (
                                 <button
-                                  className={`btn btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95 ${user.estado ? 'btn-outline' : 'btn-secondary'
-                                    }`}
+                                  className={`btn btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95 ${
+                                    user.estado
+                                      ? 'btn-outline'
+                                      : 'btn-secondary'
+                                  }`}
                                   onClick={e => {
                                     e.stopPropagation();
                                     handleSwitchClick(user);
                                   }}
-                                  title={user.estado ? 'Deshabilitar usuario' : 'Habilitar usuario'}
+                                  title={
+                                    user.estado
+                                      ? 'Deshabilitar usuario'
+                                      : 'Habilitar usuario'
+                                  }
                                 >
                                   <md-icon className="text-sm">
                                     {user.estado ? 'block' : 'check'}
@@ -990,7 +1059,8 @@ const UsuariosPage = () => {
                                 <md-icon className="text-sm">edit</md-icon>
                               </button>
 
-                              {user.rol?.nombreRol?.toLowerCase() === 'administrador' ? (
+                              {user.rol?.nombreRol?.toLowerCase() ===
+                              'administrador' ? (
                                 <div
                                   className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 flex-1 opacity-50 btn-disabled justify-center"
                                   title="No se puede eliminar un administrador"
@@ -1017,23 +1087,41 @@ const UsuariosPage = () => {
                   </div>
                 )}
 
-                {currentUsers.length === 0 && (
+                {isLoading ? (
                   <div
                     className="flex items-center justify-center w-full list-enter text-center content-box-outline-2-small"
                     style={{ height: 'calc(60vh - 0px)' }}
                   >
                     <div
-                      className="flex flex-col items-center justify-center"
-                      style={{ width: '340px' }}
+                      className="flex flex-col items-center gap-3"
+                      style={{ width: '200px' }}
                     >
                       <md-icon className="text-secondary mb-4">group</md-icon>
-                      <p className="text-secondary">
-                        {searchTerm || statusFilter !== 'Todos'
-                          ? 'No se encontraron usuarios que coincidan con los filtros'
-                          : 'No hay usuarios registrados'}
-                      </p>
+                      <span className="text-secondary">
+                        Cargando usuarios...
+                      </span>
+                      <md-linear-progress indeterminate></md-linear-progress>
                     </div>
                   </div>
+                ) : (
+                  currentUsers.length === 0 && (
+                    <div
+                      className="flex items-center justify-center w-full list-enter text-center content-box-outline-2-small"
+                      style={{ height: 'calc(60vh - 0px)' }}
+                    >
+                      <div
+                        className="flex flex-col items-center justify-center"
+                        style={{ width: '340px' }}
+                      >
+                        <md-icon className="text-secondary mb-4">group</md-icon>
+                        <p className="text-secondary">
+                          {searchTerm || statusFilter !== 'Todos'
+                            ? 'No se encontraron usuarios que coincidan con los filtros'
+                            : 'No hay usuarios registrados'}
+                        </p>
+                      </div>
+                    </div>
+                  )
                 )}
               </div>
             </div>
@@ -1050,7 +1138,7 @@ const UsuariosPage = () => {
               onClose={() => setIsAddModalOpen(false)}
               onConfirm={async () => {
                 await fetchUsers();
-                // Recargar conductores también
+
                 try {
                   const response = await conductorService.getConductores();
                   setConductores(response.data || response || []);

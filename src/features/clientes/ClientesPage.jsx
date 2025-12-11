@@ -170,7 +170,6 @@ const ClientesPage = () => {
       await userService.deleteUser(clienteToDelete.idUsuario);
       await fetchClientes();
     } catch (err) {
-      
       alert('Error al eliminar el cliente: ' + (err?.message || ''));
     } finally {
       setIsDeleteModalOpen(false);
@@ -265,7 +264,6 @@ const ClientesPage = () => {
         await userService.deleteUser(clienteId);
         return { success: true, id: clienteId };
       } catch (err) {
-        
         return { success: false, id: clienteId, error: err };
       }
     });
@@ -483,50 +481,54 @@ const ClientesPage = () => {
                 )}
               </div>
 
-              <div className="flex justify-between items-center mt-6 mb-4">
-                <div className="flex items-center gap-3">
-                  {selectedClientes.length > 0 ? (
-                    <>
+              <div className="flex justify-between items-center mt-4 mb-4">
+                <div className="flex gap-3">
+                  <div className="flex gap-1 bg-fill border border-border rounded-full p-1">
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`px-2 py-1 rounded-full transition-all ${
+                        viewMode === 'list'
+                          ? 'bg-primary text-on-primary'
+                          : 'text-secondary hover:text-primary'
+                      }`}
+                      title="Vista de lista"
+                    >
+                      <md-icon className="text-sm">view_list</md-icon>
+                    </button>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`px-2 py-1 rounded-full transition-all ${
+                        viewMode === 'grid'
+                          ? 'bg-primary text-on-primary'
+                          : 'text-secondary hover:text-primary'
+                      }`}
+                      title="Vista de tarjetas"
+                    >
+                      <md-icon className="text-sm">grid_view</md-icon>
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {selectedClientes.length > 0 ? (
                       <span className="text-sm text-secondary">
                         {selectedClientes.length} Seleccionados
                       </span>
-                    </>
-                  ) : (
-                    <span className="text-sm text-secondary">
-                      Mostrando {totalItems > 0 ? startIndex + 1 : 0}-
-                      {Math.min(startIndex + (viewMode === 'grid' ? 8 : 4), totalItems)} de {totalItems}{' '}
-                      clientes
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {showPagination && (
-                    <span className="text-xs text-secondary">
-                      Página {currentPage} de {totalPages}
-                    </span>
-                  )}
-
-                  <div className="flex bg-fill rounded-lg p-1 border border-border ml-2">
-                    <button
-                      className={`p-1 rounded-md transition-all ${viewMode === 'list'
-                          ? 'bg-background text-primary shadow-sm'
-                          : 'text-secondary hover:text-primary'
-                        }`}
-                      onClick={() => setViewMode('list')}
-                    >
-                      <md-icon className="text-xl">view_list</md-icon>
-                    </button>
-                    <button
-                      className={`p-1 rounded-md transition-all ${viewMode === 'grid'
-                          ? 'bg-background text-primary shadow-sm'
-                          : 'text-secondary hover:text-primary'
-                        }`}
-                      onClick={() => setViewMode('grid')}
-                    >
-                      <md-icon className="text-xl">grid_view</md-icon>
-                    </button>
+                    ) : (
+                      <span className="text-sm text-secondary">
+                        Mostrando {totalItems > 0 ? startIndex + 1 : 0}-
+                        {Math.min(
+                          startIndex + (viewMode === 'grid' ? 8 : 4),
+                          totalItems
+                        )}{' '}
+                        de {totalItems} clientes
+                      </span>
+                    )}
                   </div>
                 </div>
+                {showPagination && (
+                  <span className="text-xs text-secondary">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                )}
               </div>
 
               <div className="mt-3">
@@ -565,13 +567,21 @@ const ClientesPage = () => {
                 ) : (
                   !loading &&
                   !error && (
-                    <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
+                    <div
+                      className={
+                        viewMode === 'grid'
+                          ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+                          : 'flex flex-col gap-3'
+                      }
+                    >
                       {currentClients.map((client, index) => (
                         <div
                           key={index}
-                          className={`content-box-outline-4-small ${client.status === 'Inactivo' ? 'opacity-60' : ''} cursor-pointer hover:shadow-md transition-shadow relative`}
+                          className={`content-box-outline-4-small ${
+                            client.status === 'Inactivo' ? 'opacity-60' : ''
+                          } cursor-pointer hover:shadow-md transition-shadow relative mb-3`}
                           onClick={e => {
-                            if (e.target.closest('md-switch')) return;
+                            if (e.target.closest('button')) return;
                             handleOpenProfile(client);
                           }}
                         >
@@ -600,25 +610,25 @@ const ClientesPage = () => {
 
                           {viewMode === 'grid' ? (
                             <div className="flex flex-col h-full">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-3">
-                                  <div className="flex items-center justify-center w-10 h-10">
+                              <div className="flex items-start justify-between gap-2 mb-3">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <div className="flex items-center justify-center w-16 h-16 shrink-0">
                                     {client?.foto ? (
                                       <img
                                         src={resolveAssetUrl(client.foto)}
                                         alt="Foto cliente"
-                                        className="rounded-lg w-10 h-10 object-cover shadow-sm"
+                                        className="rounded-lg w-16 h-16 object-cover shadow-sm"
                                       />
                                     ) : (
                                       <Avvvatars
                                         value={client?.name || 'Cliente'}
-                                        size={40}
-                                        radius={8}
+                                        size={64}
+                                        radius={10}
                                       />
                                     )}
                                   </div>
                                   <div className="flex flex-col min-w-0">
-                                    <h3 className="text-sm font-bold text-primary truncate max-w-[120px]">
+                                    <h3 className="text-h5 font-bold text-primary truncate max-w-[120px]">
                                       {client.name}
                                     </h3>
                                     <span className="text-xs text-secondary truncate max-w-[120px]">
@@ -627,7 +637,7 @@ const ClientesPage = () => {
                                   </div>
                                 </div>
                                 <span
-                                  className={`btn font-medium btn-xs flex items-center ${client.status === 'Activo' ? 'btn-green' : 'btn-red'}`}
+                                  className={`btn font-medium btn-sm flex items-center shrink-0 ${client.status === 'Activo' ? 'btn-green' : 'btn-red'}`}
                                 >
                                   {client.status}
                                 </span>
@@ -636,10 +646,14 @@ const ClientesPage = () => {
                               <div className="flex-1 space-y-2 mb-4">
                                 <div className="flex items-center gap-2">
                                   <div className="w-7 h-7 rounded-lg bg-fill flex items-center justify-center">
-                                    <md-icon className="text-sm text-primary">badge</md-icon>
+                                    <md-icon className="text-sm text-primary">
+                                      badge
+                                    </md-icon>
                                   </div>
                                   <div className="flex flex-col min-w-0">
-                                    <span className="text-[10px] text-secondary">Documento</span>
+                                    <span className="text-[10px] text-secondary">
+                                      Documento
+                                    </span>
                                     <span className="text-xs font-semibold text-primary truncate">
                                       {client.document || 'N/A'}
                                     </span>
@@ -647,10 +661,14 @@ const ClientesPage = () => {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <div className="w-7 h-7 rounded-lg bg-fill flex items-center justify-center">
-                                    <md-icon className="text-sm text-primary">location_on</md-icon>
+                                    <md-icon className="text-sm text-primary">
+                                      location_on
+                                    </md-icon>
                                   </div>
                                   <div className="flex flex-col min-w-0">
-                                    <span className="text-[10px] text-secondary">Ciudad</span>
+                                    <span className="text-[10px] text-secondary">
+                                      Ciudad
+                                    </span>
                                     <span className="text-xs font-semibold text-primary truncate">
                                       {client.city || 'Sin ciudad'}
                                     </span>
@@ -668,13 +686,17 @@ const ClientesPage = () => {
                                     }}
                                   >
                                     <md-icon className="text-sm">
-                                      {client.status === 'Activo' ? 'block' : 'check'}
+                                      {client.status === 'Activo'
+                                        ? 'block'
+                                        : 'check'}
                                     </md-icon>
                                   </button>
                                   <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
                                     <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
                                       <p className="text-xs text-primary">
-                                        {client.status === 'Activo' ? 'Deshabilitar' : 'Habilitar'}
+                                        {client.status === 'Activo'
+                                          ? 'Deshabilitar'
+                                          : 'Habilitar'}
                                       </p>
                                     </div>
                                   </div>
@@ -693,7 +715,9 @@ const ClientesPage = () => {
                                   </button>
                                   <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
                                     <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                      <p className="text-xs text-primary">Editar</p>
+                                      <p className="text-xs text-primary">
+                                        Editar
+                                      </p>
                                     </div>
                                   </div>
                                 </div>
@@ -706,11 +730,15 @@ const ClientesPage = () => {
                                       handleDeleteClick(client);
                                     }}
                                   >
-                                    <md-icon className="text-sm">delete</md-icon>
+                                    <md-icon className="text-sm">
+                                      delete
+                                    </md-icon>
                                   </button>
                                   <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
                                     <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                      <p className="text-xs text-primary">Eliminar</p>
+                                      <p className="text-xs text-primary">
+                                        Eliminar
+                                      </p>
                                     </div>
                                   </div>
                                 </div>
@@ -736,7 +764,9 @@ const ClientesPage = () => {
                                 </div>
                                 <div className="flex-1">
                                   <div className="leading-tight">
-                                    <h1 className="h4 font-bold">{client.name}</h1>
+                                    <h1 className="h4 font-bold">
+                                      {client.name}
+                                    </h1>
                                     <div className="flex gap-2 text-secondary">
                                       <span>{client.email}</span>
                                       <span>|</span>
@@ -771,16 +801,6 @@ const ClientesPage = () => {
                                     : 'Habilitar'}
                                 </button>
                                 <button
-                                  className="btn btn-secondary btn-lg font-medium flex items-center"
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    handleDeleteClick(client);
-                                  }}
-                                >
-                                  <md-icon className="text-sm">delete</md-icon>
-                                </button>
-
-                                <button
                                   className="btn btn-primary btn-lg font-medium flex items-center"
                                   onClick={e => {
                                     e.stopPropagation();
@@ -790,6 +810,15 @@ const ClientesPage = () => {
                                 >
                                   <md-icon className="text-sm">edit</md-icon>
                                   Editar
+                                </button>
+                                <button
+                                  className="btn btn-secondary btn-lg font-medium flex items-center"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleDeleteClick(client);
+                                  }}
+                                >
+                                  <md-icon className="text-sm">delete</md-icon>
                                 </button>
                               </div>
                             </div>

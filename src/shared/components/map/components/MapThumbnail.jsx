@@ -25,7 +25,7 @@ const MapThumbnail = memo(({ ubicacion, onClick, className = '' }) => {
     import.meta.env.VITE_MAPBOX_TOKEN ||
     'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
 
-  const staticMapUrl = `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s+B4C7ED(${lng},${lat})/${lng},${lat},${zoom},0/${width}x${height}@2x?access_token=${mapboxToken}`;
+  const staticMapUrl = `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/${lng},${lat},${zoom},0/${width}x${height}?access_token=${mapboxToken}`;
 
   return (
     <div

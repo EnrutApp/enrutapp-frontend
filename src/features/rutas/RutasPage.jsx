@@ -1,6 +1,7 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/checkbox/checkbox.js';
+import '@material/web/progress/linear-progress.js';
 import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
 import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
 import Pagination from '../../shared/components/pagination/Pagination';
@@ -71,8 +72,8 @@ const RutasPage = () => {
     } catch (error) {
       setError(
         error?.message ||
-        error?.response?.data?.message ||
-        'Error al cargar rutas'
+          error?.response?.data?.message ||
+          'Error al cargar rutas'
       );
       setRutas([]);
     } finally {
@@ -101,7 +102,6 @@ const RutasPage = () => {
       setSelectedRuta(rutaCompleta?.data || rutaCompleta || ruta);
       setIsProfileOpen(true);
     } catch (error) {
-
       setSelectedRuta(ruta);
       setIsProfileOpen(true);
     }
@@ -123,9 +123,7 @@ const RutasPage = () => {
       setIsDeleteModalOpen(false);
       setRutaToDelete(null);
       fetchRutas();
-    } catch (error) {
-
-    }
+    } catch (error) {}
   };
 
   const handleToggleEstado = (ruta, e) => {
@@ -145,7 +143,6 @@ const RutasPage = () => {
       setRutaToSwitch(null);
       fetchRutas();
     } catch (error) {
-
       setIsSwitchModalOpen(false);
       setRutaToSwitch(null);
     }
@@ -200,7 +197,6 @@ const RutasPage = () => {
         await apiClient.delete(`/rutas/${rutaId}`);
         return { success: true, id: rutaId };
       } catch (err) {
-
         return { success: false, id: rutaId, error: err };
       }
     });
@@ -473,54 +469,74 @@ const RutasPage = () => {
                 )}
               </div>
 
-              <div className="flex justify-between items-center mt-6 mb-4">
-                <div className="flex items-center gap-3">
-                  {selectedRutas.length > 0 ? (
-                    <>
+              <div className="flex justify-between items-center mt-4 mb-4">
+                <div className="flex gap-3">
+                  <div className="flex gap-1 bg-fill border border-border rounded-full p-1">
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`px-2 py-1 rounded-full transition-all ${
+                        viewMode === 'list'
+                          ? 'bg-primary text-on-primary'
+                          : 'text-secondary hover:text-primary'
+                      }`}
+                      title="Vista de lista"
+                    >
+                      <md-icon className="text-sm">view_list</md-icon>
+                    </button>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`px-2 py-1 rounded-full transition-all ${
+                        viewMode === 'grid'
+                          ? 'bg-primary text-on-primary'
+                          : 'text-secondary hover:text-primary'
+                      }`}
+                      title="Vista de tarjetas"
+                    >
+                      <md-icon className="text-sm">grid_view</md-icon>
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {selectedRutas.length > 0 ? (
                       <span className="text-sm text-secondary">
                         {selectedRutas.length} Seleccionados
                       </span>
-                    </>
-                  ) : (
-                    <span className="text-sm text-secondary">
-                      {loading
-                        ? 'Cargando rutas...'
-                        : `Mostrando ${totalItems > 0 ? startIndex + 1 : 0}-${Math.min(startIndex + (viewMode === 'grid' ? 8 : 4), totalItems)} de ${totalItems} rutas`}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {showPagination && (
-                    <span className="text-xs text-secondary">
-                      Página {currentPage} de {totalPages}
-                    </span>
-                  )}
-
-                  <div className="flex bg-fill rounded-lg p-1 border border-border ml-2">
-                    <button
-                      className={`p-1 rounded-md transition-all ${viewMode === 'list'
-                          ? 'bg-background text-primary shadow-sm'
-                          : 'text-secondary hover:text-primary'
-                        }`}
-                      onClick={() => setViewMode('list')}
-                    >
-                      <md-icon className="text-xl">view_list</md-icon>
-                    </button>
-                    <button
-                      className={`p-1 rounded-md transition-all ${viewMode === 'grid'
-                          ? 'bg-background text-primary shadow-sm'
-                          : 'text-secondary hover:text-primary'
-                        }`}
-                      onClick={() => setViewMode('grid')}
-                    >
-                      <md-icon className="text-xl">grid_view</md-icon>
-                    </button>
+                    ) : (
+                      !loading && (
+                        <span className="text-sm text-secondary">
+                          {`Mostrando ${
+                            totalItems > 0 ? startIndex + 1 : 0
+                          }-${Math.min(
+                            startIndex + (viewMode === 'grid' ? 8 : 4),
+                            totalItems
+                          )} de ${totalItems} rutas`}
+                        </span>
+                      )
+                    )}
                   </div>
                 </div>
+                {showPagination && (
+                  <span className="text-xs text-secondary">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                )}
               </div>
 
               <div className="mt-3">
-                {currentRutas.length === 0 ? (
+                {loading ? (
+                  <div
+                    className="flex items-center justify-center w-full list-enter text-center content-box-outline-2-small"
+                    style={{ height: 'calc(60vh - 0px)' }}
+                  >
+                    <div
+                      className="flex flex-col items-center gap-3"
+                      style={{ width: '200px' }}
+                    >
+                      <md-icon className="text-secondary mb-4">route</md-icon>
+                      <span className="text-secondary">Cargando rutas...</span>
+                      <md-linear-progress indeterminate></md-linear-progress>
+                    </div>
+                  </div>
+                ) : currentRutas.length === 0 ? (
                   <div
                     className="flex items-center justify-center w-full list-enter text-center content-box-outline-2-small"
                     style={{ height: 'calc(60vh - 0px)' }}
@@ -538,7 +554,13 @@ const RutasPage = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
+                  <div
+                    className={
+                      viewMode === 'grid'
+                        ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+                        : 'flex flex-col gap-3'
+                    }
+                  >
                     {currentRutas.map((ruta, index) => (
                       <div
                         key={ruta.idRuta || index}
@@ -567,122 +589,150 @@ const RutasPage = () => {
                         )}
 
                         {viewMode === 'grid' ? (
-                          <div className="flex flex-col gap-3">
-                            <div className="relative w-full h-40 rounded-xl overflow-hidden bg-surface border border-border flex items-center justify-center">
-                              <md-icon style={{ fontSize: '48px' }} className="text-secondary">map</md-icon>
-                            </div>
-
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-start justify-between gap-2 pb-3">
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="text-h5 font-bold text-primary truncate mb-1">
-                                    {ruta.origen?.ubicacion?.nombreUbicacion || 'Sin origen'}
-                                  </h3>
-                                  <div className="flex items-center gap-2 text-body2">
-                                    <md-icon className="text-xs text-secondary">arrow_forward</md-icon>
-                                    <span className="text-secondary truncate">
-                                      {ruta.destino?.ubicacion?.nombreUbicacion || 'Sin destino'}
-                                    </span>
-                                  </div>
-                                </div>
-                                <span
-                                  className={`btn font-medium btn-sm flex items-center ${ruta.estado === 'Activa' ? 'btn-green' : 'btn-red'
-                                    }`}
-                                >
-                                  {ruta.estado}
-                                </span>
-                              </div>
-
-                              <div className="flex-1 space-y-2 mb-3">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center">
-                                    <md-icon className="text-base text-primary">attach_money</md-icon>
-                                  </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="text-xs text-secondary">Precio Base</span>
-                                    <span className="text-sm font-semibold text-primary truncate">
-                                      ${Number(ruta.precioBase)?.toLocaleString('es-CO') || '0'}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center">
-                                    <md-icon className="text-base text-primary">place</md-icon>
-                                  </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="text-xs text-secondary">Paradas</span>
-                                    <span className="text-sm font-semibold text-primary">
-                                      {ruta.paradas?.length || 0}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex gap-2">
-                              <div className="relative group flex-1">
-                                <button
-                                  className={`btn btn-sm-2 font-medium flex items-center gap-1 w-full justify-center ${ruta.estado === 'Activa' ? 'btn-outline' : 'btn-secondary'
-                                    }`}
-                                  onClick={e => handleToggleEstado(ruta, e)}
-                                >
-                                  <md-icon className="text-sm">
-                                    {ruta.estado === 'Activa' ? 'block' : 'check'}
+                          <div className="flex flex-col h-full">
+                            <div
+                              className="flex items-start justify-between gap-2 pb-3 cursor-pointer flex-1"
+                              onClick={e => {
+                                if (
+                                  !e.target.closest('button') &&
+                                  !e.target.closest('md-checkbox') &&
+                                  !e.target.closest('.action-buttons')
+                                ) {
+                                  handleOpenProfile(ruta);
+                                }
+                              }}
+                            >
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <div className="w-12 h-12 rounded-lg bg-surface flex items-center justify-center shadow-lg border border-border shrink-0">
+                                  <md-icon className="text-secondary">
+                                    route
                                   </md-icon>
-                                </button>
-                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                    <p className="text-xs text-primary">
-                                      {ruta.estado === 'Activa' ? 'Deshabilitar' : 'Habilitar'}
-                                    </p>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="text-h5 font-bold text-primary truncate group-hover:text-primary/80 transition-colors">
+                                    {ruta.origen?.ubicacion?.nombreUbicacion ||
+                                      'Sin origen'}
+                                  </h3>
+                                  <div className="flex items-center gap-1 text-body2">
+                                    <md-icon className="text-xs text-secondary">
+                                      arrow_forward
+                                    </md-icon>
+                                    <span className="text-secondary truncate text-xs">
+                                      {ruta.destino?.ubicacion
+                                        ?.nombreUbicacion || 'Sin destino'}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
+                              <span
+                                className={`btn font-medium btn-sm flex items-center shrink-0 ${
+                                  ruta.estado === 'Activa'
+                                    ? 'btn-green'
+                                    : 'btn-red'
+                                }`}
+                              >
+                                {ruta.estado}
+                              </span>
+                            </div>
 
-                              <div className="relative group flex-1">
-                                <button
-                                  className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
-                                  onClick={async e => {
-                                    e.stopPropagation();
-                                    try {
-                                      const rutaCompleta = await apiClient.get(
-                                        `/rutas/${ruta.idRuta}`
-                                      );
-                                      setRutaToEdit(
-                                        rutaCompleta?.data || rutaCompleta || ruta
-                                      );
-                                      setIsAddModalOpen(true);
-                                    } catch (error) {
-                                      setRutaToEdit(ruta);
-                                      setIsAddModalOpen(true);
-                                    }
-                                  }}
-                                >
-                                  <md-icon className="text-sm">edit</md-icon>
-                                </button>
-                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                    <p className="text-xs text-primary">Editar</p>
-                                  </div>
+                            <div
+                              className="flex-1 space-y-2 mb-3 cursor-pointer"
+                              onClick={e => {
+                                if (
+                                  !e.target.closest('button') &&
+                                  !e.target.closest('md-checkbox') &&
+                                  !e.target.closest('.action-buttons')
+                                ) {
+                                  handleOpenProfile(ruta);
+                                }
+                              }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center shrink-0">
+                                  <md-icon className="text-base text-primary">
+                                    attach_money
+                                  </md-icon>
+                                </div>
+                                <div className="flex flex-col min-w-0 flex-1">
+                                  <span className="text-xs text-secondary">
+                                    Precio Base
+                                  </span>
+                                  <span className="text-sm font-semibold text-primary truncate">
+                                    $
+                                    {Number(ruta.precioBase)?.toLocaleString(
+                                      'es-CO'
+                                    ) || '0'}
+                                  </span>
                                 </div>
                               </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center shrink-0">
+                                  <md-icon className="text-base text-primary">
+                                    place
+                                  </md-icon>
+                                </div>
+                                <div className="flex flex-col min-w-0 flex-1">
+                                  <span className="text-xs text-secondary">
+                                    Paradas
+                                  </span>
+                                  <span className="text-sm font-semibold text-primary truncate">
+                                    {ruta.paradas?.length || 0}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
 
-                              <div className="relative group flex-1">
-                                <button
-                                  className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    handleDeleteClick(ruta);
-                                  }}
-                                >
-                                  <md-icon className="text-sm">delete</md-icon>
-                                </button>
-                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                    <p className="text-xs text-primary">Eliminar</p>
-                                  </div>
-                                </div>
-                              </div>
+                            <div className="flex gap-2 mt-auto action-buttons">
+                              <button
+                                className={`btn btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95 ${
+                                  ruta.estado === 'Activa'
+                                    ? 'btn-outline'
+                                    : 'btn-secondary'
+                                }`}
+                                onClick={e => handleToggleEstado(ruta, e)}
+                                title={
+                                  ruta.estado === 'Activa'
+                                    ? 'Deshabilitar ruta'
+                                    : 'Habilitar ruta'
+                                }
+                              >
+                                <md-icon className="text-sm">
+                                  {ruta.estado === 'Activa' ? 'block' : 'check'}
+                                </md-icon>
+                              </button>
+
+                              <button
+                                className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95"
+                                onClick={async e => {
+                                  e.stopPropagation();
+                                  try {
+                                    const rutaCompleta = await apiClient.get(
+                                      `/rutas/${ruta.idRuta}`
+                                    );
+                                    setRutaToEdit(
+                                      rutaCompleta?.data || rutaCompleta || ruta
+                                    );
+                                    setIsAddModalOpen(true);
+                                  } catch (error) {
+                                    setRutaToEdit(ruta);
+                                    setIsAddModalOpen(true);
+                                  }
+                                }}
+                                title="Editar ruta"
+                              >
+                                <md-icon className="text-sm">edit</md-icon>
+                              </button>
+
+                              <button
+                                className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95 hover:bg-red-500/20 hover:text-red-500"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleDeleteClick(ruta);
+                                }}
+                                title="Eliminar ruta"
+                              >
+                                <md-icon className="text-sm">delete</md-icon>
+                              </button>
                             </div>
                           </div>
                         ) : (
@@ -701,7 +751,8 @@ const RutasPage = () => {
                                     <>
                                       {ruta.paradas
                                         .sort(
-                                          (a, b) => (a.orden || 0) - (b.orden || 0)
+                                          (a, b) =>
+                                            (a.orden || 0) - (b.orden || 0)
                                         )
                                         .slice(0, 2)
                                         .map((parada, index) => (
@@ -710,7 +761,8 @@ const RutasPage = () => {
                                             className="flex items-center gap-2 shrink-0"
                                           >
                                             <span className="h4 font-bold truncate max-w-[150px]">
-                                              {parada.ubicacion?.nombreUbicacion ||
+                                              {parada.ubicacion
+                                                ?.nombreUbicacion ||
                                                 'Sin nombre'}
                                             </span>
                                             <md-icon className="text-xl text-secondary">
@@ -738,11 +790,14 @@ const RutasPage = () => {
                                                   .slice(2)
                                                   .map((parada, index) => (
                                                     <div
-                                                      key={parada.idParada || index}
+                                                      key={
+                                                        parada.idParada || index
+                                                      }
                                                       className="flex items-center gap-2"
                                                     >
                                                       <span className="text-xs font-medium text-secondary bg-primary/20 px-2 py-1 rounded">
-                                                        {parada.orden || index + 3}
+                                                        {parada.orden ||
+                                                          index + 3}
                                                       </span>
                                                       <span className="text-xs text-primary">
                                                         {parada.ubicacion
@@ -860,7 +915,6 @@ const RutasPage = () => {
                 setRutaToEdit(rutaCompleta?.data || rutaCompleta || ruta);
                 setIsAddModalOpen(true);
               } catch (error) {
-
                 setRutaToEdit(ruta);
                 setIsAddModalOpen(true);
               }

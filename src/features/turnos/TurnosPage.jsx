@@ -1,5 +1,6 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
+import '@material/web/progress/linear-progress.js';
 import '@material/web/switch/switch.js';
 import '@material/web/checkbox/checkbox.js';
 import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
@@ -10,8 +11,10 @@ import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import TurnosProfile from './pages/TurnosProfile';
 import { useState, useEffect } from 'react';
+import Avvvatars from 'avvvatars-react';
+import resolveAssetUrl from '../../shared/utils/url';
+import { turnoService } from './api/turnoService';
 
-// Estilos para animación de checkbox
 const styles = `
   @keyframes checkboxAppear {
     0% {
@@ -40,6 +43,8 @@ const styles = `
 `;
 
 const TurnosPage = () => {
+  const [allTurnos, setAllTurnos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedTurno, setSelectedTurno] = useState(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -49,6 +54,11 @@ const TurnosPage = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [turnoToEdit, setTurnoToEdit] = useState(null);
+
+  const [selectedTurnos, setSelectedTurnos] = useState([]);
+  const [isDeleteMultipleModalOpen, setIsDeleteMultipleModalOpen] =
+    useState(false);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [statusFilter, setStatusFilter] = useState('Todos');
   const [sortBy, setSortBy] = useState('fecha');
   const [sortOrder, setSortOrder] = useState('asc');
@@ -56,63 +66,46 @@ const TurnosPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  // Estados para selección múltiple
-  const [selectedTurnos, setSelectedTurnos] = useState([]);
-  const [isDeleteMultipleModalOpen, setIsDeleteMultipleModalOpen] = useState(false);
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const allTurnos = [
-    {
-      id: 1,
-      fecha: '20 de Mayo',
-      hora: '4:00 AM',
-      vehiculo: 'Alaskan',
-      conductor: 'Diomedes Diaz',
-      status: 'Activo',
-    },
-    {
-      id: 2,
-      fecha: '20 de Mayo',
-      hora: '4:00 AM',
-      vehiculo: 'Alaskan',
-      conductor: 'Diomedes Diaz',
-      status: 'Activo',
-    },
-    {
-      id: 3,
-      fecha: '20 de Mayo',
-      hora: '4:00 AM',
-      vehiculo: 'Alaskan',
-      conductor: 'Diomedes Diaz',
-      status: 'Activo',
-    },
-    {
-      id: 4,
-      fecha: '20 de Mayo',
-      hora: '4:00 AM',
-      vehiculo: 'Alaskan',
-      conductor: 'Diomedes Diaz',
-      status: 'Activo',
-    },
-    {
-      id: 5,
-      fecha: '20 de Mayo',
-      hora: '4:00 AM',
-      vehiculo: 'Alaskan',
-      conductor: 'Diomedes Diaz',
-      status: 'Inactivo',
-    },
-  ];
+  const loadTurnos = async () => {
+    setLoading(true);
+    try {
+      const response = await turnoService.getTurnos();
+
+      const data = Array.isArray(response) ? response : response.data || [];
+
+      const mappedTurnos = data.map(turno => ({
+        id: turno.idTurno,
+        idTurno: turno.idTurno,
+        fecha: new Date(turno.fecha).toLocaleDateString('es-ES', {
+          day: 'numeric',
+          month: 'long',
+        }),
+        fechaRaw: turno.fecha,
+        hora: turno.hora,
+        vehiculo: turno.vehiculo
+          ? `${turno.vehiculo.placa} - ${turno.vehiculo.linea}`
+          : 'Sin vehículo',
+        idVehiculo: turno.idVehiculo,
+        conductor: turno.conductor?.usuario
+          ? `${turno.conductor.usuario.nombre} ${turno.conductor.usuario.apellido || ''}`
+          : 'Sin conductor',
+        idConductor: turno.idConductor,
+        status: turno.estado === 'Programado' ? 'Activo' : 'Inactivo',
+        estado: turno.estado,
+        usuarioConductor: turno.conductor?.usuario,
+      }));
+
+      setAllTurnos(mappedTurnos);
+    } catch (error) {
+      console.error('Error al cargar turnos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const handleClickOutside = event => {
-      if (isSearchOpen && !event.target.closest('.relative')) {
-        setIsSearchOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isSearchOpen]);
+    loadTurnos();
+  }, []);
 
   const handleOpenProfile = turno => {
     setSelectedTurno(turno);
@@ -129,9 +122,17 @@ const TurnosPage = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
-    setIsDeleteModalOpen(false);
-    setTurnoToDelete(null);
+  const handleDeleteConfirm = async () => {
+    if (!turnoToDelete) return;
+    try {
+      await turnoService.deleteTurno(turnoToDelete.idTurno);
+      await loadTurnos();
+      setIsDeleteModalOpen(false);
+      setTurnoToDelete(null);
+    } catch (error) {
+      console.error('Error al eliminar turno:', error);
+      alert('Error al eliminar el turno');
+    }
   };
 
   const handleDeleteCancel = () => {
@@ -144,9 +145,21 @@ const TurnosPage = () => {
     setIsSwitchModalOpen(true);
   };
 
-  const handleSwitchConfirm = () => {
-    setIsSwitchModalOpen(false);
-    setTurnoToSwitch(null);
+  const handleSwitchConfirm = async () => {
+    if (!turnoToSwitch) return;
+    try {
+      const newStatus =
+        turnoToSwitch.estado === 'Programado' ? 'Cancelado' : 'Programado';
+      await turnoService.updateTurno(turnoToSwitch.idTurno, {
+        estado: newStatus,
+      });
+      await loadTurnos();
+      setIsSwitchModalOpen(false);
+      setTurnoToSwitch(null);
+    } catch (error) {
+      console.error('Error al cambiar estado:', error);
+      alert('Error al cambiar el estado del turno');
+    }
   };
 
   const handleSwitchCancel = () => {
@@ -158,10 +171,15 @@ const TurnosPage = () => {
     setIsAddModalOpen(true);
   };
 
-  const handleAddTurno = async (data) => {
-    // Aquí se implementará la lógica con el API
-    console.log('Agregar turno:', data);
-    setIsAddModalOpen(false);
+  const handleAddTurno = async data => {
+    try {
+      await turnoService.createTurno(data);
+      await loadTurnos();
+      setIsAddModalOpen(false);
+    } catch (error) {
+      console.error('Error al crear turno:', error);
+      throw error;
+    }
   };
 
   const handleEditClick = (e, turno) => {
@@ -170,14 +188,18 @@ const TurnosPage = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateTurno = async (data) => {
-    // Aquí se implementará la lógica con el API
-    console.log('Actualizar turno:', data);
-    setIsEditModalOpen(false);
-    setTurnoToEdit(null);
+  const handleUpdateTurno = async (id, data) => {
+    try {
+      await turnoService.updateTurno(id, data);
+      await loadTurnos();
+      setIsEditModalOpen(false);
+      setTurnoToEdit(null);
+    } catch (error) {
+      console.error('Error al actualizar turno:', error);
+      throw error;
+    }
   };
 
-  // Funciones para selección múltiple
   const handleToggleSelectionMode = () => {
     setIsSelectionMode(!isSelectionMode);
     setSelectedTurnos([]);
@@ -233,14 +255,14 @@ const TurnosPage = () => {
     setIsSelectionMode(false);
   };
 
-  // Filtrado y ordenamiento
   const filteredTurnos = allTurnos.filter(turno => {
     const matchesStatus =
       statusFilter === 'Todos' ||
       (statusFilter === 'Activos' && turno.status === 'Activo') ||
       (statusFilter === 'Inactivos' && turno.status === 'Inactivo');
 
-    const matchesSearch = searchQuery === '' ||
+    const matchesSearch =
+      searchQuery === '' ||
       turno.conductor?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       turno.vehiculo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       turno.fecha?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -346,7 +368,9 @@ const TurnosPage = () => {
               <div className="content-box-outline-3-small">
                 <div className="flex flex-col">
                   <span className="subtitle2 font-light">Totales</span>
-                  <h2 className="h4 text-primary font-bold">{allTurnos.length}</h2>
+                  <h2 className="h4 text-primary font-bold">
+                    {allTurnos.length}
+                  </h2>
                 </div>
               </div>
               <div className="content-box-outline-3-small">
@@ -432,9 +456,7 @@ const TurnosPage = () => {
                     <md-checkbox
                       checked={
                         currentTurnos.length > 0 &&
-                        currentTurnos.every(t =>
-                          selectedTurnos.includes(t.id)
-                        )
+                        currentTurnos.every(t => selectedTurnos.includes(t.id))
                       }
                       touch-target="wrapper"
                     />
@@ -462,80 +484,97 @@ const TurnosPage = () => {
               )}
             </div>
 
-            <div className="flex justify-between items-center mt-6 mb-4">
-              <div className="flex items-center gap-3">
-                {selectedTurnos.length > 0 ? (
-                  <>
+            <div className="flex justify-between items-center mt-4 mb-4">
+              <div className="flex gap-3">
+                <div className="flex gap-1 bg-fill border border-border rounded-full p-1">
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`px-2 py-1 rounded-full transition-all ${
+                      viewMode === 'list'
+                        ? 'bg-primary text-on-primary'
+                        : 'text-secondary hover:text-primary'
+                    }`}
+                    title="Vista de lista"
+                  >
+                    <md-icon className="text-sm">view_list</md-icon>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`px-2 py-1 rounded-full transition-all ${
+                      viewMode === 'grid'
+                        ? 'bg-primary text-on-primary'
+                        : 'text-secondary hover:text-primary'
+                    }`}
+                    title="Vista de tarjetas"
+                  >
+                    <md-icon className="text-sm">grid_view</md-icon>
+                  </button>
+                </div>
+                <div className="flex items-center gap-3">
+                  {selectedTurnos.length > 0 ? (
                     <span className="text-sm text-secondary">
                       {selectedTurnos.length} Seleccionados
                     </span>
-                  </>
-                ) : (
-                  <span className="text-sm text-secondary">
-                    Mostrando {totalItems > 0 ? startIndex + 1 : 0}-
-                    {Math.min(startIndex + (viewMode === 'grid' ? 8 : 4), totalItems)} de {totalItems} turnos
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                {showPagination && (
-                  <span className="text-xs text-secondary">
-                    Página {currentPage} de {totalPages}
-                  </span>
-                )}
-
-                <div className="flex bg-fill rounded-lg p-1 border border-border ml-2">
-                  <button
-                    className={`p-1 rounded-md transition-all ${viewMode === 'list'
-                        ? 'bg-background text-primary shadow-sm'
-                        : 'text-secondary hover:text-primary'
-                      }`}
-                    onClick={() => setViewMode('list')}
-                  >
-                    <md-icon className="text-xl">view_list</md-icon>
-                  </button>
-                  <button
-                    className={`p-1 rounded-md transition-all ${viewMode === 'grid'
-                        ? 'bg-background text-primary shadow-sm'
-                        : 'text-secondary hover:text-primary'
-                      }`}
-                    onClick={() => setViewMode('grid')}
-                  >
-                    <md-icon className="text-xl">grid_view</md-icon>
-                  </button>
+                  ) : (
+                    !loading && (
+                      <span className="text-sm text-secondary">
+                        {`Mostrando ${
+                          totalItems > 0 ? startIndex + 1 : 0
+                        }-${Math.min(
+                          startIndex + (viewMode === 'grid' ? 8 : 4),
+                          totalItems
+                        )} de ${totalItems} turnos`}
+                      </span>
+                    )
+                  )}
                 </div>
               </div>
+              {showPagination && (
+                <span className="text-xs text-secondary">
+                  Página {currentPage} de {totalPages}
+                </span>
+              )}
             </div>
 
             <div className="mt-3">
               {currentTurnos.length === 0 ? (
                 <div className="empty-state">
-                  <md-icon className="empty-state-icon">event_busy</md-icon>
-                  <p className="empty-state-text">
-                    {searchTerm || statusFilter !== 'Todos'
-                      ? 'No se encontraron turnos con los filtros aplicados'
-                      : 'No hay turnos disponibles'}
+                  <md-icon className="text-secondary mb-4">schedule</md-icon>
+                  <p className="text-secondary">
+                    {searchQuery || statusFilter !== 'Todos'
+                      ? 'No se encontraron turnos que coincidan con los filtros'
+                      : 'No hay turnos registrados'}
                   </p>
                   <p className="empty-state-subtext">
-                    {searchTerm || statusFilter !== 'Todos'
+                    {searchQuery || statusFilter !== 'Todos'
                       ? 'Intenta ajustar tus filtros de búsqueda'
                       : 'Comienza agregando un nuevo turno'}
                   </p>
                 </div>
               ) : (
-                <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
+                <div
+                  className={
+                    viewMode === 'grid'
+                      ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+                      : 'flex flex-col gap-3'
+                  }
+                >
                   {currentTurnos.map((turno, index) => (
                     <div
                       key={index}
-                      className={`content-box-outline-4-small cursor-pointer relative ${turno.status !== 'Activo' ? 'opacity-60' : ''} ${selectedTurnos.includes(turno.id) ? 'card-selected' : ''
-                        }`}
+                      className={`content-box-outline-4-small cursor-pointer relative ${
+                        turno.status !== 'Activo' ? 'opacity-60' : ''
+                      } ${
+                        selectedTurnos.includes(turno.id) ? 'card-selected' : ''
+                      }`}
                       onClick={() => handleOpenProfile(turno)}
                     >
                       {isSelectionMode && (
                         <div
                           className="absolute top-3 left-3 z-10"
                           style={{
-                            animation: 'checkboxAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                            animation:
+                              'checkboxAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
                             transformOrigin: 'center',
                           }}
                         >
@@ -552,40 +591,68 @@ const TurnosPage = () => {
 
                       {viewMode === 'grid' ? (
                         <div className="flex flex-col h-full">
-                          <div className="flex items-start justify-between gap-2 pb-3 ">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="text-h5 font-bold text-primary truncate mb-1">
-                                {turno.conductor}
-                              </h3>
-                              <div className="flex items-center gap-2 text-body2">
-                                <span className="text-secondary truncate">{turno.vehiculo}</span>
+                          <div className="flex items-start justify-between gap-2 pb-3">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <div className="relative w-12 h-12 shrink-0">
+                                <Avvvatars
+                                  value={turno.conductor}
+                                  size={48}
+                                  radius={10}
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-h5 font-bold text-primary truncate">
+                                  {turno.conductor}
+                                </h3>
+                                <div className="flex items-center gap-1 text-body2">
+                                  <span className="text-secondary truncate text-xs">
+                                    {turno.vehiculo}
+                                  </span>
+                                </div>
                               </div>
                             </div>
                             <span
-                              className={`btn font-medium btn-sm flex items-center ${turno.status === 'Activo' ? 'btn-green' : 'btn-red'
-                                }`}
+                              className={`btn font-medium btn-sm flex items-center shrink-0 ${
+                                turno.status === 'Activo'
+                                  ? 'btn-green'
+                                  : 'btn-red'
+                              }`}
                             >
-                              {turno.status === 'Activo' ? 'Activo' : 'Inactivo'}
+                              {turno.status === 'Activo'
+                                ? 'Activo'
+                                : 'Inactivo'}
                             </span>
                           </div>
 
                           <div className="flex-1 space-y-2 mb-3">
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center">
-                                <md-icon className="text-base text-primary">calendar_today</md-icon>
+                              <div className="w-7 h-7 rounded-lg bg-fill flex items-center justify-center">
+                                <md-icon className="text-sm text-primary">
+                                  calendar_today
+                                </md-icon>
                               </div>
                               <div className="flex flex-col min-w-0">
-                                <span className="text-xs text-secondary">Fecha</span>
-                                <span className="text-sm font-semibold text-primary truncate">{turno.fecha}</span>
+                                <span className="text-[10px] text-secondary">
+                                  Fecha
+                                </span>
+                                <span className="text-xs font-semibold text-primary truncate">
+                                  {turno.fecha}
+                                </span>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center">
-                                <md-icon className="text-base text-primary">schedule</md-icon>
+                              <div className="w-7 h-7 rounded-lg bg-fill flex items-center justify-center">
+                                <md-icon className="text-sm text-primary">
+                                  schedule
+                                </md-icon>
                               </div>
                               <div className="flex flex-col min-w-0">
-                                <span className="text-xs text-secondary">Hora</span>
-                                <span className="text-sm font-semibold text-primary">{turno.hora}</span>
+                                <span className="text-[10px] text-secondary">
+                                  Hora
+                                </span>
+                                <span className="text-xs font-semibold text-primary">
+                                  {turno.hora}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -593,21 +660,28 @@ const TurnosPage = () => {
                           <div className="flex gap-2 mt-auto">
                             <div className="relative group flex-1">
                               <button
-                                className={`btn btn-sm-2 font-medium flex items-center gap-1 w-full justify-center ${turno.status === 'Activo' ? 'btn-outline' : 'btn-secondary'
-                                  }`}
+                                className={`btn btn-sm-2 font-medium flex items-center gap-1 w-full justify-center ${
+                                  turno.status === 'Activo'
+                                    ? 'btn-outline'
+                                    : 'btn-secondary'
+                                }`}
                                 onClick={e => {
                                   e.stopPropagation();
                                   handleSwitchClick(turno);
                                 }}
                               >
                                 <md-icon className="text-sm">
-                                  {turno.status === 'Activo' ? 'block' : 'check'}
+                                  {turno.status === 'Activo'
+                                    ? 'block'
+                                    : 'check'}
                                 </md-icon>
                               </button>
                               <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
                                 <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
                                   <p className="text-xs text-primary">
-                                    {turno.status === 'Activo' ? 'Deshabilitar' : 'Habilitar'}
+                                    {turno.status === 'Activo'
+                                      ? 'Deshabilitar'
+                                      : 'Habilitar'}
                                   </p>
                                 </div>
                               </div>
@@ -642,7 +716,9 @@ const TurnosPage = () => {
                               </button>
                               <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
                                 <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                  <p className="text-xs text-primary">Eliminar</p>
+                                  <p className="text-xs text-primary">
+                                    Eliminar
+                                  </p>
                                 </div>
                               </div>
                             </div>
@@ -651,11 +727,15 @@ const TurnosPage = () => {
                       ) : (
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-3 flex-1">
-                            <div className="w-12 h-12 rounded-lg bg-fill flex items-center justify-center">
-                              <md-icon className="text-2xl text-primary">schedule</md-icon>
+                            <div className="w-16 h-16 rounded-lg bg-fill flex items-center justify-center shrink-0">
+                              <md-icon className="text-3xl text-primary">
+                                schedule
+                              </md-icon>
                             </div>
                             <div>
-                              <h1 className="h4 font-bold">{turno.conductor}</h1>
+                              <h1 className="h4 font-bold">
+                                {turno.conductor}
+                              </h1>
                               <div className="flex gap-2 mt-1 items-center text-body2 text-secondary">
                                 <span>{turno.vehiculo}</span>
                                 <span>•</span>
@@ -665,15 +745,20 @@ const TurnosPage = () => {
                               </div>
                             </div>
                           </div>
-                          
+
                           <div className="flex gap-2 items-center">
                             <span
-                              className={`btn font-medium btn-lg flex items-center mr-2 ${turno.status === 'Activo' ? 'btn-green' : 'btn-red'
-                                }`}
+                              className={`btn font-medium btn-lg flex items-center mr-2 ${
+                                turno.status === 'Activo'
+                                  ? 'btn-green'
+                                  : 'btn-red'
+                              }`}
                             >
-                              {turno.status === 'Activo' ? 'Activo' : 'Inactivo'}
+                              {turno.status === 'Activo'
+                                ? 'Activo'
+                                : 'Inactivo'}
                             </span>
-                            
+
                             <button
                               className={`btn btn-lg font-medium flex items-center gap-1 ${turno.status === 'Activo' ? 'btn-outline' : 'btn-secondary'}`}
                               onClick={e => {
@@ -681,7 +766,9 @@ const TurnosPage = () => {
                                 handleSwitchClick(turno);
                               }}
                             >
-                              {turno.status === 'Activo' ? 'Deshabilitar' : 'Habilitar'}
+                              {turno.status === 'Activo'
+                                ? 'Deshabilitar'
+                                : 'Habilitar'}
                             </button>
                             <button
                               className="btn btn-primary btn-lg font-medium flex items-center gap-1"
