@@ -166,6 +166,67 @@ export const reservaSchema = yup.object().shape({
     .default("Pendiente"),
 });
 
+// Esquema de validación para búsqueda de viajes
+export const searchViajeSchema = yup.object().shape({
+  origen: yup
+    .string()
+    .min(2, "La ciudad de origen debe tener al menos 2 caracteres")
+    .required("La ciudad de origen es obligatoria"),
+  destino: yup
+    .string()
+    .min(2, "La ciudad de destino debe tener al menos 2 caracteres")
+    .required("La ciudad de destino es obligatoria")
+    .test(
+      "not-same-as-origen",
+      "Origen y destino no pueden ser la misma ciudad",
+      function(value) {
+        return value && this.parent.origen && value.toLowerCase() !== this.parent.origen.toLowerCase();
+      }
+    ),
+  fecha: yup
+    .date()
+    .typeError("La fecha debe ser válida")
+    .min(
+      new Date(new Date().setHours(0, 0, 0, 0)),
+      "No puedes seleccionar una fecha en el pasado"
+    )
+    .required("La fecha es obligatoria"),
+  fechaRegreso: yup
+    .date()
+    .nullable()
+    .typeError("La fecha de regreso debe ser válida")
+    .test(
+      "is-after-ida",
+      "La fecha de regreso debe ser posterior a la fecha de ida",
+      function(value) {
+        if (!value) return true; // Si no hay fecha de regreso, está bien
+        return value > this.parent.fecha;
+      }
+    ),
+  tipoViaje: yup
+    .string()
+    .oneOf(["Hoy", "Mañana"], "Tipo de viaje no válido")
+    .default("Hoy"),
+});
+
+// Esquema de validación para reserva de viaje
+export const reservaViajeSchema = yup.object().shape({
+  viajeId: yup
+    .number()
+    .positive("ID de viaje debe ser positivo")
+    .required("El viaje es obligatorio"),
+  asientosSeleccionados: yup
+    .array()
+    .of(yup.number().positive())
+    .min(1, "Debes seleccionar al menos 1 asiento")
+    .max(10, "Máximo 10 asientos por reserva")
+    .required("Los asientos son obligatorios"),
+  precioTotal: yup
+    .number()
+    .positive("El precio debe ser positivo")
+    .required("El precio total es obligatorio"),
+});
+
 export default {
   loginSchema,
   registerSchema,
@@ -173,4 +234,6 @@ export default {
   createUserSchema,
   changePasswordSchema,
   reservaSchema,
+  searchViajeSchema,
+  reservaViajeSchema,
 };

@@ -1,6 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import "@material/web/icon/icon.js";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import CityAutocomplete from "./components/CityAutocomplete";
+import SeatsModal from "./components/SeatsModal";
+import viajeService from "../../shared/services/viajeService";
+
+// Obtener fecha de hoy en formato local correcto (no UTC)
+const getTodayDate = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
   const navigate = useNavigate();
@@ -9,62 +21,56 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
   const [scrolled, setScrolled] = useState(false);
   const [filtroHorario, setFiltroHorario] = useState("todos");
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [seatsModalOpen, setSeatsModalOpen] = useState(false);
+  const [selectedViaje, setSelectedViaje] = useState(null);
+  const [viajes, setViajes] = useState([]);
+  const [error, setError] = useState(null);
   
-  // Obtener fecha de hoy en formato local correcto (no UTC)
-  const getTodayDate = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-  
-  // Obtener datos de la URL o usar los iniciales/por defecto
-  const [busqueda, setBusqueda] = useState({
+  // Estado temporal para el formulario (no se aplica hasta buscar)
+  const [formTemporal, setFormTemporal] = useState({
     origen: searchParams.get("origen") || datosIniciales?.origen || "Medellín",
     destino: searchParams.get("destino") || datosIniciales?.destino || "Cartagena",
     fecha: searchParams.get("fecha") || datosIniciales?.fecha || getTodayDate(),
     fechaRegreso: searchParams.get("fechaRegreso") || null
   });
 
-  // Generar 4 viajes automáticamente según origen, destino y período del día
-  const generarViajes = () => {
-    const periodos = [
-      { id: 'manana', hora: '06:30', icono: 'wb_sunny', horaLlegada: '2:00 PM' },
-      { id: 'tarde', hora: '02:00', icono: 'wb_twilight', horaLlegada: '10:30 PM' },
-      { id: 'noche', hora: '09:30', icono: 'nights_stay', horaLlegada: '5:30 AM', periodo: 'PM' },
-      { id: 'madrugada', hora: '12:30', icono: 'bedtime', horaLlegada: '8:30 AM', periodo: 'AM' }
-    ];
+  // Estado actual de búsqueda (lo que se muestra)
+  const [busqueda, setBusqueda] = useState(formTemporal);
 
-    return periodos.map((periodo, index) => {
-      const hora = periodo.hora;
-      const horaPeriodo = periodo.periodo || 'AM';
-      return {
-        id: index + 1,
-        empresa: "La Tribu",
-        categoria: index % 2 === 0 ? "Diamante" : "Premium",
-        categoriaDesc: index % 2 === 0 ? "Preferencial de Lujo" : "Preferencial",
-        horaSalida: `${hora} ${horaPeriodo}`,
-        horaLlegada: periodo.horaLlegada,
-        origenTerminal: `${busqueda.origen.toUpperCase()} TERMINAL`,
-        destinoTerminal: `${busqueda.destino.toUpperCase()} TERMINAL`,
-        rutas: 1,
-        precio: index % 2 === 0 ? 178000 : 165000,
-        precioAnterior: index % 2 === 0 ? 196000 : 182000,
-        icono: periodo.icono,
-        etiqueta: index === 0 ? "Más rápido" : null,
-        disponible: true
-      };
-    });
-  };
+  // Obtener viajes desde la API
+  const obtenerViajes = useCallback(async (origen, destino, fecha, fechaRegreso) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const viajesCargados = await viajeService.buscarViajes({
+        origen,
+        destino,
+        fecha,
+        fechaRegreso
+      });
 
-  const viajes = generarViajes();
+      setViajes(viajesCargados || []);
+    } catch (err) {
+      console.error("Error al obtener viajes:", err);
+      setError("Error al cargar los viajes disponibles");
+      setViajes([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   React.useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Cargar viajes cuando se monta el componente o cuando cambia la búsqueda
+  useEffect(() => {
+    obtenerViajes(busqueda.origen, busqueda.destino, busqueda.fecha, busqueda.fechaRegreso);
+  }, [busqueda, obtenerViajes]);
 
   // Formatear fecha para mostrar
   const formatearFecha = (fechaISO) => {
@@ -81,18 +87,32 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
     }).format(precio);
   };
 
-  const handleNuevaBusqueda = () => {
-    // Aquí se puede agregar lógica para nueva búsqueda
-    console.log('Nueva búsqueda:', busqueda);
-  };
+  const handleNuevaBusqueda = useCallback(async () => {
+    // Validar que origen y destino sean diferentes
+    if (formTemporal.origen.toLowerCase() === formTemporal.destino.toLowerCase()) {
+      alert("El origen y destino no pueden ser iguales");
+      return;
+    }
 
-  const handleIntercambiar = () => {
-    setBusqueda(prev => ({
+    // Aplicar los cambios
+    setBusqueda(formTemporal);
+    
+    // Obtener viajes desde la API
+    await obtenerViajes(
+      formTemporal.origen,
+      formTemporal.destino,
+      formTemporal.fecha,
+      formTemporal.fechaRegreso
+    );
+  }, [formTemporal, obtenerViajes]);
+
+  const handleIntercambiar = useCallback(() => {
+    setFormTemporal(prev => ({
       ...prev,
       origen: prev.destino,
       destino: prev.origen
     }));
-  };
+  }, []);
 
   const viajesFiltrados = viajes.filter(viaje => {
     if (filtroHorario === "todos") return true;
@@ -145,15 +165,17 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
           <div className="bg-white rounded-xl shadow-xl p-4">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
               <div className="md:col-span-3">
-                <label className="text-xs font-semibold text-gray-700 mb-1 block">Origen</label>
+                <label className="text-xs font-semibold text-gray-700 mb-2 block">Origen</label>
                 <div className="relative">
-                  <md-icon className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600">location_on</md-icon>
-                  <input
-                    type="text"
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600 pointer-events-none z-20">
+                    <md-icon>location_on</md-icon>
+                  </div>
+                  <CityAutocomplete
+                    value={formTemporal.origen}
+                    onChange={(value) => setFormTemporal(prev => ({ ...prev, origen: value }))}
+                    onSelect={(city) => setFormTemporal(prev => ({ ...prev, origen: city.city }))}
                     placeholder="Ciudad de origen"
-                    value={busqueda.origen}
-                    onChange={(e) => setBusqueda(prev => ({ ...prev, origen: e.target.value }))}
-                    className="w-full pl-10 pr-3 py-2.5 bg-white border-2 border-blue-300 rounded-lg text-sm font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"
+                    inputClassName="w-full pl-10 pr-3 py-2.5 bg-white border-2 border-blue-300 rounded-lg text-sm font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"
                   />
                 </div>
               </div>
@@ -167,15 +189,17 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
               </div>
 
               <div className="md:col-span-3">
-                <label className="text-xs font-semibold text-gray-700 mb-1 block">Destino</label>
+                <label className="text-xs font-semibold text-gray-700 mb-2 block">Destino</label>
                 <div className="relative">
-                  <md-icon className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600">flag</md-icon>
-                  <input
-                    type="text"
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600 pointer-events-none z-20">
+                    <md-icon>flag</md-icon>
+                  </div>
+                  <CityAutocomplete
+                    value={formTemporal.destino}
+                    onChange={(value) => setFormTemporal(prev => ({ ...prev, destino: value }))}
+                    onSelect={(city) => setFormTemporal(prev => ({ ...prev, destino: city.city }))}
                     placeholder="Ciudad de destino"
-                    value={busqueda.destino}
-                    onChange={(e) => setBusqueda(prev => ({ ...prev, destino: e.target.value }))}
-                    className="w-full pl-10 pr-3 py-2.5 bg-white border-2 border-blue-300 rounded-lg text-sm font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"
+                    inputClassName="w-full pl-10 pr-3 py-2.5 bg-white border-2 border-blue-300 rounded-lg text-sm font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"
                   />
                 </div>
               </div>
@@ -186,9 +210,9 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
                   <md-icon className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600">event</md-icon>
                   <input
                     type="date"
-                    value={busqueda.fecha}
+                    value={formTemporal.fecha}
                     min={getTodayDate()}
-                    onChange={(e) => setBusqueda(prev => ({ ...prev, fecha: e.target.value }))}
+                    onChange={(e) => setFormTemporal(prev => ({ ...prev, fecha: e.target.value }))}
                     className="w-full pl-10 pr-3 py-2.5 bg-white border-2 border-blue-300 rounded-lg text-sm font-semibold text-gray-900 focus:outline-none focus:border-blue-600 transition-colors"
                   />
                 </div>
@@ -200,9 +224,9 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
                   <md-icon className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600">event</md-icon>
                   <input
                     type="date"
-                    value={busqueda.fechaRegreso || ''}
+                    value={formTemporal.fechaRegreso || ''}
                     min={getTodayDate()}
-                    onChange={(e) => setBusqueda(prev => ({ ...prev, fechaRegreso: e.target.value }))}
+                    onChange={(e) => setFormTemporal(prev => ({ ...prev, fechaRegreso: e.target.value }))}
                     className="w-full pl-10 pr-3 py-2.5 bg-white border-2 border-blue-300 rounded-lg text-sm font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"
                   />
                 </div>
@@ -211,8 +235,19 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
               <div className="md:col-span-1">
                 <button 
                   onClick={handleNuevaBusqueda}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
-                  <md-icon>search</md-icon>
+                  disabled={isLoading}
+                  className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+                  {isLoading ? (
+                    <>
+                      <md-icon className="animate-spin">refresh</md-icon>
+                      <span>Buscando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <md-icon>search</md-icon>
+                      <span className="hidden sm:inline">Buscar</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -262,6 +297,35 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
             PARA TI
           </span>
         </div>
+
+        {/* Mostrar error si hay */}
+        {error && (
+          <div className="bg-red-50 border-2 border-red-300 rounded-xl p-4 mb-4">
+            <p className="text-red-700 font-semibold flex items-center gap-2">
+              <md-icon className="text-red-600">error</md-icon>
+              {error}
+            </p>
+          </div>
+        )}
+
+        {/* Mostrar loader si está cargando */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex flex-col items-center gap-3">
+              <md-icon className="text-blue-600 text-4xl animate-spin">refresh</md-icon>
+              <p className="text-gray-600 font-semibold">Cargando viajes disponibles...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Mostrar mensaje si no hay viajes */}
+        {!isLoading && viajes.length === 0 && !error && (
+          <div className="bg-blue-50 border-2 border-blue-300 rounded-xl p-8 text-center">
+            <md-icon className="text-blue-600 text-4xl mb-3 block">info</md-icon>
+            <p className="text-gray-700 font-semibold">No hay viajes disponibles para esta ruta</p>
+            <p className="text-gray-500 text-sm mt-1">Intenta con otras fechas u otra ruta</p>
+          </div>
+        )}
 
         {/* Lista de viajes */}
         <div className="space-y-4">
@@ -336,19 +400,19 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
                       </div>
                     </div>
 
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-all hover:scale-105 shadow-lg whitespace-nowrap">
+                    <button 
+                      onClick={() => {
+                        setSelectedViaje(viaje);
+                        setSeatsModalOpen(true);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-all hover:scale-105 shadow-lg whitespace-nowrap">
                       Ver sillas
                     </button>
                   </div>
                 </div>
 
                 {/* Enlace ver detalles */}
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <button className="text-blue-600 hover:text-blue-700 text-sm font-semibold flex items-center gap-1">
-                    Ver detalles
-                    <md-icon className="text-lg">chevron_right</md-icon>
-                  </button>
-                </div>
+                {/* Removido: Ver detalles */}
               </div>
             </div>
           ))}
@@ -367,6 +431,16 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
           </div>
         )}
       </div>
+
+      {/* Modal de sillas */}
+      <SeatsModal 
+        isOpen={seatsModalOpen}
+        onClose={() => {
+          setSeatsModalOpen(false);
+          setSelectedViaje(null);
+        }}
+        viaje={selectedViaje}
+      />
     </div>
   );
 };
