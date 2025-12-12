@@ -21,6 +21,7 @@ export const ROUTES = {
     ROLES: '/admin/rol',
     CONTRATOS: '/admin/contratos',
     TRACKING: '/admin/tracking',
+    CALENDARIO: '/admin/calendario',
   },
 
   CONDUCTOR: {

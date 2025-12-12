@@ -73,6 +73,11 @@ const Tracking = withLazyLoading(
   'Cargando tracking de conductores...'
 );
 
+const CalendarioPage = withLazyLoading(
+  lazy(() => import('../../features/calendario/CalendarioPage')),
+  'Cargando calendario...'
+);
+
 const AdminHomeWithErrorBoundary = withErrorBoundary(HomeAdmin, {
   title: 'Error en Dashboard',
   message: 'No se pudo cargar el dashboard de administrador',
@@ -222,6 +227,16 @@ export const adminRoutes = [
     })(),
     handle: {
       crumb: () => 'Tracking',
+    },
+  },
+  {
+    path: ROUTES.ADMIN.CALENDARIO,
+    element: withErrorBoundary(CalendarioPage, {
+      title: 'Error en Calendario',
+      message: 'No se pudo cargar el calendario',
+    })(),
+    handle: {
+      crumb: () => 'Calendario',
     },
   },
 ];
