@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import CityAutocomplete from "./components/CityAutocomplete";
 import SeatsModal from "./components/SeatsModal";
 import viajeService from "../../shared/services/viajeService";
+import ubicacionesService from "../ubicaciones/api/ubicacionesService";
 
 // Obtener fecha de hoy en formato local correcto (no UTC)
 const getTodayDate = () => {
@@ -17,7 +18,7 @@ const getTodayDate = () => {
 const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  
+
   const [scrolled, setScrolled] = useState(false);
   const [filtroHorario, setFiltroHorario] = useState("todos");
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
@@ -26,11 +27,16 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
   const [selectedViaje, setSelectedViaje] = useState(null);
   const [viajes, setViajes] = useState([]);
   const [error, setError] = useState(null);
-  
+
+  const [ubicacionesItems, setUbicacionesItems] = useState([]);
+  const [ubicacionesReady, setUbicacionesReady] = useState(false);
+
   // Estado temporal para el formulario (no se aplica hasta buscar)
   const [formTemporal, setFormTemporal] = useState({
-    origen: searchParams.get("origen") || datosIniciales?.origen || "Medellín",
-    destino: searchParams.get("destino") || datosIniciales?.destino || "Cartagena",
+    origenId: searchParams.get("origenId") || datosIniciales?.origenId || "",
+    destinoId: searchParams.get("destinoId") || datosIniciales?.destinoId || "",
+    origen: searchParams.get("origen") || datosIniciales?.origen || "",
+    destino: searchParams.get("destino") || datosIniciales?.destino || "",
     fecha: searchParams.get("fecha") || datosIniciales?.fecha || getTodayDate(),
     fechaRegreso: searchParams.get("fechaRegreso") || null
   });
@@ -39,14 +45,16 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
   const [busqueda, setBusqueda] = useState(formTemporal);
 
   // Obtener viajes desde la API
-  const obtenerViajes = useCallback(async (origen, destino, fecha, fechaRegreso) => {
+  const obtenerViajes = useCallback(async (origen, destino, origenId, destinoId, fecha, fechaRegreso) => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const viajesCargados = await viajeService.buscarViajes({
         origen,
         destino,
+        origenId,
+        destinoId,
         fecha,
         fechaRegreso
       });
@@ -69,8 +77,112 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
 
   // Cargar viajes cuando se monta el componente o cuando cambia la búsqueda
   useEffect(() => {
-    obtenerViajes(busqueda.origen, busqueda.destino, busqueda.fecha, busqueda.fechaRegreso);
+    const tieneOrigen = Boolean(busqueda.origenId || busqueda.origen);
+    const tieneDestino = Boolean(busqueda.destinoId || busqueda.destino);
+
+    if (!tieneOrigen || !tieneDestino) {
+      setViajes([]);
+      return;
+    }
+
+    obtenerViajes(
+      busqueda.origen,
+      busqueda.destino,
+      busqueda.origenId,
+      busqueda.destinoId,
+      busqueda.fecha,
+      busqueda.fechaRegreso
+    );
   }, [busqueda, obtenerViajes]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadUbicaciones = async () => {
+      try {
+        const res = await ubicacionesService.getAll();
+        const data = Array.isArray(res) ? res : res?.data || [];
+
+        const mapped = data
+          .map((u) => ({
+            idUbicacion: u.idUbicacion || u.id,
+            city: u.nombreUbicacion || u.nombre,
+            department: u.direccion || '',
+            estado: u.estado !== undefined ? u.estado : u.activo,
+          }))
+          .filter((u) => u.idUbicacion && u.city)
+          .filter((u) => u.estado !== false);
+
+        if (mounted) {
+          setUbicacionesItems(mapped);
+          setUbicacionesReady(true);
+        }
+      } catch (_) {
+        if (mounted) {
+          setUbicacionesItems([]);
+          setUbicacionesReady(true);
+        }
+      }
+    };
+
+    loadUbicaciones();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Si llegan IDs (por query) pero no texto, rellenar desde ubicaciones.
+  useEffect(() => {
+    if (!ubicacionesReady || ubicacionesItems.length === 0) return;
+
+    setFormTemporal((prev) => {
+      const next = { ...prev };
+      if (prev.origenId && !prev.origen) {
+        const found = ubicacionesItems.find((u) => String(u.idUbicacion) === String(prev.origenId));
+        if (found) next.origen = found.city;
+      }
+      if (prev.destinoId && !prev.destino) {
+        const found = ubicacionesItems.find((u) => String(u.idUbicacion) === String(prev.destinoId));
+        if (found) next.destino = found.city;
+      }
+      return next;
+    });
+  }, [ubicacionesReady, ubicacionesItems]);
+
+  // También mantener el estado de búsqueda sincronizado si se rellenó texto.
+  useEffect(() => {
+    setBusqueda(formTemporal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formTemporal.origenId, formTemporal.destinoId]);
+
+  const parseHoraTo24 = (hora) => {
+    const raw = String(hora || '').trim();
+    if (!raw) return null;
+
+    // Formato HH:mm (24h)
+    const m24 = raw.match(/^(\d{1,2}):(\d{2})$/);
+    if (m24) {
+      const h = Number.parseInt(m24[1], 10);
+      const mm = Number.parseInt(m24[2], 10);
+      if (!Number.isFinite(h) || !Number.isFinite(mm)) return null;
+      if (h < 0 || h > 23 || mm < 0 || mm > 59) return null;
+      return h;
+    }
+
+    // Formato h:mm AM/PM
+    const m12 = raw.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (m12) {
+      let h = Number.parseInt(m12[1], 10);
+      const mm = Number.parseInt(m12[2], 10);
+      const periodo = m12[3].toUpperCase();
+      if (h < 1 || h > 12 || mm < 0 || mm > 59) return null;
+      if (periodo === 'PM' && h !== 12) h += 12;
+      if (periodo === 'AM' && h === 12) h = 0;
+      return h;
+    }
+
+    return null;
+  };
 
   // Formatear fecha para mostrar
   const formatearFecha = (fechaISO) => {
@@ -88,37 +200,88 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
   };
 
   const handleNuevaBusqueda = useCallback(async () => {
+    // Si hay catálogo de ubicaciones, intentamos resolver IDs (sin depender de setState async).
+    const origenResolvedId =
+      ubicacionesItems.length > 0
+        ? formTemporal.origenId ||
+        (formTemporal.origen
+          ? ubicacionesItems.find(
+            u => u.city.toLowerCase() === formTemporal.origen.toLowerCase()
+          )?.idUbicacion
+          : "")
+        : formTemporal.origenId;
+
+    const destinoResolvedId =
+      ubicacionesItems.length > 0
+        ? formTemporal.destinoId ||
+        (formTemporal.destino
+          ? ubicacionesItems.find(
+            u => u.city.toLowerCase() === formTemporal.destino.toLowerCase()
+          )?.idUbicacion
+          : "")
+        : formTemporal.destinoId;
+
+    if (ubicacionesItems.length > 0) {
+      if (!origenResolvedId) {
+        alert("Selecciona un origen válido");
+        return;
+      }
+      if (!destinoResolvedId) {
+        alert("Selecciona un destino válido");
+        return;
+      }
+    }
+
+    const busquedaToApply = {
+      ...formTemporal,
+      origenId: origenResolvedId || "",
+      destinoId: destinoResolvedId || "",
+    };
+
     // Validar que origen y destino sean diferentes
-    if (formTemporal.origen.toLowerCase() === formTemporal.destino.toLowerCase()) {
+    if (busquedaToApply.origenId && busquedaToApply.destinoId) {
+      if (String(busquedaToApply.origenId) === String(busquedaToApply.destinoId)) {
+        alert("El origen y destino no pueden ser iguales");
+        return;
+      }
+    } else if (
+      busquedaToApply.origen &&
+      busquedaToApply.destino &&
+      busquedaToApply.origen.toLowerCase() === busquedaToApply.destino.toLowerCase()
+    ) {
       alert("El origen y destino no pueden ser iguales");
       return;
     }
 
     // Aplicar los cambios
-    setBusqueda(formTemporal);
-    
+    setBusqueda(busquedaToApply);
+
     // Obtener viajes desde la API
     await obtenerViajes(
-      formTemporal.origen,
-      formTemporal.destino,
-      formTemporal.fecha,
-      formTemporal.fechaRegreso
+      busquedaToApply.origen,
+      busquedaToApply.destino,
+      busquedaToApply.origenId,
+      busquedaToApply.destinoId,
+      busquedaToApply.fecha,
+      busquedaToApply.fechaRegreso
     );
-  }, [formTemporal, obtenerViajes]);
+  }, [formTemporal, obtenerViajes, ubicacionesItems]);
 
   const handleIntercambiar = useCallback(() => {
     setFormTemporal(prev => ({
       ...prev,
       origen: prev.destino,
-      destino: prev.origen
+      destino: prev.origen,
+      origenId: prev.destinoId,
+      destinoId: prev.origenId,
     }));
   }, []);
 
   const viajesFiltrados = viajes.filter(viaje => {
     if (filtroHorario === "todos") return true;
-    const hora = parseInt(viaje.horaSalida.split(":")[0]);
-    const periodo = viaje.horaSalida.includes("PM") ? hora + 12 : hora;
-    
+    const periodo = parseHoraTo24(viaje.horaSalida);
+    if (periodo === null) return true;
+
     if (filtroHorario === "manana") return periodo >= 6 && periodo < 12;
     if (filtroHorario === "tarde") return periodo >= 12 && periodo < 18;
     if (filtroHorario === "noche") return periodo >= 18 && periodo < 24;
@@ -129,20 +292,18 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Navegación */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-white shadow-lg" : "bg-blue-700"
-      }`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-lg" : "bg-blue-700"
+        }`}>
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md cursor-pointer" onClick={() => navigate('/')}>
+              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md cursor-pointer" onClick={() => navigate('/')}>
                 <span className="text-white font-bold text-lg">LT</span>
               </div>
-              <span 
+              <span
                 onClick={() => navigate('/')}
-                className={`font-bold text-xl transition-colors cursor-pointer ${
-                  scrolled ? "text-gray-900" : "text-white"
-                }`}>
+                className={`font-bold text-xl transition-colors cursor-pointer ${scrolled ? "text-gray-900" : "text-white"
+                  }`}>
                 La Tribu
               </span>
             </div>
@@ -161,7 +322,7 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
           <p className="text-white/90 text-sm mb-4">
             ¡Bienvenido a La Tribu! Recuerda: los precios online son exclusivos de nuestra web y pueden cambiar en otros puntos de venta
           </p>
-          
+
           <div className="bg-white rounded-xl shadow-xl p-4">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
               <div className="md:col-span-3">
@@ -172,16 +333,17 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
                   </div>
                   <CityAutocomplete
                     value={formTemporal.origen}
-                    onChange={(value) => setFormTemporal(prev => ({ ...prev, origen: value }))}
-                    onSelect={(city) => setFormTemporal(prev => ({ ...prev, origen: city.city }))}
+                    onChange={(value) => setFormTemporal(prev => ({ ...prev, origen: value, origenId: "" }))}
+                    onSelect={(city) => setFormTemporal(prev => ({ ...prev, origen: city.city, origenId: city.idUbicacion || city.id || "" }))}
                     placeholder="Ciudad de origen"
+                    items={ubicacionesItems}
                     inputClassName="w-full pl-10 pr-3 py-2.5 bg-white border-2 border-blue-300 rounded-lg text-sm font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"
                   />
                 </div>
               </div>
 
               <div className="md:col-span-1 flex justify-center">
-                <button 
+                <button
                   onClick={handleIntercambiar}
                   className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
                   <md-icon className="text-blue-600">swap_horiz</md-icon>
@@ -196,9 +358,10 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
                   </div>
                   <CityAutocomplete
                     value={formTemporal.destino}
-                    onChange={(value) => setFormTemporal(prev => ({ ...prev, destino: value }))}
-                    onSelect={(city) => setFormTemporal(prev => ({ ...prev, destino: city.city }))}
+                    onChange={(value) => setFormTemporal(prev => ({ ...prev, destino: value, destinoId: "" }))}
+                    onSelect={(city) => setFormTemporal(prev => ({ ...prev, destino: city.city, destinoId: city.idUbicacion || city.id || "" }))}
                     placeholder="Ciudad de destino"
+                    items={ubicacionesItems}
                     inputClassName="w-full pl-10 pr-3 py-2.5 bg-white border-2 border-blue-300 rounded-lg text-sm font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"
                   />
                 </div>
@@ -233,7 +396,7 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
               </div>
 
               <div className="md:col-span-1">
-                <button 
+                <button
                   onClick={handleNuevaBusqueda}
                   disabled={isLoading}
                   className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
@@ -277,11 +440,10 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
               <button
                 key={filtro.id}
                 onClick={() => setFiltroHorario(filtro.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
-                  filtroHorario === filtro.id
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${filtroHorario === filtro.id
                     ? "bg-blue-600 text-white shadow-md"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 <md-icon className="text-lg">{filtro.icon}</md-icon>
                 {filtro.label}
@@ -339,7 +501,7 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
                   {/* Logo y categoría */}
                   <div className="md:col-span-2">
                     <div className="flex flex-col items-center gap-2">
-                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                      <div className="w-16 h-16 rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
                         <span className="text-white font-black text-xl">LT</span>
                       </div>
                       <div className="text-center">
@@ -400,7 +562,7 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
                       </div>
                     </div>
 
-                    <button 
+                    <button
                       onClick={() => {
                         setSelectedViaje(viaje);
                         setSeatsModalOpen(true);
@@ -433,7 +595,7 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
       </div>
 
       {/* Modal de sillas */}
-      <SeatsModal 
+      <SeatsModal
         isOpen={seatsModalOpen}
         onClose={() => {
           setSeatsModalOpen(false);

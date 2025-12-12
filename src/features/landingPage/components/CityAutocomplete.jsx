@@ -48,7 +48,7 @@ const COLOMBIAN_CITIES = {
     { city: "Copacabana", department: "Copacabana" },
     { city: "Girardota", department: "Girardota" },
     { city: "Marinilla", department: "Marinilla" },
-    {city: "Carepa", department: "Carepa"}
+    { city: "Carepa", department: "Carepa" }
   ],
   CAUCA: [
     { city: "Popayan", department: "Popayan" },
@@ -102,8 +102,9 @@ const ALL_CITIES = Object.entries(COLOMBIAN_CITIES).flatMap(([dept, cities]) =>
 const CityAutocomplete = memo(
   ({
     value = "",
-    onChange = () => {},
-    onSelect = () => {},
+    onChange = () => { },
+    onSelect = () => { },
+    items = null,
     placeholder = "Buscar ciudad",
     className = "",
     inputClassName = "",
@@ -125,6 +126,37 @@ const CityAutocomplete = memo(
       };
     }, []);
 
+    const sourceItems = React.useMemo(() => {
+      if (Array.isArray(items) && items.length > 0) {
+        return items
+          .map((item) => {
+            const city =
+              item?.city ||
+              item?.nombreUbicacion ||
+              item?.nombre ||
+              item?.label ||
+              "";
+
+            const department =
+              item?.department || item?.direccion || item?.subtitle || "";
+
+            const id = item?.idUbicacion || item?.id || item?.value;
+
+            return {
+              ...item,
+              id,
+              idUbicacion: id,
+              city,
+              department,
+              departamento: item?.departamento || item?.group || "UBICACIONES",
+            };
+          })
+          .filter((x) => x.city);
+      }
+
+      return ALL_CITIES;
+    }, [items]);
+
     // Buscar ciudades
     const searchCities = useCallback((query) => {
       if (!query.trim() || query.length < 1) {
@@ -134,7 +166,7 @@ const CityAutocomplete = memo(
       }
 
       const queryLower = query.toLowerCase();
-      const filtered = ALL_CITIES.filter(
+      const filtered = sourceItems.filter(
         (item) =>
           item.city.toLowerCase().includes(queryLower) ||
           item.department.toLowerCase().includes(queryLower)
@@ -143,7 +175,7 @@ const CityAutocomplete = memo(
       setSuggestions(filtered);
       setShowSuggestions(filtered.length > 0);
       setSelectedIndex(-1);
-    }, []);
+    }, [sourceItems]);
 
     // Manejar cambio en input
     const handleInputChange = useCallback(
@@ -236,7 +268,7 @@ const CityAutocomplete = memo(
             placeholder={placeholder}
             disabled={disabled}
             autoComplete="off"
-            className={inputClassName || "w-full pl-10 pr-3 py-2.5 bg-white border-2 border-blue-300 rounded-lg text-sm font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"}
+            className={inputClassName || "input w-full pl-10 text-primary placeholder-secondary bg-fill border-border"}
           />
         </div>
 
@@ -244,7 +276,7 @@ const CityAutocomplete = memo(
         {showSuggestions && suggestions.length > 0 && (
           <div
             ref={suggestionsRef}
-            className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+            className="absolute z-50 w-full mt-2 bg-fill border border-border rounded-xl shadow-xl overflow-hidden"
             style={{ maxHeight: "300px", overflowY: "auto" }}
           >
             {/* Agrupar por departamento */}
@@ -258,7 +290,7 @@ const CityAutocomplete = memo(
             ).map(([dept, cities]) => (
               <div key={dept}>
                 {/* Header del departamento */}
-                <div className="px-4 py-2 bg-gray-100 font-bold text-gray-700 text-xs uppercase tracking-wide border-b border-gray-200">
+                <div className="px-4 py-2 bg-background font-bold text-secondary text-caption uppercase tracking-wider border-b border-border">
                   {dept}
                 </div>
 
@@ -272,18 +304,17 @@ const CityAutocomplete = memo(
                       key={`${dept}-${suggestion.city}`}
                       type="button"
                       onClick={() => handleSelect(suggestion)}
-                      className={`w-full text-left px-4 py-3 transition-colors border-b border-gray-100 last:border-b-0 flex items-start gap-3 ${
-                        isSelected ? "bg-blue-50" : "hover:bg-gray-50"
-                      }`}
+                      className={`w-full text-left px-4 py-3 transition-colors border-b border-border last:border-b-0 flex items-start gap-3 ${isSelected ? "bg-primary text-on-primary" : "hover:bg-background text-primary"
+                        }`}
                     >
-                      <md-icon className="text-gray-400 text-lg flex-shrink-0 mt-0.5">
+                      <md-icon className={`text-lg shrink-0 mt-0.5 ${isSelected ? "text-on-primary" : "text-secondary"}`}>
                         location_on
                       </md-icon>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className={`text-body2 font-medium ${isSelected ? "text-on-primary" : "text-primary"}`}>
                           {suggestion.city}
                         </p>
-                        <p className="text-xs text-gray-500 mt-0.5">
+                        <p className={`text-caption mt-0.5 ${isSelected ? "text-on-primary opacity-80" : "text-secondary"}`}>
                           {suggestion.department}
                         </p>
                       </div>
@@ -299,8 +330,8 @@ const CityAutocomplete = memo(
         {showSuggestions &&
           suggestions.length === 0 &&
           value.trim().length >= 1 && (
-            <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
-              <p className="text-sm text-gray-500 text-center">
+            <div className="absolute z-50 w-full mt-2 bg-fill border border-border rounded-xl shadow-xl p-4 text-center">
+              <p className="text-body2 text-secondary">
                 No se encontraron ciudades
               </p>
             </div>

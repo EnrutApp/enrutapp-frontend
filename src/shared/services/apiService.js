@@ -148,15 +148,19 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
     const requestId = originalRequest?._requestId;
 
-    const publicRoutes = [
-      '/auth/login',
-      '/auth/register',
-      '/auth/forgot-password',
-      '/auth/reset-password',
-    ];
-    const isPublicRoute = publicRoutes.some(route =>
-      originalRequest.url?.includes(route)
-    );
+    const url = originalRequest?.url || '';
+    const isPublicRoute =
+      // Auth
+      url.includes('/auth/login') ||
+      url.includes('/auth/register') ||
+      url.includes('/auth/forgot-password') ||
+      url.includes('/auth/reset-password') ||
+      // Catálogos públicos
+      url.includes('/ubicaciones') ||
+      // Compra pública (Turnos)
+      /^\/turnos\/buscar(\?|$)/.test(url) ||
+      /^\/turnos\/ruta\/.+/.test(url) ||
+      /^\/turnos\/[^/]+\/asientos(\?|$)/.test(url);
 
     if (error.response?.status === 401 && isPublicRoute) {
       const formattedError = {
