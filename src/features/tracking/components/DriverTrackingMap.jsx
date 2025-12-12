@@ -14,6 +14,7 @@ const DriverTrackingMap = memo(
     locations = [],
     selectedDriverId = null,
     driverInfo = null,
+    getDriverLabel = null,
     isConnected = false,
     isLoading = false,
     error = null,
@@ -157,7 +158,15 @@ const DriverTrackingMap = memo(
             >
               <div className="p-2 min-w-[200px]">
                 <div className="font-semibold text-gray-900 mb-1">
-                  Conductor #{selectedMarker.driverId}
+                  {(() => {
+                    const label =
+                      typeof getDriverLabel === 'function'
+                        ? getDriverLabel(selectedMarker.driverId)
+                        : null;
+                    return label
+                      ? `Conductor: ${label}`
+                      : `Conductor #${selectedMarker.driverId}`;
+                  })()}
                 </div>
                 <div className="text-xs text-gray-600 mb-2">
                   {selectedMarker.latitude.toFixed(6)},{' '}

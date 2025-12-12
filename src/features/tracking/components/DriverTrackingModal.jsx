@@ -42,6 +42,10 @@ const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
       `Conductor #${conductor.idConductor}`
     : `Conductor #${driverId}`;
 
+  const driverLabel = conductor
+    ? `${conductor.usuario?.nombre || ''} ${conductor.usuario?.apellido || ''}`.trim()
+    : null;
+
   const isOnline = isDriverOnline(driverId || conductor?.idConductor);
 
   const formatTime = date => {
@@ -91,6 +95,7 @@ const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
                 isLoading={isLoading}
                 height="100%"
                 showStatusPanel={false}
+                getDriverLabel={() => driverLabel}
               />
             </div>
 

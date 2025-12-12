@@ -3,7 +3,7 @@
  * Vista de administrador para monitorear todos los conductores
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/button/filled-tonal-button.js';
@@ -69,6 +69,23 @@ const TrackingPage = () => {
     return 0;
   });
 
+  const driverLabelById = useMemo(() => {
+    const map = new Map();
+    conductores.forEach(conductor => {
+      const nombre =
+        `${conductor.usuario?.nombre || ''} ${conductor.usuario?.apellido || ''}`.trim();
+      if (nombre) {
+        map.set(conductor.idConductor, nombre);
+      }
+    });
+    return map;
+  }, [conductores]);
+
+  const getDriverLabel = useCallback(
+    driverId => driverLabelById.get(driverId) || null,
+    [driverLabelById]
+  );
+
   const onlineCount = conductoresConUbicacion.filter(c => c.isOnline).length;
   const offlineCount = conductoresConUbicacion.length - onlineCount;
 
@@ -108,6 +125,7 @@ const TrackingPage = () => {
             isLoading={isLoading}
             error={error}
             onDriverSelect={handleDriverSelect}
+            getDriverLabel={getDriverLabel}
             height="100%"
             showStatusPanel={true}
           />
