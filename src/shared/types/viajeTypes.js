@@ -74,12 +74,12 @@
  */
 
 /**
- * Estructura esperada de la respuesta del endpoint /viajes/buscar
- * 
- * GET /viajes/buscar?origen=Medellín&destino=Cartagena&fecha=2025-12-10
- * 
+ * Estructura esperada de la respuesta del endpoint /turnos/buscar
+ *
+ * GET /turnos/buscar?origen=Medellín&destino=Cartagena&fecha=2025-12-10
+ *
  * Response: Array<Viaje>
- * 
+ *
  * Ejemplo:
  * [
  *   {
@@ -119,33 +119,33 @@
 
 export const VIAJE_SCHEMA = {
   viaje: {
-    id: "number",
-    turnoId: "number",
-    horaSalida: "string",
-    horaLlegada: "string",
-    fecha: "string",
-    origenTerminal: "string",
-    destinoTerminal: "string",
-    precio: "number",
-    precioAnterior: "number",
-    vehiculo: "object", // Vehiculo
-    conductor: "object", // Conductor
-    asientosOcupados: "array", // Array<number>
-    empresa: "string",
-    categoria: "string",
-    categoriaDesc: "string",
-    disponible: "boolean",
-    etiqueta: "string (opcional)",
-    icono: "string",
+    id: 'number',
+    turnoId: 'number',
+    horaSalida: 'string',
+    horaLlegada: 'string',
+    fecha: 'string',
+    origenTerminal: 'string',
+    destinoTerminal: 'string',
+    precio: 'number',
+    precioAnterior: 'number',
+    vehiculo: 'object', // Vehiculo
+    conductor: 'object', // Conductor
+    asientosOcupados: 'array', // Array<number>
+    empresa: 'string',
+    categoria: 'string',
+    categoriaDesc: 'string',
+    disponible: 'boolean',
+    etiqueta: 'string (opcional)',
+    icono: 'string',
   },
   vehiculo: {
-    id: "number",
-    placa: "string",
-    modelo: "string",
-    asientos: "number",
-    tipo: "string",
-    linea: "string (opcional)",
-    estado: "string (opcional)",
+    id: 'number',
+    placa: 'string',
+    modelo: 'string',
+    asientos: 'number',
+    tipo: 'string',
+    linea: 'string (opcional)',
+    estado: 'string (opcional)',
   },
 };
 

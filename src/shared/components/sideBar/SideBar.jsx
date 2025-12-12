@@ -26,12 +26,12 @@ const SideBar = () => {
     return saved
       ? JSON.parse(saved)
       : {
-          0: false,
-          1: true,
-          2: true,
-          3: true,
-          4: true,
-        };
+        0: false,
+        1: true,
+        2: true,
+        3: true,
+        4: true,
+      };
   });
 
   const isActive = path => {
@@ -147,13 +147,6 @@ const SideBar = () => {
         label: 'Rutas',
         icon: 'route',
       });
-
-    if (permissions.includes('VER_VIAJES') || permissions.includes('VER_RUTAS'))
-      transporteItems.push({
-        path: '/admin/viajes',
-        label: 'Viajes',
-        icon: 'map',
-      });
     if (permissions.includes('VER_UBICACIONES'))
       transporteItems.push({
         path: '/admin/ubicaciones',
@@ -260,7 +253,6 @@ const SideBar = () => {
         items: [
           { path: '/admin/vehiculos', label: 'Vehículos', icon: 'drive_eta' },
           { path: '/admin/rutas', label: 'Rutas', icon: 'route' },
-          { path: '/admin/viajes', label: 'Viajes', icon: 'map' },
           {
             path: '/admin/ubicaciones',
             label: 'Ubicaciones',
@@ -428,11 +420,10 @@ const SideBar = () => {
               </div>
             )}
             <ul
-              className={`space-y-1 transition-all duration-500 ease-in-out overflow-hidden ${
-                section.title && collapsedSections[sectionIndex]
+              className={`space-y-1 transition-all duration-500 ease-in-out overflow-hidden ${section.title && collapsedSections[sectionIndex]
                   ? 'max-h-0 blur-md opacity-0'
                   : 'max-h-[1000px] blur-0 opacity-100'
-              }`}
+                }`}
             >
               {section.items.map(({ path, label, icon }) => (
                 <li key={path}>
@@ -440,10 +431,9 @@ const SideBar = () => {
                     to={path}
                     className={`
                       sidebar-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ml-2
-                      ${
-                        isActive(path)
-                          ? 'bg-blue bg-opacity-10 text-blue  scale-105'
-                          : 'text-secondary hover:bg-blue hover:bg-opacity-5 hover:scale-[1.02] hover:text-primary'
+                      ${isActive(path)
+                        ? 'bg-blue bg-opacity-10 text-blue  scale-105'
+                        : 'text-secondary hover:bg-blue hover:bg-opacity-5 hover:scale-[1.02] hover:text-primary'
                       }
                     `}
                     style={{ transformOrigin: 'left' }}

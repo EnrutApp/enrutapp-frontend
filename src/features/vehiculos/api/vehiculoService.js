@@ -9,6 +9,7 @@ function buildVehiculoFormData(data, file) {
     idTipoVehiculo: data.idTipoVehiculo,
     idMarcaVehiculo: data.idMarcaVehiculo,
     placa: data.placa,
+    tipoPlaca: data.tipoPlaca,
     linea: data.linea,
     modelo: data.modelo,
     color: data.color,

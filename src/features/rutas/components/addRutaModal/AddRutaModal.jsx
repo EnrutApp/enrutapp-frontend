@@ -23,6 +23,7 @@ import {
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
+import { formatTiempoEstimado } from '../../utils/formatTiempoEstimado';
 
 const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
   const isEditMode = !!itemData;
@@ -49,6 +50,10 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
   const [isParadaModalOpen, setIsParadaModalOpen] = useState(false);
   const [tipoUbicacion, setTipoUbicacion] = useState(null);
   const [paradas, setParadas] = useState([]);
+
+  const { valor: tiempoValor, unidad: tiempoUnidad } = formatTiempoEstimado(
+    formData.tiempo
+  );
 
   useEffect(() => {
     if (!isOpen) {
@@ -607,10 +612,10 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
       console.error('Error submitting ruta:', err);
       setError(
         err.response?.data?.message ||
-          err.message ||
-          (isEditMode
-            ? 'Error al actualizar la ruta'
-            : 'Error al crear la ruta')
+        err.message ||
+        (isEditMode
+          ? 'Error al actualizar la ruta'
+          : 'Error al crear la ruta')
       );
     } finally {
       setLoading(false);
@@ -718,7 +723,7 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                                 String(p.idUbicacion) === String(u.idUbicacion)
                             ) &&
                             String(u.idUbicacion) !==
-                              String(formData.idUbicacionDestino)
+                            String(formData.idUbicacionDestino)
                         )
                         .map(ubicacion => (
                           <option
@@ -782,7 +787,7 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                                 String(p.idUbicacion) === String(u.idUbicacion)
                             ) &&
                             String(u.idUbicacion) !==
-                              String(formData.idUbicacionOrigen)
+                            String(formData.idUbicacionOrigen)
                         )
                         .map(ubicacion => (
                           <option
@@ -918,9 +923,9 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                           </p>
                         </div>
                         <p className="text-primary text-2xl font-bold">
-                          {formData.tiempo || '0:00'}
+                          {tiempoValor}
                           <span className="text-sm font-normal text-secondary ml-1">
-                            hrs
+                            {tiempoUnidad}
                           </span>
                         </p>
                       </div>

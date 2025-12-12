@@ -88,6 +88,22 @@ export const userService = {
       throw error;
     }
   },
+
+  verificarPerfilCliente: async () => {
+    try {
+      return await apiClient.get('/usuarios/verificar-perfil/me');
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  completarPerfilCliente: async data => {
+    try {
+      return await apiClient.post('/usuarios/completar-perfil/me', data);
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default userService;

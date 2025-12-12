@@ -22,9 +22,13 @@ export const turnoService = {
     return await apiClient.post('/turnos', {
       idConductor: data.idConductor,
       idVehiculo: data.idVehiculo,
+      idRuta: data.idRuta,
       fecha: data.fecha,
       hora: data.hora,
-      estado: data.estado || 'Programado',
+      estado: 'Programado',
+      ...(typeof data.cuposDisponibles === 'number'
+        ? { cuposDisponibles: data.cuposDisponibles }
+        : {}),
     });
   },
 

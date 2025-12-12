@@ -2,6 +2,7 @@ import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/switch/switch.js';
 import '@material/web/checkbox/checkbox.js';
+import '@material/web/progress/linear-progress.js';
 import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
 import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
 import AddUserModal from '../usuarios/components/addUserModal/AddUserModal';
@@ -533,12 +534,19 @@ const ClientesPage = () => {
 
               <div className="mt-3">
                 {loading && (
-                  <div className="content-box-outline-4-small mb-3">
-                    <div className="flex items-center gap-2 p-3">
-                      <md-circular-progress
-                        indeterminate
-                      ></md-circular-progress>
-                      <span className="text-secondary">Cargando clientes…</span>
+                  <div
+                    className="flex items-center justify-center w-full list-enter text-center content-box-outline-2-small"
+                    style={{ height: 'calc(60vh - 0px)' }}
+                  >
+                    <div
+                      className="flex flex-col items-center gap-3"
+                      style={{ width: '200px' }}
+                    >
+                      <md-icon className="text-secondary mb-4">group</md-icon>
+                      <span className="text-secondary">
+                        Cargando clientes...
+                      </span>
+                      <md-linear-progress indeterminate></md-linear-progress>
                     </div>
                   </div>
                 )}

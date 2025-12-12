@@ -1,5 +1,40 @@
 import apiClient from '../../../shared/services/apiService';
 
+const persistAuthSession = (response, remember) => {
+  if (response.success && response.data?.access_token) {
+    const token = response.data.access_token;
+    const refreshToken = response.data.refresh_token;
+
+    if (!token || typeof token !== 'string' || token.split('.').length !== 3) {
+      throw new Error('Token inválido recibido del servidor');
+    }
+
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('token_expires_in');
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('refresh_token');
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('token_expires_in');
+
+    const storage = remember ? localStorage : sessionStorage;
+    storage.setItem('access_token', token);
+
+    if (refreshToken) {
+      storage.setItem('refresh_token', refreshToken);
+    }
+
+    if (response.data.user) {
+      storage.setItem('user', JSON.stringify(response.data.user));
+    }
+
+    if (response.data.expires_in) {
+      storage.setItem('token_expires_in', response.data.expires_in);
+    }
+  }
+};
+
 export const authService = {
   login: async credentials => {
     const response = await apiClient.post('/auth/login', {
@@ -7,43 +42,18 @@ export const authService = {
       contrasena: credentials.password,
     });
 
-    if (response.success && response.data?.access_token) {
-      const token = response.data.access_token;
-      const refreshToken = response.data.refresh_token;
+    persistAuthSession(response, !!credentials.remember);
 
-      if (
-        !token ||
-        typeof token !== 'string' ||
-        token.split('.').length !== 3
-      ) {
-        throw new Error('Token inválido recibido del servidor');
-      }
+    return response;
+  },
 
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('token_expires_in');
-      sessionStorage.removeItem('access_token');
-      sessionStorage.removeItem('refresh_token');
-      sessionStorage.removeItem('user');
-      sessionStorage.removeItem('token_expires_in');
+  loginWithGoogle: async ({ idToken, remember }) => {
+    const response = await apiClient.post('/auth/google', {
+      idToken,
+      remember: !!remember,
+    });
 
-      const storage = credentials.remember ? localStorage : sessionStorage;
-      storage.setItem('access_token', token);
-
-      if (refreshToken) {
-        storage.setItem('refresh_token', refreshToken);
-      }
-
-      if (response.data.user) {
-        storage.setItem('user', JSON.stringify(response.data.user));
-      }
-
-      if (response.data.expires_in) {
-        storage.setItem('token_expires_in', response.data.expires_in);
-      }
-    }
-
+    persistAuthSession(response, !!remember);
     return response;
   },
 

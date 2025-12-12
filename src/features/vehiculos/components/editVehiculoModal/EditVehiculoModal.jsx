@@ -72,6 +72,7 @@ export default function EditVehiculoModal({
           vehiculo?.propietarioExternoDocumento || '',
         propietarioExternoTelefono: vehiculo?.propietarioExternoTelefono || '',
         placa: vehiculo?.placa || '',
+        tipoPlaca: vehiculo?.tipoPlaca || 'BLANCA',
         linea: vehiculo?.linea || vehiculo?.name || '',
         modelo: vehiculo?.modelo || vehiculo?.model || '',
         color: vehiculo?.color || '',
@@ -179,6 +180,7 @@ export default function EditVehiculoModal({
           ? form.propietarioExternoTelefono
           : null,
         placa: form.placa,
+        tipoPlaca: form.tipoPlaca,
         linea: form.linea,
         modelo: Number(form.modelo),
         color: form.color,
@@ -419,6 +421,24 @@ export default function EditVehiculoModal({
                   </div>
                 </div>
 
+                <div className="flex flex-col gap-2">
+                  <label className="subtitle1 text-primary font-medium">
+                    Tipo de placa <span className="text-red">*</span>
+                  </label>
+                  <div className="select-wrapper w-full">
+                    <md-icon className="text-sm">arrow_drop_down</md-icon>
+                    <select
+                      name="tipoPlaca"
+                      value={form.tipoPlaca || 'BLANCA'}
+                      onChange={handleChange}
+                      className="select-filter w-full px-4 py-3 input bg-fill border border-border rounded-lg text-primary focus:outline-none focus:border-primary transition-colors"
+                    >
+                      <option value="BLANCA">Placa blanca</option>
+                      <option value="AMARILLA">Placa amarilla</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div className="pt-4 border-t border-border mt-2">
                   <div className="flex items-center justify-between mb-4">
                     <div>
@@ -574,12 +594,11 @@ export default function EditVehiculoModal({
                           target: { name: 'capacidadPasajeros', value: '4' },
                         })
                       }
-                      className={`px-4 py-3 rounded-lg font-medium transition-all ${
-                        form.capacidadPasajeros === '4' ||
-                        form.capacidadPasajeros === 4
+                      className={`px-4 py-3 rounded-lg font-medium transition-all ${form.capacidadPasajeros === '4' ||
+                          form.capacidadPasajeros === 4
                           ? 'bg-primary text-on-primary'
                           : 'bg-fill border border-border text-secondary hover:bg-border'
-                      }`}
+                        }`}
                     >
                       4
                     </button>
@@ -590,12 +609,11 @@ export default function EditVehiculoModal({
                           target: { name: 'capacidadPasajeros', value: '5' },
                         })
                       }
-                      className={`px-4 py-3 rounded-lg font-medium transition-all ${
-                        form.capacidadPasajeros === '5' ||
-                        form.capacidadPasajeros === 5
+                      className={`px-4 py-3 rounded-lg font-medium transition-all ${form.capacidadPasajeros === '5' ||
+                          form.capacidadPasajeros === 5
                           ? 'bg-primary text-on-primary'
                           : 'bg-fill border border-border text-secondary hover:bg-border'
-                      }`}
+                        }`}
                     >
                       5
                     </button>

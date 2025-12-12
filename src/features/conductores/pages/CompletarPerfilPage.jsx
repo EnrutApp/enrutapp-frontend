@@ -75,7 +75,7 @@ function CompletarPerfilPage() {
       console.log('Respuesta del servidor:', response);
 
       if (response.success) {
-        window.location.href = '/';
+        window.location.href = '/dashboard';
       } else {
         setError(response.error || 'Error al completar el perfil');
       }

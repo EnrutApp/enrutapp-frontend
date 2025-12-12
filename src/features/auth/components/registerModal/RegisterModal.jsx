@@ -1,6 +1,6 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import '@material/web/progress/linear-progress.js';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -17,10 +17,15 @@ const ModalRegister = ({ isOpen, onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [step, setStep] = useState(1);
-  const { register: registerUser, isLoading } = useAuth();
+  const { register: registerUser, loginWithGoogle, isLoading } = useAuth();
   const [registerError, setRegisterError] = useState('');
   const [step1Loading, setStep1Loading] = useState(false);
+  const [isGoogleReady, setIsGoogleReady] = useState(false);
   const navigate = useNavigate();
+
+  const googleHostRef = useRef(null);
+  const googleButtonRef = useRef(null);
+  const googleRenderedRef = useRef(false);
 
   const {
     register,
@@ -45,6 +50,62 @@ const ModalRegister = ({ isOpen, onClose }) => {
       onClose();
     }
   };
+
+  // Opción de registro/inicio con Google (usa GIS; el backend crea Cliente y redirige a completar perfil)
+  useEffect(() => {
+    if (!isOpen) return;
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+
+    const getButtonWidth = () => {
+      const width = googleHostRef.current?.clientWidth || 360;
+      return Math.max(240, Math.min(420, width));
+    };
+
+    const initGoogle = () => {
+      if (googleRenderedRef.current) return true;
+      const googleObj = window.google;
+      if (!googleObj?.accounts?.id) return false;
+      if (!googleButtonRef.current) return false;
+
+      const alreadyInitialized = !!window.__enrutappGoogleIdInitialized;
+      if (!alreadyInitialized) {
+        googleObj.accounts.id.initialize({
+          client_id: clientId,
+          callback: async response => {
+            try {
+              await loginWithGoogle({ idToken: response.credential, remember: false });
+              handleClose();
+              navigate('/dashboard', { replace: true });
+            } catch {
+              // errores vía AuthContext
+            }
+          },
+        });
+        window.__enrutappGoogleIdInitialized = true;
+      }
+
+      googleObj.accounts.id.renderButton(googleButtonRef.current, {
+        theme: 'outline',
+        size: 'large',
+        shape: 'pill',
+        width: getButtonWidth(),
+      });
+
+      googleRenderedRef.current = true;
+      setIsGoogleReady(true);
+      return true;
+    };
+
+    if (initGoogle()) return;
+
+    const intervalId = setInterval(() => {
+      if (initGoogle()) clearInterval(intervalId);
+    }, 250);
+
+    return () => clearInterval(intervalId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, loginWithGoogle]);
 
   const { data: roles, isLoading: rolesLoading } = useApi(
     catalogService.getRoles,
@@ -119,7 +180,7 @@ const ModalRegister = ({ isOpen, onClose }) => {
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="xl">
-      <main className="p-3 list-enter max-h-[90vh] overflow-y-auto scrollbar-hide rounded-xl shadow-lg">
+      <main className="p-5 list-enter max-h-[90vh] overflow-y-auto scrollbar-hide rounded-xl shadow-lg">
         <div className="absolute left-5 top-4 z-20">
           <button
             onClick={handleClose}
@@ -310,7 +371,7 @@ const ModalRegister = ({ isOpen, onClose }) => {
                   </div>
                 </div>
 
-                <div className="flex justify-end items-center w-full mx-auto max-w-md">
+                <div className="flex flex-col justify-end items-center w-full mx-auto max-w-md gap-3">
                   <button
                     type="button"
                     className="btn btn-secondary w-full flex items-center justify-center gap-2"
@@ -359,6 +420,41 @@ const ModalRegister = ({ isOpen, onClose }) => {
                     )}
                     {step1Loading ? 'Validando...' : 'Siguiente'}
                   </button>
+
+                  <div className="flex items-center gap-3 w-full">
+                    <div className="flex-1 h-px border border-border" />
+                    <span className="text-secondary text-xs">o</span>
+                    <div className="flex-1 h-px border border-border" />
+                  </div>
+
+                  <div ref={googleHostRef} className="relative w-full group">
+                    <button
+                      type="button"
+                      disabled={!isGoogleReady || isLoading}
+                      className="w-full btn btn-secondary font-medium text-subtitle1 flex items-center justify-center gap-2 transition-all duration-150 group-hover:opacity-90 group-hover:-translate-y-px"
+                    >
+                      <img
+                        src="/googleIcon.png"
+                        alt="Google"
+                        className="w-5 h-5 object-contain"
+                        draggable={false}
+                      />
+                      <span>Continuar con Google</span>
+                      {isLoading && (
+                        <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      )}
+                    </button>
+
+                    <div
+                      className={`absolute inset-0 z-10 ${isGoogleReady ? 'opacity-0' : 'opacity-0 pointer-events-none'
+                        }`}
+                    >
+                      <div
+                        ref={googleButtonRef}
+                        className="w-full flex justify-center"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

@@ -68,16 +68,24 @@ const Contratos = withLazyLoading(
   'Cargando gestión de contratos...'
 );
 
+const ContratoCreate = withLazyLoading(
+  lazy(() => import('../../features/contratos/pages/ContratoCreatePage')),
+  'Cargando creación de contrato...'
+);
+
+const ContratoDetail = withLazyLoading(
+  lazy(() => import('../../features/contratos/pages/ContratoDetailPage')),
+  'Cargando contrato...'
+);
+
 const Tracking = withLazyLoading(
   lazy(() => import('../../features/tracking/TrackingPage')),
   'Cargando tracking de conductores...'
 );
-
 const CalendarioPage = withLazyLoading(
   lazy(() => import('../../features/calendario/CalendarioPage')),
   'Cargando calendario...'
 );
-
 const AdminHomeWithErrorBoundary = withErrorBoundary(HomeAdmin, {
   title: 'Error en Dashboard',
   message: 'No se pudo cargar el dashboard de administrador',
@@ -119,14 +127,6 @@ export const adminRoutes = [
       crumb: () => 'Clientes',
     },
     permission: 'VER_CLIENTES',
-  },
-  {
-    path: ROUTES.ADMIN.VIAJE_DETALLE,
-    element: <ViajeDetailsWithErrorBoundary />,
-    handle: {
-      crumb: () => 'Detalle Viaje',
-    },
-    permission: 'VER_VIAJES',
   },
   {
     path: ROUTES.ADMIN.USUARIOS,
@@ -241,6 +241,28 @@ export const adminRoutes = [
     permission: 'VER_CONTRATOS',
   },
   {
+    path: ROUTES.ADMIN.CONTRATOS_NUEVO,
+    element: withErrorBoundary(ContratoCreate, {
+      title: 'Error en Creación de Contrato',
+      message: 'No se pudo cargar el formulario de creación de contrato',
+    })(),
+    handle: {
+      crumb: () => 'Nuevo contrato',
+    },
+    permission: 'VER_CONTRATOS',
+  },
+  {
+    path: ROUTES.ADMIN.CONTRATOS_DETALLE,
+    element: withErrorBoundary(ContratoDetail, {
+      title: 'Error en Contrato',
+      message: 'No se pudo cargar el detalle del contrato',
+    })(),
+    handle: {
+      crumb: () => 'Detalle',
+    },
+    permission: 'VER_CONTRATOS',
+  },
+  {
     path: ROUTES.ADMIN.TRACKING,
     element: withErrorBoundary(Tracking, {
       title: 'Error en Tracking',
@@ -250,17 +272,6 @@ export const adminRoutes = [
       crumb: () => 'Tracking',
     },
     permission: 'VER_TRACKING',
-  },
-  {
-    path: ROUTES.ADMIN.VIAJES,
-    element: withErrorBoundary(Viajes, {
-      title: 'Error en Gestión de Viajes',
-      message: 'No se pudo cargar la gestión de viajes',
-    })(),
-    handle: {
-      crumb: () => 'Viajes',
-    },
-    permission: 'VER_VIAJES',
   },
   {
     path: ROUTES.ADMIN.CALENDARIO,

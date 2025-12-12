@@ -3,7 +3,10 @@ import '@material/web/button/filled-button.js';
 import DeleteModal from '../../../shared/components/modal/deleteModal/DeleteModal';
 import apiClient from '../../../shared/services/apiService';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import GoogleMapComponent from '../../../shared/components/map/components/GoogleMapComponent';
+import { formatTiempoEstimado } from '../utils/formatTiempoEstimado';
+import ContratoQuickCreateModal from '../components/ContratoQuickCreateModal';
 
 const RutaProfilePage = ({
   ruta,
@@ -13,8 +16,10 @@ const RutaProfilePage = ({
   onEdit,
   onAdd,
 }) => {
+  const navigate = useNavigate();
   const [isClosing, setIsClosing] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isContratoModalOpen, setIsContratoModalOpen] = useState(false);
 
   if (!isOpen || !ruta) return null;
 
@@ -52,6 +57,10 @@ const RutaProfilePage = ({
   const destinoNombre =
     ruta.destino?.ubicacion?.nombreUbicacion || 'Sin destino';
 
+  const { valor: tiempoValor, unidad: tiempoUnidad } = formatTiempoEstimado(
+    ruta.tiempoEstimado
+  );
+
   return (
     <div
       className={`flex flex-col h-full ${isClosing ? 'profile-exit' : 'profile-enter'}`}
@@ -74,6 +83,15 @@ const RutaProfilePage = ({
           <h2 className="h4 font-medium text-primary">Rutas</h2>
         </div>
         <div className="flex gap-2">
+          <md-filled-button
+            className="btn-add px-6 py-2"
+            onClick={() => setIsContratoModalOpen(true)}
+          >
+            <md-icon slot="icon" className="text-sm text-on-primary">
+              description
+            </md-icon>
+            Crear contrato
+          </md-filled-button>
           <md-filled-button
             className="btn-add px-6 py-2"
             onClick={() => onEdit && onEdit(ruta)}
@@ -171,7 +189,8 @@ const RutaProfilePage = ({
                     Duración estimada
                   </p>
                   <p className="h3 font-normal">
-                    {ruta.tiempoEstimado || '0:00'}hrs
+                    {tiempoValor}
+                    {tiempoUnidad}
                   </p>
                 </div>
                 <div className="content-box-outline-3-small">
@@ -244,6 +263,13 @@ const RutaProfilePage = ({
         onConfirm={handleDeleteConfirm}
         itemType="ruta"
         itemName={`${origenNombre} - ${destinoNombre}`}
+      />
+
+      <ContratoQuickCreateModal
+        isOpen={isContratoModalOpen}
+        onClose={() => setIsContratoModalOpen(false)}
+        ruta={ruta}
+        navigate={navigate}
       />
     </div>
   );

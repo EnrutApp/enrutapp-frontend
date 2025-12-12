@@ -9,10 +9,8 @@ const Footer = memo(({ scrollToSection }) => {
       <div className="max-w-7xl mx-auto px-4 md:px-16">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           {/* Logo y descripción */}
-          <div>
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-black text-xl mb-4">
-              LT
-            </div>
+          <div className="gap-4 flex flex-col">
+            <img src="/logoLaTribu.png" alt="logo" width={82} />
             <p className="text-gray-400 text-sm">Tu compañero de viaje confiable desde hace más de 20 años.</p>
           </div>
 

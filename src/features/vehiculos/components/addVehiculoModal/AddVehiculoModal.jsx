@@ -16,6 +16,7 @@ const initialForm = {
   propietarioExternoDocumento: '',
   propietarioExternoTelefono: '',
   placa: '',
+  tipoPlaca: 'BLANCA',
   linea: '',
   modelo: '',
   color: '',
@@ -155,6 +156,7 @@ export default function AddVehiculoModal({
     if (!form.idTipoVehiculo) return 'Selecciona un tipo de vehículo';
     if (!form.idMarcaVehiculo) return 'Selecciona una marca';
     if (!form.placa) return 'La placa es obligatoria';
+    if (!form.tipoPlaca) return 'Selecciona el tipo de placa';
 
     if (form.isExternalOwner) {
       if (!form.propietarioExternoNombre)
@@ -304,11 +306,10 @@ export default function AddVehiculoModal({
                 <div
                   className={`
                                     flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 transform
-                                    ${
-                                      currentStep >= step
-                                        ? 'bg-primary text-on-primary shadow-md scale-110 ring-4 ring-primary/20'
-                                        : 'bg-fill text-secondary scale-100'
-                                    }
+                                    ${currentStep >= step
+                      ? 'bg-primary text-on-primary shadow-md scale-110 ring-4 ring-primary/20'
+                      : 'bg-fill text-secondary scale-100'
+                    }
                                     ${currentStep === step ? 'animate-pulse' : ''}
                                     font-semibold
                                 `}
@@ -484,6 +485,20 @@ export default function AddVehiculoModal({
                     </div>
                   </div>
 
+                  <div className="flex items-start gap-3">
+                    <md-icon className="text-primary mt-1">badge</md-icon>
+                    <div className="flex-1">
+                      <p className="text-xs text-secondary font-medium mb-1">
+                        Tipo de placa
+                      </p>
+                      <p className="text-primary font-medium">
+                        {form.tipoPlaca === 'AMARILLA'
+                          ? 'Placa amarilla'
+                          : 'Placa blanca'}
+                      </p>
+                    </div>
+                  </div>
+
                   {form.vin && (
                     <div className="flex items-start gap-3">
                       <md-icon className="text-primary mt-1">numbers</md-icon>
@@ -539,57 +554,57 @@ export default function AddVehiculoModal({
                   {(form.soatVencimiento ||
                     form.tecnomecanicaVencimiento ||
                     form.seguroVencimiento) && (
-                    <div className="flex items-start gap-3 pt-4 border-t border-border">
-                      <md-icon className="text-primary mt-1">
-                        event_note
-                      </md-icon>
-                      <div className="flex-1">
-                        <p className="text-xs text-secondary font-medium mb-2">
-                          Fechas de vencimiento
-                        </p>
-                        <div className="space-y-1">
-                          {form.soatVencimiento && (
-                            <p className="text-primary text-sm">
-                              <span className="text-secondary">SOAT:</span>{' '}
-                              {new Date(
-                                form.soatVencimiento
-                              ).toLocaleDateString('es-ES', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                              })}
-                            </p>
-                          )}
-                          {form.tecnomecanicaVencimiento && (
-                            <p className="text-primary text-sm">
-                              <span className="text-secondary">
-                                Tecnomecánica:
-                              </span>{' '}
-                              {new Date(
-                                form.tecnomecanicaVencimiento
-                              ).toLocaleDateString('es-ES', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                              })}
-                            </p>
-                          )}
-                          {form.seguroVencimiento && (
-                            <p className="text-primary text-sm">
-                              <span className="text-secondary">Seguro:</span>{' '}
-                              {new Date(
-                                form.seguroVencimiento
-                              ).toLocaleDateString('es-ES', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                              })}
-                            </p>
-                          )}
+                      <div className="flex items-start gap-3 pt-4 border-t border-border">
+                        <md-icon className="text-primary mt-1">
+                          event_note
+                        </md-icon>
+                        <div className="flex-1">
+                          <p className="text-xs text-secondary font-medium mb-2">
+                            Fechas de vencimiento
+                          </p>
+                          <div className="space-y-1">
+                            {form.soatVencimiento && (
+                              <p className="text-primary text-sm">
+                                <span className="text-secondary">SOAT:</span>{' '}
+                                {new Date(
+                                  form.soatVencimiento
+                                ).toLocaleDateString('es-ES', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                                })}
+                              </p>
+                            )}
+                            {form.tecnomecanicaVencimiento && (
+                              <p className="text-primary text-sm">
+                                <span className="text-secondary">
+                                  Tecnomecánica:
+                                </span>{' '}
+                                {new Date(
+                                  form.tecnomecanicaVencimiento
+                                ).toLocaleDateString('es-ES', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                                })}
+                              </p>
+                            )}
+                            {form.seguroVencimiento && (
+                              <p className="text-primary text-sm">
+                                <span className="text-secondary">Seguro:</span>{' '}
+                                {new Date(
+                                  form.seguroVencimiento
+                                ).toLocaleDateString('es-ES', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                                })}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
 
                 <div className="rounded-lg content-box-outline-4-small p-4 flex items-start gap-3">
@@ -726,7 +741,8 @@ export default function AddVehiculoModal({
                         e.key === 'Enter' &&
                         form.idTipoVehiculo &&
                         form.idMarcaVehiculo &&
-                        form.placa
+                        form.placa &&
+                        form.tipoPlaca
                       ) {
                         e.preventDefault();
                         handleNextStep();
@@ -812,6 +828,24 @@ export default function AddVehiculoModal({
                             placeholder="ABC123"
                             maxLength={10}
                           />
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="subtitle1 text-primary font-medium">
+                            Tipo de placa <span className="text-red">*</span>
+                          </label>
+                          <div className="select-wrapper w-full">
+                            <md-icon className="text-sm">arrow_drop_down</md-icon>
+                            <select
+                              name="tipoPlaca"
+                              value={form.tipoPlaca}
+                              onChange={handleChange}
+                              className="select-filter w-full px-4 input bg-surface border rounded-lg"
+                            >
+                              <option value="BLANCA">Placa blanca</option>
+                              <option value="AMARILLA">Placa amarilla</option>
+                            </select>
+                          </div>
                         </div>
 
                         <div className="flex flex-col gap-1">
@@ -1020,12 +1054,11 @@ export default function AddVehiculoModal({
                               },
                             })
                           }
-                          className={`px-4 py-3 rounded-lg font-medium transition-all ${
-                            form.capacidadPasajeros === '4' ||
-                            form.capacidadPasajeros === 4
+                          className={`px-4 py-3 rounded-lg font-medium transition-all ${form.capacidadPasajeros === '4' ||
+                              form.capacidadPasajeros === 4
                               ? 'bg-primary text-on-primary'
                               : 'bg-fill border border-border text-secondary hover:bg-border'
-                          }`}
+                            }`}
                         >
                           4
                         </button>
@@ -1039,12 +1072,11 @@ export default function AddVehiculoModal({
                               },
                             })
                           }
-                          className={`px-4 py-3 rounded-lg font-medium transition-all ${
-                            form.capacidadPasajeros === '5' ||
-                            form.capacidadPasajeros === 5
+                          className={`px-4 py-3 rounded-lg font-medium transition-all ${form.capacidadPasajeros === '5' ||
+                              form.capacidadPasajeros === 5
                               ? 'bg-primary text-on-primary'
                               : 'bg-fill border border-border text-secondary hover:bg-border'
-                          }`}
+                            }`}
                         >
                           5
                         </button>

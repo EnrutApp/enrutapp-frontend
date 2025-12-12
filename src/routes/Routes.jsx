@@ -33,8 +33,8 @@ const RoleRedirect = withLazyLoading(
   'Redirigiendo...'
 );
 
-const CompletarPerfilPage = withLazyLoading(
-  lazy(() => import('../features/conductores/pages/CompletarPerfilPage')),
+const CompletarPerfilRouter = withLazyLoading(
+  lazy(() => import('./components/CompletarPerfilRouter')),
   'Cargando...'
 );
 
@@ -105,8 +105,8 @@ const Routes = createBrowserRouter([
   {
     path: '/completar-perfil',
     element: (
-      <ProtectedRoute allowedRoles={[USER_ROLES.CONDUCTOR]}>
-        <CompletarPerfilPage />
+      <ProtectedRoute allowedRoles={[USER_ROLES.CONDUCTOR, USER_ROLES.CLIENTE]}>
+        <CompletarPerfilRouter />
       </ProtectedRoute>
     ),
   },

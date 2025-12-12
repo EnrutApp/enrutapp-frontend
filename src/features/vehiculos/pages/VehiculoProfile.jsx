@@ -80,7 +80,7 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
     } catch (error) {
       alert(
         'Error al eliminar el vehículo: ' +
-          (error.message || 'Error desconocido')
+        (error.message || 'Error desconocido')
       );
       setIsDeleteModalOpen(false);
     }
@@ -180,6 +180,17 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
               <span className="text-xs text-secondary font-medium">Color</span>
               <p className="text-sm font-semibold text-primary mt-1">
                 {vehicleData.color || '-'}
+              </p>
+            </div>
+
+            <div className="p-4 content-box-outline-3-small rounded-lg">
+              <span className="text-xs text-secondary font-medium">
+                Tipo de placa
+              </span>
+              <p className="text-sm font-semibold text-primary mt-1">
+                {vehicleData.tipoPlaca === 'AMARILLA'
+                  ? 'Placa amarilla'
+                  : 'Placa blanca'}
               </p>
             </div>
 

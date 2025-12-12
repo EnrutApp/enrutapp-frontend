@@ -4,6 +4,7 @@ import GoogleMapComponent from '../../../../shared/components/map/components/Goo
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
+import { formatTiempoEstimado } from '../../utils/formatTiempoEstimado';
 
 const EditRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
   const ruta = itemData;
@@ -25,6 +26,10 @@ const EditRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+
+  const { valor: tiempoValor, unidad: tiempoUnidad } = formatTiempoEstimado(
+    formData.tiempo
+  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -137,8 +142,8 @@ const EditRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          err.message ||
-          'Error al actualizar la ruta'
+        err.message ||
+        'Error al actualizar la ruta'
       );
     } finally {
       setLoading(false);
@@ -291,9 +296,9 @@ const EditRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                         </p>
                       </div>
                       <p className="text-primary text-2xl font-bold">
-                        {formData.tiempo || '0:00'}
+                        {tiempoValor}
                         <span className="text-sm font-normal text-secondary ml-1">
-                          hrs
+                          {tiempoUnidad}
                         </span>
                       </p>
                     </div>

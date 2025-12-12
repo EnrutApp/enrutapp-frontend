@@ -20,6 +20,8 @@ export const ROUTES = {
     UBICACIONES: '/admin/ubicaciones',
     ROLES: '/admin/rol',
     CONTRATOS: '/admin/contratos',
+    CONTRATOS_NUEVO: '/admin/contratos/nuevo',
+    CONTRATOS_DETALLE: '/admin/contratos/:idContrato',
     TRACKING: '/admin/tracking',
     CALENDARIO: '/admin/calendario',
   },

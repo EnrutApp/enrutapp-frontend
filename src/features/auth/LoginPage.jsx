@@ -1,12 +1,11 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/checkbox/checkbox.js';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuth } from '../../shared/context/AuthContext';
-import { useLoading } from '../../shared/context/LoadingContext';
 import { loginSchema } from '../../shared/utils/validationSchemas';
 import ModalRegister from './components/registerModal/RegisterModal';
 import ResetPasswordModal from './components/resetPasswordModal/ResetPasswordModal';
@@ -19,10 +18,17 @@ const Login = () => {
     }
   };
   const [showPassword, setShowPassword] = useState(false);
-  const { login, isLoading, error, isAuthenticated } = useAuth();
+  const { login, loginWithGoogle, isLoading, error, isAuthenticated } =
+    useAuth();
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isGoogleReady, setIsGoogleReady] = useState(false);
   const navigate = useNavigate();
+
+  const googleHostRef = useRef(null);
+  const googleButtonRef = useRef(null);
+  const googleInitializedRef = useRef(false);
+  const rememberRef = useRef(false);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -30,7 +36,8 @@ const Login = () => {
     }
   }, [isLoading, isAuthenticated, navigate]);
 
-  const handleRegisterClick = () => {
+  const handleRegisterClick = e => {
+    if (e?.preventDefault) e.preventDefault();
     setIsRegisterModalOpen(true);
   };
 
@@ -51,10 +58,74 @@ const Login = () => {
     mode: 'onBlur',
   });
 
+  const rememberValue = watch('remember');
+
+  useEffect(() => {
+    rememberRef.current = !!rememberValue;
+  }, [rememberValue]);
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+
+    const getButtonWidth = () => {
+      const width = googleHostRef.current?.clientWidth || 360;
+      return Math.max(240, Math.min(420, width));
+    };
+
+    const initGoogle = () => {
+      if (googleInitializedRef.current) return true;
+      const googleObj = window.google;
+      if (!googleObj?.accounts?.id) return false;
+      if (!googleButtonRef.current) return false;
+
+      const alreadyInitialized = !!window.__enrutappGoogleIdInitialized;
+
+      if (!alreadyInitialized) {
+        googleObj.accounts.id.initialize({
+          client_id: clientId,
+          callback: async response => {
+            try {
+              await loginWithGoogle({
+                idToken: response.credential,
+                remember: rememberRef.current,
+              });
+            } catch {
+              // El error se muestra vía AuthContext (error)
+            }
+          },
+        });
+
+        window.__enrutappGoogleIdInitialized = true;
+      }
+
+      googleObj.accounts.id.renderButton(googleButtonRef.current, {
+        theme: 'outline',
+        size: 'large',
+        shape: 'pill',
+        width: getButtonWidth(),
+      });
+
+      googleInitializedRef.current = true;
+      setIsGoogleReady(true);
+      return true;
+    };
+
+    if (initGoogle()) return;
+
+    const intervalId = setInterval(() => {
+      if (initGoogle()) {
+        clearInterval(intervalId);
+      }
+    }, 250);
+
+    return () => clearInterval(intervalId);
+  }, [loginWithGoogle]);
+
   const onSubmit = async data => {
     try {
       await login({ ...data, remember: data.remember || false });
-    } catch {}
+    } catch { }
   };
 
   const togglePasswordVisibility = () => {
@@ -146,7 +217,7 @@ const Login = () => {
                   <md-checkbox
                     id="remember"
                     name="remember"
-                    checked={!!watch('remember')}
+                    checked={!!rememberValue}
                     onInput={e => setValue('remember', e.target.checked)}
                     label="Recuérdame"
                     class="accent-primary"
@@ -177,11 +248,42 @@ const Login = () => {
               </button>
             </div>
 
-            <div className="pt-1">
+            <div>
+              <div className="flex items-center gap-3 my-2 pb-2">
+                <div className="flex-1 h-px border border-border" />
+                <span className="text-secondary text-xs">o</span>
+                <div className="flex-1 h-px border border-border" />
+              </div>
+              <div ref={googleHostRef} className="relative w-full group">
+                <button
+                  type="button"
+                  disabled={!isGoogleReady || isLoading}
+                  className="w-full btn btn-secondary font-medium text-subtitle1 flex items-center justify-center gap-2 transition-all duration-150 group-hover:opacity-90 group-hover:-translate-y-px"
+                >
+                  <img
+                    src="/googleIcon.png"
+                    alt="Google"
+                    className="w-5 h-5 object-contain"
+                    draggable={false}
+                  />
+                  <span>Continuar con Google</span>
+                </button>
+
+                <div
+                  className={`absolute inset-0 z-10 ${isGoogleReady ? 'opacity-0' : 'opacity-0 pointer-events-none'
+                    }`}
+                >
+                  <div ref={googleButtonRef} className="w-full flex justify-center" />
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2">
               <span className="text-secondary subtitle2">
                 ¿No tienes cuenta?{' '}
               </span>
               <button
+                type="button"
                 onClick={handleRegisterClick}
                 className="text-primary subtitle2 underline hover:opacity-80 transition-opacity"
               >

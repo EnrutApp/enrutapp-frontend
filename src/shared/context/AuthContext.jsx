@@ -136,6 +136,51 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async ({ idToken, remember }) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await authService.loginWithGoogle({
+        idToken,
+        remember: !!remember,
+      });
+
+      if (response.success && response.data) {
+        setUser(response.data.user);
+
+        try {
+          await updateProfile();
+        } catch (profileError) {
+          console.warn(
+            'Error al actualizar perfil después del login con Google:',
+            profileError
+          );
+        }
+
+        return response;
+      }
+
+      throw new Error(response.message || 'Error en el login con Google');
+    } catch (error) {
+      let errorMessage = 'Error al iniciar sesión con Google';
+
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      }
+
+      setError(errorMessage);
+      setUser(null);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const register = async userData => {
     setIsLoading(true);
     setError(null);
@@ -200,6 +245,7 @@ export const AuthProvider = ({ children }) => {
     isLoggingOut,
     error,
     login,
+    loginWithGoogle,
     register,
     logout,
     changePassword,
