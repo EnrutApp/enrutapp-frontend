@@ -5,9 +5,16 @@ import '@material/web/progress/linear-progress.js';
 import { useEffect, useRef, useState } from 'react';
 import { catalogService } from '../../../../shared/services/catalogService';
 
+import '@material/web/switch/switch.js';
+
 const initialForm = {
   idTipoVehiculo: '',
   idMarcaVehiculo: '',
+  idPropietario: '',
+  isExternalOwner: false,
+  propietarioExternoNombre: '',
+  propietarioExternoDocumento: '',
+  propietarioExternoTelefono: '',
   placa: '',
   linea: '',
   modelo: '',
@@ -31,6 +38,7 @@ export default function AddVehiculoModal({
   const [form, setForm] = useState(initialForm);
   const [tipos, setTipos] = useState([]);
   const [marcas, setMarcas] = useState([]);
+  const [conductores, setConductores] = useState([]);
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -49,15 +57,16 @@ export default function AddVehiculoModal({
     setLoadingCatalogs(true);
     (async () => {
       try {
-        const [t, m] = await Promise.all([
+        const [t, m, c] = await Promise.all([
           catalogService.getTiposVehiculo(),
           catalogService.getMarcasVehiculo(),
+          catalogService.getConductores(),
         ]);
         if (!mounted) return;
         setTipos(Array.isArray(t?.data) ? t.data : t);
         setMarcas(Array.isArray(m?.data) ? m.data : m);
+        setConductores(Array.isArray(c?.data) ? c.data : c);
       } catch (e) {
-
       } finally {
         if (mounted) setLoadingCatalogs(false);
       }
@@ -85,6 +94,24 @@ export default function AddVehiculoModal({
   const handleChange = e => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSwitchChange = e => {
+    const isExternal = e.target.selected;
+    setForm(prev => ({
+      ...prev,
+      isExternalOwner: isExternal,
+      idPropietario: isExternal ? '' : prev.idPropietario,
+      propietarioExternoNombre: !isExternal
+        ? ''
+        : prev.propietarioExternoNombre,
+      propietarioExternoDocumento: !isExternal
+        ? ''
+        : prev.propietarioExternoDocumento,
+      propietarioExternoTelefono: !isExternal
+        ? ''
+        : prev.propietarioExternoTelefono,
+    }));
   };
 
   const handleSelectFile = e => {
@@ -128,6 +155,18 @@ export default function AddVehiculoModal({
     if (!form.idTipoVehiculo) return 'Selecciona un tipo de vehículo';
     if (!form.idMarcaVehiculo) return 'Selecciona una marca';
     if (!form.placa) return 'La placa es obligatoria';
+
+    if (form.isExternalOwner) {
+      if (!form.propietarioExternoNombre)
+        return 'El nombre del propietario es obligatorio';
+      if (!form.propietarioExternoDocumento)
+        return 'El documento del propietario es obligatorio';
+      if (!form.propietarioExternoTelefono)
+        return 'El teléfono del propietario es obligatorio';
+    } else {
+      if (!form.idPropietario) return 'Selecciona un propietario (Conductor)';
+    }
+
     return null;
   };
 
@@ -205,7 +244,15 @@ export default function AddVehiculoModal({
         'Error al crear el vehículo';
       setError(errorMessage);
       setShowConfirmation(false);
-      setCurrentStep(1);
+
+      if (
+        errorMessage.toLowerCase().includes('placa') ||
+        errorMessage.toLowerCase().includes('vin')
+      ) {
+        setCurrentStep(2);
+      } else {
+        setCurrentStep(1);
+      }
     } finally {
       setLoading(false);
     }
@@ -257,10 +304,11 @@ export default function AddVehiculoModal({
                 <div
                   className={`
                                     flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 transform
-                                    ${currentStep >= step
-                      ? 'bg-primary text-on-primary shadow-md scale-110 ring-4 ring-primary/20'
-                      : 'bg-fill text-secondary scale-100'
-                    }
+                                    ${
+                                      currentStep >= step
+                                        ? 'bg-primary text-on-primary shadow-md scale-110 ring-4 ring-primary/20'
+                                        : 'bg-fill text-secondary scale-100'
+                                    }
                                     ${currentStep === step ? 'animate-pulse' : ''}
                                     font-semibold
                                 `}
@@ -285,7 +333,9 @@ export default function AddVehiculoModal({
               <div className="flex flex-col items-center justify-center py-16 px-4 animate-fade-in">
                 <div className="relative mb-8">
                   <div className="flex items-center justify-center mb-4 mt-3 animate-scale-in">
-                    <md-icon className="text-green text-3xl">directions_car</md-icon>
+                    <md-icon className="text-green text-3xl">
+                      directions_car
+                    </md-icon>
                   </div>
                 </div>
 
@@ -308,7 +358,6 @@ export default function AddVehiculoModal({
                     </p>
                   </div>
                 </div>
-
 
                 <button
                   onClick={() => {
@@ -490,61 +539,63 @@ export default function AddVehiculoModal({
                   {(form.soatVencimiento ||
                     form.tecnomecanicaVencimiento ||
                     form.seguroVencimiento) && (
-                      <div className="flex items-start gap-3 pt-4 border-t border-border">
-                        <md-icon className="text-primary mt-1">
-                          event_note
-                        </md-icon>
-                        <div className="flex-1">
-                          <p className="text-xs text-secondary font-medium mb-2">
-                            Fechas de vencimiento
-                          </p>
-                          <div className="space-y-1">
-                            {form.soatVencimiento && (
-                              <p className="text-primary text-sm">
-                                <span className="text-secondary">SOAT:</span>{' '}
-                                {new Date(
-                                  form.soatVencimiento
-                                ).toLocaleDateString('es-ES', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                })}
-                              </p>
-                            )}
-                            {form.tecnomecanicaVencimiento && (
-                              <p className="text-primary text-sm">
-                                <span className="text-secondary">
-                                  Tecnomecánica:
-                                </span>{' '}
-                                {new Date(
-                                  form.tecnomecanicaVencimiento
-                                ).toLocaleDateString('es-ES', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                })}
-                              </p>
-                            )}
-                            {form.seguroVencimiento && (
-                              <p className="text-primary text-sm">
-                                <span className="text-secondary">Seguro:</span>{' '}
-                                {new Date(
-                                  form.seguroVencimiento
-                                ).toLocaleDateString('es-ES', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                })}
-                              </p>
-                            )}
-                          </div>
+                    <div className="flex items-start gap-3 pt-4 border-t border-border">
+                      <md-icon className="text-primary mt-1">
+                        event_note
+                      </md-icon>
+                      <div className="flex-1">
+                        <p className="text-xs text-secondary font-medium mb-2">
+                          Fechas de vencimiento
+                        </p>
+                        <div className="space-y-1">
+                          {form.soatVencimiento && (
+                            <p className="text-primary text-sm">
+                              <span className="text-secondary">SOAT:</span>{' '}
+                              {new Date(
+                                form.soatVencimiento
+                              ).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                            </p>
+                          )}
+                          {form.tecnomecanicaVencimiento && (
+                            <p className="text-primary text-sm">
+                              <span className="text-secondary">
+                                Tecnomecánica:
+                              </span>{' '}
+                              {new Date(
+                                form.tecnomecanicaVencimiento
+                              ).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                            </p>
+                          )}
+                          {form.seguroVencimiento && (
+                            <p className="text-primary text-sm">
+                              <span className="text-secondary">Seguro:</span>{' '}
+                              {new Date(
+                                form.seguroVencimiento
+                              ).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                            </p>
+                          )}
                         </div>
                       </div>
-                    )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="rounded-lg content-box-outline-4-small p-4 flex items-start gap-3">
-                  <md-icon className="text-yellow-2 text-xl mt-0.5">info</md-icon>
+                  <md-icon className="text-yellow-2 text-xl mt-0.5">
+                    info
+                  </md-icon>
                   <p className="text-secondary text-sm flex-1">
                     Por favor, verifica que toda la información sea correcta
                     antes de crear el vehículo.
@@ -605,7 +656,9 @@ export default function AddVehiculoModal({
                             <div className="mt-4 p-4 content-box-outline-7-small bg-fill">
                               <div className="flex items-center gap-3">
                                 <div>
-                                  <md-icon className="text-yellow-2 text-xl">burst_mode</md-icon>
+                                  <md-icon className="text-yellow-2 text-xl">
+                                    burst_mode
+                                  </md-icon>
                                 </div>
                                 <div className="flex-1">
                                   <p className="font-normal text-primary truncate">
@@ -774,6 +827,120 @@ export default function AddVehiculoModal({
                             maxLength={17}
                           />
                         </div>
+
+                        <div className="pt-4 border-t border-border mt-2">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <p className="subtitle1 text-primary font-medium">
+                                Propietario
+                              </p>
+                              <p className="text-xs text-secondary">
+                                ¿El propietario es un conductor registrado?
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`text-sm ${form.isExternalOwner ? 'text-primary font-medium' : 'text-secondary'}`}
+                              >
+                                No
+                              </span>
+                              <md-switch
+                                selected={!form.isExternalOwner}
+                                onClick={e => {
+                                  const isInternal = !e.target.selected;
+
+                                  handleSwitchChange({
+                                    target: { selected: !form.isExternalOwner },
+                                  });
+                                }}
+                                touch-target="wrapper"
+                              ></md-switch>
+                              <span
+                                className={`text-sm ${!form.isExternalOwner ? 'text-primary font-medium' : 'text-secondary'}`}
+                              >
+                                Sí
+                              </span>
+                            </div>
+                          </div>
+
+                          {!form.isExternalOwner ? (
+                            <div className="flex flex-col gap-1 fade-in">
+                              <label className="subtitle1 text-primary font-medium">
+                                Conductor Propietario{' '}
+                                <span className="text-red">*</span>
+                              </label>
+                              <div className="select-wrapper w-full">
+                                <md-icon className="text-sm">
+                                  arrow_drop_down
+                                </md-icon>
+                                <select
+                                  name="idPropietario"
+                                  value={form.idPropietario}
+                                  onChange={handleChange}
+                                  className="select-filter w-full px-4 input bg-surface border rounded-lg"
+                                >
+                                  <option value="">
+                                    Selecciona un conductor
+                                  </option>
+                                  {conductores?.map(c => (
+                                    <option
+                                      key={c.idUsuario}
+                                      value={c.idUsuario}
+                                    >
+                                      {c.usuario?.nombre ||
+                                        c.nombre ||
+                                        'Conductor'}{' '}
+                                      - {c.numeroLicencia}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col gap-3 fade-in">
+                              <div className="flex flex-col gap-1">
+                                <label className="subtitle1 text-primary font-medium">
+                                  Nombre Propietario{' '}
+                                  <span className="text-red">*</span>
+                                </label>
+                                <input
+                                  name="propietarioExternoNombre"
+                                  value={form.propietarioExternoNombre}
+                                  onChange={handleChange}
+                                  className="w-full px-4 input bg-surface border rounded-lg text-primary"
+                                  placeholder="Nombre completo"
+                                />
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1">
+                                  <label className="subtitle1 text-primary font-medium">
+                                    Documento{' '}
+                                    <span className="text-red">*</span>
+                                  </label>
+                                  <input
+                                    name="propietarioExternoDocumento"
+                                    value={form.propietarioExternoDocumento}
+                                    onChange={handleChange}
+                                    className="w-full px-4 input bg-surface border rounded-lg text-primary"
+                                    placeholder="CC / NIT"
+                                  />
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                  <label className="subtitle1 text-primary font-medium">
+                                    Teléfono <span className="text-red">*</span>
+                                  </label>
+                                  <input
+                                    name="propietarioExternoTelefono"
+                                    value={form.propietarioExternoTelefono}
+                                    onChange={handleChange}
+                                    className="w-full px-4 input bg-surface border rounded-lg text-primary"
+                                    placeholder="Número de contacto"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </>
                     )}
                   </div>
@@ -845,31 +1012,55 @@ export default function AddVehiculoModal({
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={() => handleChange({ target: { name: 'capacidadPasajeros', value: '4' } })}
-                          className={`px-4 py-3 rounded-lg font-medium transition-all ${form.capacidadPasajeros === '4' || form.capacidadPasajeros === 4
-                            ? 'bg-primary text-on-primary'
-                            : 'bg-fill border border-border text-secondary hover:bg-border'
-                            }`}
+                          onClick={() =>
+                            handleChange({
+                              target: {
+                                name: 'capacidadPasajeros',
+                                value: '4',
+                              },
+                            })
+                          }
+                          className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                            form.capacidadPasajeros === '4' ||
+                            form.capacidadPasajeros === 4
+                              ? 'bg-primary text-on-primary'
+                              : 'bg-fill border border-border text-secondary hover:bg-border'
+                          }`}
                         >
                           4
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleChange({ target: { name: 'capacidadPasajeros', value: '5' } })}
-                          className={`px-4 py-3 rounded-lg font-medium transition-all ${form.capacidadPasajeros === '5' || form.capacidadPasajeros === 5
-                            ? 'bg-primary text-on-primary'
-                            : 'bg-fill border border-border text-secondary hover:bg-border'
-                            }`}
+                          onClick={() =>
+                            handleChange({
+                              target: {
+                                name: 'capacidadPasajeros',
+                                value: '5',
+                              },
+                            })
+                          }
+                          className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                            form.capacidadPasajeros === '5' ||
+                            form.capacidadPasajeros === 5
+                              ? 'bg-primary text-on-primary'
+                              : 'bg-fill border border-border text-secondary hover:bg-border'
+                          }`}
                         >
                           5
                         </button>
                         <input
                           type="text"
                           name="capacidadPasajeros"
-                          value={form.capacidadPasajeros ? `${form.capacidadPasajeros} pasajeros` : ''}
-                          onChange={(e) => {
+                          value={
+                            form.capacidadPasajeros
+                              ? `${form.capacidadPasajeros} pasajeros`
+                              : ''
+                          }
+                          onChange={e => {
                             const value = e.target.value.replace(/[^\d]/g, '');
-                            handleChange({ target: { name: 'capacidadPasajeros', value } });
+                            handleChange({
+                              target: { name: 'capacidadPasajeros', value },
+                            });
                           }}
                           className="flex-1 px-4 py-3 input bg-fill border border-border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                           placeholder="Otra cantidad"
@@ -885,10 +1076,16 @@ export default function AddVehiculoModal({
                         <input
                           type="text"
                           name="capacidadCarga"
-                          value={form.capacidadCarga ? `${form.capacidadCarga} kg` : ''}
-                          onChange={(e) => {
+                          value={
+                            form.capacidadCarga
+                              ? `${form.capacidadCarga} kg`
+                              : ''
+                          }
+                          onChange={e => {
                             const value = e.target.value.replace(/[^\d.]/g, '');
-                            handleChange({ target: { name: 'capacidadCarga', value } });
+                            handleChange({
+                              target: { name: 'capacidadCarga', value },
+                            });
                           }}
                           className="w-full px-4 py-3 pr-12 input bg-fill border border-border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                           placeholder="Aquí la capacidad de carga del vehículo"
@@ -911,7 +1108,6 @@ export default function AddVehiculoModal({
                       }
                     }}
                   >
-
                     <div className="flex flex-col gap-1">
                       <label className="subtitle1 text-primary font-medium">
                         SOAT vence

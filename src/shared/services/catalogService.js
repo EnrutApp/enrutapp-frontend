@@ -45,6 +45,15 @@ export const catalogService = {
       throw error;
     }
   },
+
+  getConductores: async () => {
+    try {
+      const response = await apiClient.get('/conductores');
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default catalogService;

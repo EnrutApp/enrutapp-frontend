@@ -41,9 +41,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         setSuccessMessage('');
         onClose();
       }, 2000);
-    } catch {
-      // Error handled by setErrorMessage
-    }
+    } catch {}
   };
 
   const handleClose = () => {
@@ -80,7 +78,9 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 
           <div className="px-4">
             <div className="leading-tight mb-6">
-              <h2 className="h2 font-medium text-primary">Cambiar contraseña</h2>
+              <h2 className="h2 font-medium text-primary">
+                Cambiar contraseña
+              </h2>
               <p className="h5 text-secondary font-medium">
                 Actualiza tu contraseña de acceso
               </p>
@@ -119,10 +119,11 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                     placeholder="Tu contraseña actual"
                     autoComplete="current-password"
                     {...register('currentPassword')}
-                    className={`w-full px-4 py-3 input bg-fill pr-12 border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${errors.currentPassword
-                      ? 'border-red focus:ring-red/20 focus:border-red'
-                      : 'border-border focus:ring-primary/20 focus:border-primary'
-                      }`}
+                    className={`w-full px-4 py-3 input bg-fill pr-12 border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
+                      errors.currentPassword
+                        ? 'border-red focus:ring-red/20 focus:border-red'
+                        : 'border-border focus:ring-primary/20 focus:border-primary'
+                    }`}
                     disabled={isSubmitting}
                   />
                   <button
@@ -157,10 +158,11 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                     placeholder="Tu nueva contraseña"
                     autoComplete="new-password"
                     {...register('newPassword')}
-                    className={`w-full px-4 py-3 input bg-fill pr-12 border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${errors.newPassword
-                      ? 'border-red focus:ring-red/20 focus:border-red'
-                      : 'border-border focus:ring-primary/20 focus:border-primary'
-                      }`}
+                    className={`w-full px-4 py-3 input bg-fill pr-12 border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
+                      errors.newPassword
+                        ? 'border-red focus:ring-red/20 focus:border-red'
+                        : 'border-border focus:ring-primary/20 focus:border-primary'
+                    }`}
                     disabled={isSubmitting}
                   />
                   <button
@@ -195,10 +197,11 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                     placeholder="Repite tu nueva contraseña"
                     autoComplete="new-password"
                     {...register('confirmNewPassword')}
-                    className={`w-full px-4 py-3 input bg-fill pr-12 border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${errors.confirmNewPassword
-                      ? 'border-red focus:ring-red/20 focus:border-red'
-                      : 'border-border focus:ring-primary/20 focus:border-primary'
-                      }`}
+                    className={`w-full px-4 py-3 input bg-fill pr-12 border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
+                      errors.confirmNewPassword
+                        ? 'border-red focus:ring-red/20 focus:border-red'
+                        : 'border-border focus:ring-primary/20 focus:border-primary'
+                    }`}
                     disabled={isSubmitting}
                   />
                   <button

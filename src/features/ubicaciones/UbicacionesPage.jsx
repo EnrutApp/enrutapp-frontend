@@ -1,6 +1,7 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/checkbox/checkbox.js';
+import '@material/web/progress/linear-progress.js';
 import UbicacionProfile from './pages/UbicacionProfile';
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
@@ -79,10 +80,10 @@ const UbicacionesPage = () => {
       const data = Array.isArray(res) ? res : res.data || [];
 
       const allMapped = data.map(u => ({
-        id: u.id,
-        nombre: u.nombre,
+        id: u.idUbicacion || u.id,
+        nombre: u.nombreUbicacion || u.nombre,
         direccion: u.direccion,
-        activo: u.estado,
+        activo: u.estado !== undefined ? u.estado : u.activo,
         latitud: u.latitud,
         longitud: u.longitud,
         createdAt: u.createdAt,
@@ -93,11 +94,10 @@ const UbicacionesPage = () => {
 
       setUbicaciones(allMapped);
     } catch (err) {
-      
       setError(
         err?.message ||
-        err?.response?.data?.message ||
-        'Error al cargar ubicaciones'
+          err?.response?.data?.message ||
+          'Error al cargar ubicaciones'
       );
     } finally {
       setLoading(false);
@@ -204,7 +204,6 @@ const UbicacionesPage = () => {
         setIsDeleteModalOpen(true);
       }
     } catch (err) {
-      
       setIsDeleteModalOpen(true);
     }
   };
@@ -227,8 +226,6 @@ const UbicacionesPage = () => {
 
       await fetchUbicaciones();
     } catch (err) {
-      
-
       let errorMessage = 'Error al eliminar ubicación';
       const errorData = err?.data || err?.response?.data || err;
 
@@ -262,8 +259,6 @@ const UbicacionesPage = () => {
 
       await fetchUbicaciones();
     } catch (err) {
-      
-
       let errorMessage = 'Error al eliminar ubicación';
 
       if (err?.response?.data?.message) {
@@ -305,9 +300,7 @@ const UbicacionesPage = () => {
           setIsInfoRutasModalOpen(true);
           return;
         }
-      } catch (err) {
-        
-      }
+      } catch (err) {}
     }
     setIsSwitchModalOpen(true);
   };
@@ -325,8 +318,6 @@ const UbicacionesPage = () => {
       setUbicacionToSwitch(null);
       await fetchUbicaciones();
     } catch (err) {
-      
-
       const errorData = err?.data || err?.response?.data || err;
       let errorMessage = 'Error al cambiar estado';
       if (errorData?.message) {
@@ -398,7 +389,6 @@ const UbicacionesPage = () => {
         await ubicacionesService.remove(ubicacionId);
         return { success: true, id: ubicacionId };
       } catch (err) {
-        
         return { success: false, id: ubicacionId, error: err };
       }
     });
@@ -620,57 +610,85 @@ const UbicacionesPage = () => {
                 )}
               </div>
 
-              <div className="flex justify-between items-center mt-6 mb-4">
-                <div className="flex items-center gap-3">
-                  {selectedUbicaciones.length > 0 ? (
-                    <>
+              <div className="flex justify-between items-center mt-4 mb-4">
+                <div className="flex gap-3">
+                  <div className="flex gap-1 bg-fill border border-border rounded-full p-1">
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`px-2 py-1 rounded-full transition-all ${
+                        viewMode === 'list'
+                          ? 'bg-primary text-on-primary'
+                          : 'text-secondary hover:text-primary'
+                      }`}
+                      title="Vista de lista"
+                    >
+                      <md-icon className="text-sm">view_list</md-icon>
+                    </button>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`px-2 py-1 rounded-full transition-all ${
+                        viewMode === 'grid'
+                          ? 'bg-primary text-on-primary'
+                          : 'text-secondary hover:text-primary'
+                      }`}
+                      title="Vista de tarjetas"
+                    >
+                      <md-icon className="text-sm">grid_view</md-icon>
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {selectedUbicaciones.length > 0 ? (
                       <span className="text-sm text-secondary">
                         {selectedUbicaciones.length} Seleccionados
                       </span>
-                    </>
-                  ) : (
-                    <span className="text-sm text-secondary">
-                      {loading
-                        ? 'Cargando ubicaciones...'
-                        : `Mostrando ${totalItems > 0 ? startIndex + 1 : 0}-${Math.min(startIndex + (viewMode === 'grid' ? 8 : 4), totalItems)} de ${totalItems} ubicaciones`}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {showPagination && (
-                    <span className="text-xs text-secondary">
-                      Página {currentPage} de {totalPages}
-                    </span>
-                  )}
-
-                  <div className="flex bg-fill rounded-lg p-1 border border-border ml-2">
-                    <button
-                      className={`p-1 rounded-md transition-all ${viewMode === 'list'
-                          ? 'bg-background text-primary shadow-sm'
-                          : 'text-secondary hover:text-primary'
-                        }`}
-                      onClick={() => setViewMode('list')}
-                    >
-                      <md-icon className="text-xl">view_list</md-icon>
-                    </button>
-                    <button
-                      className={`p-1 rounded-md transition-all ${viewMode === 'grid'
-                          ? 'bg-background text-primary shadow-sm'
-                          : 'text-secondary hover:text-primary'
-                        }`}
-                      onClick={() => setViewMode('grid')}
-                    >
-                      <md-icon className="text-xl">grid_view</md-icon>
-                    </button>
+                    ) : (
+                      !loading && (
+                        <span className="text-sm text-secondary">
+                          {`Mostrando ${
+                            totalItems > 0 ? startIndex + 1 : 0
+                          }-${Math.min(
+                            startIndex + (viewMode === 'grid' ? 8 : 4),
+                            totalItems
+                          )} de ${totalItems} ubicaciones`}
+                        </span>
+                      )
+                    )}
                   </div>
                 </div>
+                {showPagination && (
+                  <span className="text-xs text-secondary">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                )}
               </div>
 
               <div className="mt-3">
                 {loading ? (
-                  <p className="text-secondary">Cargando ubicaciones...</p>
+                  <div
+                    className="flex items-center justify-center w-full list-enter text-center content-box-outline-2-small"
+                    style={{ height: 'calc(60vh - 0px)' }}
+                  >
+                    <div
+                      className="flex flex-col items-center gap-3"
+                      style={{ width: '200px' }}
+                    >
+                      <md-icon className="text-secondary mb-4">
+                        location_on
+                      </md-icon>
+                      <span className="text-secondary">
+                        Cargando ubicaciones...
+                      </span>
+                      <md-linear-progress indeterminate></md-linear-progress>
+                    </div>
+                  </div>
                 ) : currentUbicaciones.length > 0 ? (
-                  <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
+                  <div
+                    className={
+                      viewMode === 'grid'
+                        ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+                        : 'flex flex-col gap-3'
+                    }
+                  >
                     {currentUbicaciones.map((ubicacion, index) => (
                       <div
                         key={ubicacion.id || index}
@@ -701,96 +719,126 @@ const UbicacionesPage = () => {
                         )}
 
                         {viewMode === 'grid' ? (
-                          <div className="flex flex-col gap-3">
-                            <div className="relative w-full h-40 rounded-xl overflow-hidden bg-surface border border-border flex items-center justify-center">
-                              <md-icon style={{ fontSize: '48px' }} className="text-secondary">location_on</md-icon>
-                            </div>
-
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-start justify-between gap-2 pb-3">
+                          <div className="flex flex-col h-full">
+                            <div
+                              className="flex items-start justify-between gap-2 pb-3 cursor-pointer flex-1"
+                              onClick={e => {
+                                if (
+                                  !e.target.closest('button') &&
+                                  !e.target.closest('md-checkbox') &&
+                                  !e.target.closest('.action-buttons')
+                                ) {
+                                  handleOpenProfile(ubicacion);
+                                }
+                              }}
+                            >
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <div className="w-12 h-12 rounded-lg bg-surface flex items-center justify-center shadow-lg border border-border shrink-0">
+                                  <md-icon className="text-secondary">
+                                    location_on
+                                  </md-icon>
+                                </div>
                                 <div className="flex-1 min-w-0">
-                                  <h3 className="text-h5 font-bold text-primary truncate mb-1">
+                                  <h3 className="text-h5 font-bold text-primary truncate group-hover:text-primary/80 transition-colors">
                                     {ubicacion.nombre}
                                   </h3>
-                                  <div className="flex items-center gap-2 text-body2">
-                                    <md-icon className="text-xs text-secondary">place</md-icon>
-                                    <span className="text-secondary truncate">
+                                  <div className="flex items-center gap-1 text-body2">
+                                    <span className="text-secondary truncate text-xs">
                                       {ubicacion.direccion}
                                     </span>
                                   </div>
                                 </div>
-                                <span
-                                  className={`btn font-medium btn-sm flex items-center ${ubicacion.activo ? 'btn-green' : 'btn-red'
-                                    }`}
-                                >
-                                  {ubicacion.activo ? 'Activo' : 'Inactivo'}
-                                </span>
+                              </div>
+                              <span
+                                className={`btn font-medium btn-sm flex items-center shrink-0 ${
+                                  ubicacion.activo ? 'btn-green' : 'btn-red'
+                                }`}
+                              >
+                                {ubicacion.activo ? 'Activo' : 'Inactivo'}
+                              </span>
+                            </div>
+
+                            <div
+                              className="flex-1 space-y-2 mb-3 cursor-pointer"
+                              onClick={e => {
+                                if (
+                                  !e.target.closest('button') &&
+                                  !e.target.closest('md-checkbox') &&
+                                  !e.target.closest('.action-buttons')
+                                ) {
+                                  handleOpenProfile(ubicacion);
+                                }
+                              }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center shrink-0">
+                                  <md-icon className="text-base text-primary">
+                                    place
+                                  </md-icon>
+                                </div>
+                                <div className="flex flex-col min-w-0 flex-1">
+                                  <span className="text-xs text-secondary">
+                                    Dirección
+                                  </span>
+                                  <span className="text-sm font-semibold text-primary truncate">
+                                    {ubicacion.direccion}
+                                  </span>
+                                </div>
                               </div>
                             </div>
 
-                            <div className="flex gap-2">
-                              <div className="relative group flex-1">
-                                <button
-                                  className={`btn btn-sm-2 font-medium flex items-center gap-1 w-full justify-center ${ubicacion.activo ? 'btn-outline' : 'btn-secondary'
-                                    }`}
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    handleSwitchClick(ubicacion);
-                                  }}
-                                >
-                                  <md-icon className="text-sm">
-                                    {ubicacion.activo ? 'block' : 'check'}
-                                  </md-icon>
-                                </button>
-                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                    <p className="text-xs text-primary">
-                                      {ubicacion.activo ? 'Deshabilitar' : 'Habilitar'}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
+                            <div className="flex gap-2 mt-auto action-buttons">
+                              <button
+                                className={`btn btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95 ${
+                                  ubicacion.activo
+                                    ? 'btn-outline'
+                                    : 'btn-secondary'
+                                }`}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleSwitchClick(ubicacion);
+                                }}
+                                title={
+                                  ubicacion.activo
+                                    ? 'Deshabilitar ubicación'
+                                    : 'Habilitar ubicación'
+                                }
+                              >
+                                <md-icon className="text-sm">
+                                  {ubicacion.activo ? 'block' : 'check'}
+                                </md-icon>
+                              </button>
 
-                              <div className="relative group flex-1">
-                                <button
-                                  className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    handleOpenEdit(ubicacion);
-                                  }}
-                                >
-                                  <md-icon className="text-sm">edit</md-icon>
-                                </button>
-                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                    <p className="text-xs text-primary">Editar</p>
-                                  </div>
-                                </div>
-                              </div>
+                              <button
+                                className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleOpenEdit(ubicacion);
+                                }}
+                                title="Editar ubicación"
+                              >
+                                <md-icon className="text-sm">edit</md-icon>
+                              </button>
 
-                              <div className="relative group flex-1">
-                                <button
-                                  className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    handleDeleteClick(ubicacion);
-                                  }}
-                                >
-                                  <md-icon className="text-sm">delete</md-icon>
-                                </button>
-                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                    <p className="text-xs text-primary">Eliminar</p>
-                                  </div>
-                                </div>
-                              </div>
+                              <button
+                                className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95 hover:bg-red-500/20 hover:text-red-500"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleDeleteClick(ubicacion);
+                                }}
+                                title="Eliminar ubicación"
+                              >
+                                <md-icon className="text-sm">delete</md-icon>
+                              </button>
                             </div>
                           </div>
                         ) : (
                           <div className="flex justify-between items-center">
                             <div className="flex items-center gap-3 flex-1">
                               <div>
-                                <h1 className="h4 font-bold">{ubicacion.nombre}</h1>
+                                <h1 className="h4 font-bold">
+                                  {ubicacion.nombre}
+                                </h1>
                                 <div className="flex gap-2 mt-2 items-center">
                                   <span
                                     className={`btn font-medium btn-lg flex items-center ${ubicacion.activo ? 'btn-green' : 'btn-red'}`}
@@ -814,7 +862,9 @@ const UbicacionesPage = () => {
                                   handleSwitchClick(ubicacion);
                                 }}
                               >
-                                {ubicacion.activo ? 'Deshabilitar' : 'Habilitar'}
+                                {ubicacion.activo
+                                  ? 'Deshabilitar'
+                                  : 'Habilitar'}
                               </button>
                               <button
                                 className="btn btn-primary btn-lg font-medium flex items-center gap-1"

@@ -24,7 +24,6 @@ const Login = () => {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Navegar al dashboard cuando el login sea exitoso y todo esté listo
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
       navigate('/dashboard', { replace: true });
@@ -55,11 +54,7 @@ const Login = () => {
   const onSubmit = async data => {
     try {
       await login({ ...data, remember: data.remember || false });
-      // No navegar aquí - el AuthContext y Layout manejarán la navegación
-      // cuando todo esté listo (incluyendo verificación de perfil)
-    } catch {
-      // Error handled by AuthContext
-    }
+    } catch {}
   };
 
   const togglePasswordVisibility = () => {

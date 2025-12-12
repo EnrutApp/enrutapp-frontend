@@ -12,10 +12,13 @@ const UbicacionAddQuick = ({ isOpen, onClose, onConfirm }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [coordinates, setCoordinates] = useState({ lat: null, lng: null });
+
   useEffect(() => {
     if (!isOpen) {
       setNombre('');
       setDireccion('');
+      setCoordinates({ lat: null, lng: null });
       setError(null);
     }
   }, [isOpen]);
@@ -25,11 +28,15 @@ const UbicacionAddQuick = ({ isOpen, onClose, onConfirm }) => {
     setError(null);
   };
 
-  const handleAddressSelect = async addressData => {
+  const handleAddressSelect = addressData => {
     if (addressData && addressData.lat && addressData.lng) {
       setDireccion(
         addressData.formatted_address || addressData.address || direccion
       );
+      setCoordinates({
+        lat: addressData.lat,
+        lng: addressData.lng,
+      });
     }
   };
 
@@ -50,30 +57,22 @@ const UbicacionAddQuick = ({ isOpen, onClose, onConfirm }) => {
       return;
     }
 
+    if (!coordinates.lat || !coordinates.lng) {
+      setError('Por favor selecciona una dirección válida de la lista');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const geocodeResponse = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(direccion)}.json?access_token=${import.meta.env.VITE_MAPBOX_TOKEN}&country=co&limit=1`
-      );
-      const geocodeData = await geocodeResponse.json();
-
-      let latitud = null;
-      let longitud = null;
-
-      if (geocodeData.features && geocodeData.features.length > 0) {
-        const [lng, lat] = geocodeData.features[0].center;
-        longitud = lng;
-        latitud = lat;
-      }
-
       const data = {
-        nombre: nombre.trim(),
+        nombreUbicacion: nombre.trim(),
         direccion: direccion.trim(),
-        latitud: latitud,
-        longitud: longitud,
+        latitud: coordinates.lat ? Number(coordinates.lat) : null,
+        longitud: coordinates.lng ? Number(coordinates.lng) : null,
       };
 
       const nuevaUbicacion = await ubicacionesService.create(data);
-      
+
       if (onConfirm) {
         onConfirm(nuevaUbicacion?.data || nuevaUbicacion);
       }
@@ -82,8 +81,8 @@ const UbicacionAddQuick = ({ isOpen, onClose, onConfirm }) => {
 
       setNombre('');
       setDireccion('');
+      setCoordinates({ lat: null, lng: null });
     } catch (error) {
-      
       const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
@@ -120,15 +119,6 @@ const UbicacionAddQuick = ({ isOpen, onClose, onConfirm }) => {
           <h2 className="h2 font-medium text-primary">Añadir ubicación</h2>
         </div>
 
-        {error && (
-          <div className="bg-red/10 border border-red/30 rounded-xl p-4 mb-4">
-            <div className="flex items-center gap-2">
-              <md-icon className="text-red text-lg">error</md-icon>
-              <p className="text-red text-sm">{error}</p>
-            </div>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div>
             <label
@@ -143,12 +133,36 @@ const UbicacionAddQuick = ({ isOpen, onClose, onConfirm }) => {
               type="text"
               placeholder="Aqui el nombre de la ubicación"
               value={nombre}
-              onChange={e => setNombre(e.target.value)}
+              onChange={e => {
+                setNombre(e.target.value);
+
+                if (error && error.toLowerCase().includes('nombre')) {
+                  setError(null);
+                }
+              }}
               required
               maxLength={100}
               disabled={loading}
-              className="w-full px-4 py-3 input bg-fill border border-border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-10"
+              className={`w-full px-4 py-3 input bg-fill border ${
+                error && error.toLowerCase().includes('nombre')
+                  ? 'border-red ring-1 ring-red/20'
+                  : 'border-border'
+              } rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-10`}
             />
+            {error && error.toLowerCase().includes('nombre') && (
+              <p className="text-red text-xs mt-1 ml-1 flex items-center gap-1">
+                <md-icon className="text-sm">error</md-icon>
+                {error}
+              </p>
+            )}
+            {error && !error.toLowerCase().includes('nombre') && (
+              <div className="bg-red/10 border border-red/30 rounded-xl p-4 mt-2">
+                <div className="flex items-center gap-2">
+                  <md-icon className="text-red text-lg">error</md-icon>
+                  <p className="text-red text-sm">{error}</p>
+                </div>
+              </div>
+            )}
           </div>
 
           <div>

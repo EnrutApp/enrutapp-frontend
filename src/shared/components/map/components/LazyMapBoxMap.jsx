@@ -30,12 +30,18 @@ const LazyMapBoxMap = props => {
   if (!isReady) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-fill rounded-xl">
-        <div className="flex flex-col items-center justify-center" style={{ width: '340px' }}>
+        <div
+          className="flex flex-col items-center justify-center"
+          style={{ width: '340px' }}
+        >
           <md-linear-progress
             indeterminate
             style={{ width: '100%', marginBottom: '24px' }}
           ></md-linear-progress>
-          <span className="text-secondary text-lg" style={{ textAlign: 'center' }}>
+          <span
+            className="text-secondary text-lg"
+            style={{ textAlign: 'center' }}
+          >
             Preparando mapa...
           </span>
         </div>
@@ -47,12 +53,18 @@ const LazyMapBoxMap = props => {
     <Suspense
       fallback={
         <div className="w-full h-full flex items-center justify-center bg-fill rounded-xl">
-          <div className="flex flex-col items-center justify-center" style={{ width: '340px' }}>
+          <div
+            className="flex flex-col items-center justify-center"
+            style={{ width: '340px' }}
+          >
             <md-linear-progress
               indeterminate
               style={{ width: '100%', marginBottom: '24px' }}
             ></md-linear-progress>
-            <span className="text-secondary text-lg" style={{ textAlign: 'center' }}>
+            <span
+              className="text-secondary text-lg"
+              style={{ textAlign: 'center' }}
+            >
               Cargando mapa...
             </span>
           </div>

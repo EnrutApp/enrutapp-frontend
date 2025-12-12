@@ -110,6 +110,7 @@ export const adminRoutes = [
     handle: {
       crumb: () => 'Dashboard Admin',
     },
+    permission: 'VER_DASHBOARD',
   },
   {
     path: ROUTES.ADMIN.CLIENTES,
@@ -117,6 +118,15 @@ export const adminRoutes = [
     handle: {
       crumb: () => 'Clientes',
     },
+    permission: 'VER_CLIENTES',
+  },
+  {
+    path: ROUTES.ADMIN.VIAJE_DETALLE,
+    element: <ViajeDetailsWithErrorBoundary />,
+    handle: {
+      crumb: () => 'Detalle Viaje',
+    },
+    permission: 'VER_VIAJES',
   },
   {
     path: ROUTES.ADMIN.USUARIOS,
@@ -124,6 +134,7 @@ export const adminRoutes = [
     handle: {
       crumb: () => 'Usuarios',
     },
+    permission: 'VER_USUARIOS',
   },
   {
     path: ROUTES.ADMIN.CONDUCTORES,
@@ -131,6 +142,7 @@ export const adminRoutes = [
     handle: {
       crumb: () => 'Conductores',
     },
+    permission: 'VER_CONDUCTORES',
   },
   {
     path: ROUTES.ADMIN.VEHICULOS,
@@ -138,6 +150,7 @@ export const adminRoutes = [
     handle: {
       crumb: () => 'Vehículos',
     },
+    permission: 'VER_VEHICULOS',
   },
   {
     path: ROUTES.ADMIN.RUTAS,
@@ -148,6 +161,7 @@ export const adminRoutes = [
     handle: {
       crumb: () => 'Rutas',
     },
+    permission: 'VER_RUTAS',
   },
   {
     path: ROUTES.ADMIN.TURNOS,
@@ -158,6 +172,7 @@ export const adminRoutes = [
     handle: {
       crumb: () => 'Turnos',
     },
+    permission: 'VER_TURNOS',
   },
   {
     path: ROUTES.ADMIN.RESERVAS,
@@ -168,6 +183,7 @@ export const adminRoutes = [
     handle: {
       crumb: () => 'Reservas',
     },
+    permission: 'VER_RESERVAS',
   },
   {
     path: ROUTES.ADMIN.ENCOMIENDAS,
@@ -178,6 +194,7 @@ export const adminRoutes = [
     handle: {
       crumb: () => 'Encomiendas',
     },
+    permission: 'VER_ENCOMIENDAS',
   },
   {
     path: ROUTES.ADMIN.FINANZAS,
@@ -188,6 +205,7 @@ export const adminRoutes = [
     handle: {
       crumb: () => 'Finanzas',
     },
+    permission: 'VER_FINANZAS',
   },
   {
     path: ROUTES.ADMIN.UBICACIONES,
@@ -198,6 +216,7 @@ export const adminRoutes = [
     handle: {
       crumb: () => 'Ubicaciones',
     },
+    permission: 'VER_UBICACIONES',
   },
   {
     path: ROUTES.ADMIN.ROLES,
@@ -208,6 +227,7 @@ export const adminRoutes = [
     handle: {
       crumb: () => 'Roles',
     },
+    permission: 'VER_ROLES',
   },
   {
     path: ROUTES.ADMIN.CONTRATOS,
@@ -218,6 +238,7 @@ export const adminRoutes = [
     handle: {
       crumb: () => 'Contratos',
     },
+    permission: 'VER_CONTRATOS',
   },
   {
     path: ROUTES.ADMIN.TRACKING,
@@ -228,6 +249,18 @@ export const adminRoutes = [
     handle: {
       crumb: () => 'Tracking',
     },
+    permission: 'VER_TRACKING',
+  },
+  {
+    path: ROUTES.ADMIN.VIAJES,
+    element: withErrorBoundary(Viajes, {
+      title: 'Error en Gestión de Viajes',
+      message: 'No se pudo cargar la gestión de viajes',
+    })(),
+    handle: {
+      crumb: () => 'Viajes',
+    },
+    permission: 'VER_VIAJES',
   },
   {
     path: ROUTES.ADMIN.CALENDARIO,

@@ -20,6 +20,10 @@ function buildVehiculoFormData(data, file) {
     seguroVencimiento: data.seguroVencimiento,
     estado:
       typeof data.estado === 'boolean' ? String(data.estado) : data.estado,
+    idPropietario: data.idPropietario,
+    propietarioExternoNombre: data.propietarioExternoNombre,
+    propietarioExternoDocumento: data.propietarioExternoDocumento,
+    propietarioExternoTelefono: data.propietarioExternoTelefono,
   };
   Object.entries(fields).forEach(([k, v]) => {
     if (v !== undefined && v !== null && v !== '') {

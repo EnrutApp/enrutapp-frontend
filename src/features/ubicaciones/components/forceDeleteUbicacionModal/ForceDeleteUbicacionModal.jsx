@@ -75,8 +75,6 @@ const ForceDeleteUbicacionModal = ({
           </div>
         </div>
 
-        <div className="text-center mb-6"></div>
-
         <div className="flex justify-end gap-3">
           <button className="px-5 text-blue cursor-pointer" onClick={onClose}>
             Cancelar

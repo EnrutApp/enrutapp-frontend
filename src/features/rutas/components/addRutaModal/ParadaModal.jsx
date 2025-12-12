@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Modal from '../../../../shared/components/modal/Modal';
 import UbicacionAddQuick from '../../../ubicaciones/components/ubicacionAddModal/UbicacionAddQuick';
-import apiClient from '../../../../shared/services/apiService';
+import ubicacionesService from '../../../ubicaciones/api/ubicacionesService';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 
@@ -17,26 +17,16 @@ const ParadaModal = ({
   const [isUbicacionAddOpen, setIsUbicacionAddOpen] = useState(false);
 
   const handleConfirm = () => {
-    console.log('handleConfirm llamado');
-    console.log('ubicacionSeleccionada:', ubicacionSeleccionada);
-    console.log('ubicaciones disponibles:', ubicaciones);
-    
-    if (!ubicacionSeleccionada) {
-      console.log('No hay ubicación seleccionada');
-      return;
-    }
+    if (!ubicacionSeleccionada) return;
 
     const ubicacion = ubicaciones.find(
       u => String(u.idUbicacion) === String(ubicacionSeleccionada)
     );
-    console.log('Ubicación encontrada:', ubicacion);
-    
+
     if (ubicacion) {
       onConfirm(ubicacion);
       setUbicacionSeleccionada('');
       onClose();
-    } else {
-      console.log('No se encontró la ubicación con ID:', ubicacionSeleccionada);
     }
   };
 
@@ -44,41 +34,49 @@ const ParadaModal = ({
     if (isOpen && ubicacionesProp) {
       setUbicaciones(ubicacionesProp);
     }
-  }, [isOpen, ubicacionesProp]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const handleUbicacionAdded = async nuevaUbicacion => {
-    // Refrescar la lista de ubicaciones
     try {
-      const response = await apiClient.get('/ubicaciones');
-      const data = response?.data || response || [];
-      
-      // Mapear los datos para usar la estructura esperada
-      const ubicacionesMapeadas = data
-        .filter(u => u.estado && u.latitud && u.longitud)
-        .map(u => ({
-          idUbicacion: u.id,
-          nombreUbicacion: u.nombre,
-          direccion: u.direccion,
-          latitud: u.latitud,
-          longitud: u.longitud,
-          estado: u.estado,
-        }));
-      
+      const ubicacionCreadaRaw = nuevaUbicacion.data || nuevaUbicacion;
+
+      const nuevaLocal = {
+        idUbicacion: ubicacionCreadaRaw.idUbicacion || ubicacionCreadaRaw.id,
+        nombreUbicacion:
+          ubicacionCreadaRaw.nombreUbicacion || ubicacionCreadaRaw.nombre,
+        direccion: ubicacionCreadaRaw.direccion,
+        latitud: ubicacionCreadaRaw.latitud
+          ? Number(ubicacionCreadaRaw.latitud)
+          : null,
+        longitud: ubicacionCreadaRaw.longitud
+          ? Number(ubicacionCreadaRaw.longitud)
+          : null,
+        estado: true,
+      };
+
+      if (nuevaLocal.idUbicacion) {
+        setUbicaciones(prev => [...prev, nuevaLocal]);
+        setUbicacionSeleccionada(String(nuevaLocal.idUbicacion));
+      }
+
+      const data = await ubicacionesService.getAll();
+      const ubicacionesMapeadas = data.map(u => ({
+        idUbicacion: u.idUbicacion,
+        nombreUbicacion: u.nombreUbicacion,
+        direccion: u.direccion,
+        latitud: u.latitud ? Number(u.latitud) : null,
+        longitud: u.longitud ? Number(u.longitud) : null,
+        estado: true,
+      }));
+
       setUbicaciones(ubicacionesMapeadas);
 
-      // Seleccionar la nueva ubicación
-      if (nuevaUbicacion) {
-        const idUbicacion =
-          nuevaUbicacion.idUbicacion ||
-          nuevaUbicacion.data?.idUbicacion ||
-          nuevaUbicacion.data?.id ||
-          nuevaUbicacion.id;
-        if (idUbicacion) {
-          setUbicacionSeleccionada(String(idUbicacion));
-        }
+      if (nuevaLocal.idUbicacion) {
+        setUbicacionSeleccionada(String(nuevaLocal.idUbicacion));
       }
     } catch (error) {
-      
+      console.error('Error refreshing locations:', error);
     }
     setIsUbicacionAddOpen(false);
   };
@@ -88,7 +86,6 @@ const ParadaModal = ({
     onClose();
   };
 
-  // Filtrar ubicaciones que ya están en paradas (si se pasa como prop)
   const ubicacionesDisponibles = ubicaciones || [];
 
   return (

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import '@material/web/icon/icon.js';
+import { useGoogleMaps } from '../../context/GoogleMapsLoader';
 
 const AddressAutocomplete = ({
   value = '',
@@ -11,111 +12,99 @@ const AddressAutocomplete = ({
   country = 'co',
   required = false,
 }) => {
+  const { isLoaded } = useGoogleMaps();
+  const [inputValue, setInputValue] = useState(value);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef(null);
   const suggestionsRef = useRef(null);
-  const timeoutRef = useRef(null);
 
-  const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+  const autocompleteService = useRef(null);
+  const placesService = useRef(null);
+  const sessionToken = useRef(null);
 
   useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
+    setInputValue(value);
+  }, [value]);
 
-  const searchAddresses = async query => {
-    if (!query.trim() || query.length < 2) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-
-    if (!MAPBOX_TOKEN) {
-      
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      let response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?` +
-          `access_token=${MAPBOX_TOKEN}&` +
-          `country=${country}&` +
-          `limit=10&` +
-          `language=es&` +
-          `autocomplete=true`
+  useEffect(() => {
+    if (isLoaded && window.google) {
+      autocompleteService.current =
+        new window.google.maps.places.AutocompleteService();
+      placesService.current = new window.google.maps.places.PlacesService(
+        document.createElement('div')
       );
-
-      let data = await response.json();
-
-      if (data.features && data.features.length > 0) {
-        const sortedFeatures = data.features
-          .sort((a, b) => {
-            const aIsAddress = a.place_type?.includes('address') || false;
-            const bIsAddress = b.place_type?.includes('address') || false;
-            if (aIsAddress && !bIsAddress) return -1;
-            if (!aIsAddress && bIsAddress) return 1;
-
-            const aIsPOI = a.place_type?.includes('poi') || false;
-            const bIsPOI = b.place_type?.includes('poi') || false;
-            if (aIsPOI && !bIsPOI) return -1;
-            if (!aIsPOI && bIsPOI) return 1;
-
-            return 0;
-          })
-          .slice(0, 8);
-
-        setSuggestions(sortedFeatures);
-        setShowSuggestions(true);
-        setSelectedIndex(-1);
-      } else {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    } catch (error) {
-      
-      setSuggestions([]);
-      setShowSuggestions(false);
-    } finally {
-      setIsLoading(false);
+      sessionToken.current =
+        new window.google.maps.places.AutocompleteSessionToken();
     }
+  }, [isLoaded]);
+
+  const searchAddresses = query => {
+    if (!query.trim() || query.length < 2 || !autocompleteService.current) {
+      setSuggestions([]);
+      return;
+    }
+
+    const request = {
+      input: query,
+      sessionToken: sessionToken.current,
+      componentRestrictions: { country },
+      types: [],
+      language: 'es',
+    };
+
+    autocompleteService.current.getPlacePredictions(
+      request,
+      (predictions, status) => {
+        if (
+          status === window.google.maps.places.PlacesServiceStatus.OK &&
+          predictions
+        ) {
+          setSuggestions(predictions);
+          setShowSuggestions(true);
+        } else {
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }
+      }
+    );
   };
 
   const handleInputChange = e => {
     const newValue = e.target.value;
+    setInputValue(newValue);
     onChange(newValue);
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      searchAddresses(newValue);
-    }, 200);
+    searchAddresses(newValue);
   };
 
-  const handleSelect = suggestion => {
-    const address = suggestion.place_name || suggestion.text;
-    const [lng, lat] = suggestion.center;
-
-    onChange(address);
+  const handleSelect = prediction => {
+    setInputValue(prediction.description);
+    onChange(prediction.description);
     setShowSuggestions(false);
-    setSuggestions([]);
 
-    onSelect({
-      address,
-      lat,
-      lng,
-      context: suggestion.context,
-      placeType: suggestion.place_type,
-      properties: suggestion.properties,
+    const request = {
+      placeId: prediction.place_id,
+      fields: ['name', 'formatted_address', 'geometry', 'address_components'],
+      sessionToken: sessionToken.current,
+    };
+
+    placesService.current.getDetails(request, (place, status) => {
+      if (
+        status === window.google.maps.places.PlacesServiceStatus.OK &&
+        place
+      ) {
+        onSelect({
+          address: place.formatted_address,
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+          placeId: prediction.place_id,
+          components: place.address_components,
+        });
+
+        sessionToken.current =
+          new window.google.maps.places.AutocompleteSessionToken();
+      }
     });
   };
 
@@ -146,72 +135,34 @@ const AddressAutocomplete = ({
     }
   };
 
-  const handleBlur = () => {
-    setTimeout(() => {
-      setShowSuggestions(false);
-    }, 200);
-  };
-
-  const handleFocus = () => {
-    if (suggestions.length > 0 && value.trim().length >= 2) {
-      setShowSuggestions(true);
-    } else if (value.trim().length >= 2) {
-      searchAddresses(value);
-    }
-  };
-
-  const formatAddress = suggestion => {
-    if (suggestion.place_name) {
-      return suggestion.place_name;
-    }
-
-    const context = suggestion.context || [];
-    const addressLine =
-      suggestion.properties?.address_line_1 ||
-      suggestion.properties?.address ||
-      suggestion.text ||
-      '';
-    const city = context.find(c => c.id?.startsWith('place'))?.text || '';
-    const region = context.find(c => c.id?.startsWith('region'))?.text || '';
-    const country =
-      context.find(c => c.id?.startsWith('country'))?.text || 'Colombia';
-
-    let parts = [addressLine];
-    if (city && city !== addressLine && !addressLine.includes(city))
-      parts.push(city);
-    if (region && !parts.includes(region)) parts.push(region);
-    if (country && !parts.includes(country)) parts.push(country);
-
-    return parts.join(', ');
-  };
-
   return (
     <div className={`relative ${className}`}>
       <div className="relative w-full">
         <input
           ref={inputRef}
           type="text"
-          value={value}
+          value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onBlur={handleBlur}
-          onFocus={handleFocus}
+          onFocus={() => {
+            if (inputValue.length > 2) searchAddresses(inputValue);
+          }}
+          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           placeholder={placeholder}
-          disabled={disabled}
+          disabled={disabled || !isLoaded}
           required={required}
           className="w-full px-4 py-3 pr-10 input bg-fill border border-border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-50"
-          style={{
-            overflowX: 'auto',
-            scrollbarWidth: 'thin',
-            minWidth: 0,
-          }}
           autoComplete="off"
         />
-        {isLoading && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            <md-icon className="text-secondary text-base">
-              search
+        {!isLoaded ? (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <md-icon className="text-secondary text-base animate-spin">
+              sync
             </md-icon>
+          </div>
+        ) : (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <md-icon className="text-secondary text-base">search</md-icon>
           </div>
         )}
       </div>
@@ -224,23 +175,9 @@ const AddressAutocomplete = ({
         >
           {suggestions.map((suggestion, index) => {
             const isSelected = index === selectedIndex;
-            const fullAddress = formatAddress(suggestion);
-            const mainText =
-              suggestion.properties?.address_line_1 ||
-              suggestion.properties?.address ||
-              suggestion.text ||
-              '';
-            const contextParts = fullAddress
-              .split(',')
-              .slice(1)
-              .map(s => s.trim())
-              .filter(Boolean);
-            const contextText =
-              contextParts.length > 0 ? contextParts.join(', ') : '';
-
             return (
               <button
-                key={suggestion.id}
+                key={suggestion.place_id}
                 type="button"
                 onClick={() => handleSelect(suggestion)}
                 className={`w-full text-left px-4 py-3 transition-colors border-b border-border last:border-b-0 ${
@@ -255,13 +192,11 @@ const AddressAutocomplete = ({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-body1 font-medium text-primary">
-                      {mainText}
+                      {suggestion.structured_formatting.main_text}
                     </p>
-                    {contextText && (
-                      <p className="text-sm text-secondary mt-0.5">
-                        {contextText}
-                      </p>
-                    )}
+                    <p className="text-sm text-secondary mt-0.5">
+                      {suggestion.structured_formatting.secondary_text}
+                    </p>
                   </div>
                 </div>
               </button>
@@ -269,17 +204,6 @@ const AddressAutocomplete = ({
           })}
         </div>
       )}
-
-      {showSuggestions &&
-        suggestions.length === 0 &&
-        value.trim().length >= 2 &&
-        !isLoading && (
-          <div className="absolute z-50 w-full mt-1 bg-surface border border-border rounded-lg shadow-lg p-4">
-            <p className="text-sm text-secondary text-center">
-              No se encontraron resultados
-            </p>
-          </div>
-        )}
     </div>
   );
 };

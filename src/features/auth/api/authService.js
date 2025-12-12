@@ -52,7 +52,7 @@ export const authService = {
       correo: userData.email,
       contrasena: userData.password,
       nombre: userData.name,
-      numDocumento: userData.documentNumber || '', // Campo faltante
+      numDocumento: userData.documentNumber || '',
       telefono: userData.phone,
       direccion: userData.address,
       idCiudad: Number(userData.idCiudad),

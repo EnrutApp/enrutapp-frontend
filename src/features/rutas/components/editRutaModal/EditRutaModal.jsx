@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import apiClient from '../../../../shared/services/apiService';
-import { MapBoxMap } from '../../../../shared/components/map';
+import GoogleMapComponent from '../../../../shared/components/map/components/GoogleMapComponent';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
@@ -30,15 +30,15 @@ const EditRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
     if (!isOpen) return;
     const fetchUbicaciones = async () => {
       try {
-        const response = await apiClient.get('/ubicaciones');
+        const response = await apiClient.get('/rutas/ubicaciones');
         const data = response?.data || response || [];
 
-        const ubicacionesValidas = data.filter(
-          u => u.estado && u.latitud && u.longitud
-        );
+        const ubicacionesValidas = data.map(u => ({
+          ...u,
+          estado: true,
+        }));
         setUbicaciones(ubicacionesValidas);
       } catch (error) {
-        
         setError('No se pudieron cargar las ubicaciones');
       }
     };
@@ -70,7 +70,6 @@ const EditRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
     setOrigenSeleccionado(origen || null);
     setDestinoSeleccionado(destino || null);
 
-    // Cargar paradas si existen
     if (ruta.paradas && Array.isArray(ruta.paradas)) {
       const paradas = ruta.paradas
         .sort((a, b) => (a.orden || 0) - (b.orden || 0))
@@ -136,7 +135,6 @@ const EditRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         onClose();
       }, 1000);
     } catch (err) {
-      
       setError(
         err.response?.data?.message ||
           err.message ||
@@ -373,7 +371,7 @@ const EditRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
       </div>
 
       <div className="w-[65%] overflow-hidden rounded-r-3xl">
-        <MapBoxMap
+        <GoogleMapComponent
           origen={origenSeleccionado}
           destino={destinoSeleccionado}
           paradas={paradasSeleccionadas}

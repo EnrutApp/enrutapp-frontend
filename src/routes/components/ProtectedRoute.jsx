@@ -5,7 +5,11 @@ import { useEffect } from 'react';
 import '@material/web/icon/icon.js';
 import '@material/web/progress/linear-progress.js';
 
-const UnauthorizedAccess = ({ userRole, requiredRoles }) => (
+const UnauthorizedAccess = ({
+  userRole,
+  requiredRoles,
+  requiredPermission,
+}) => (
   <div className="min-h-screen flex items-center justify-center bg-background p-4 list-enter">
     <div className="max-w-md w-full content-box-outline-4-small rounded-xl p-8 text-center animate-fade-in">
       <div className="flex items-center justify-center">
@@ -16,9 +20,7 @@ const UnauthorizedAccess = ({ userRole, requiredRoles }) => (
         </div>
       </div>
 
-      <h2 className="h3 font-medium text-primary">
-        Acceso no autorizado.
-      </h2>
+      <h2 className="h3 font-medium text-primary">Acceso no autorizado.</h2>
 
       <p className="subtitle1 text-secondary mb-6">
         No tienes permisos para acceder a esta página.
@@ -43,10 +45,12 @@ const UnauthorizedAccess = ({ userRole, requiredRoles }) => (
           </md-icon>
           <div className="flex-1">
             <p className="text-xs text-secondary font-medium mb-0.5">
-              Roles requeridos
+              Requerimientos
             </p>
             <p className="subtitle2 text-primary font-medium">
-              {requiredRoles?.join(', ') || 'No especificado'}
+              {requiredPermission
+                ? `Permiso: ${requiredPermission}`
+                : `Roles: ${requiredRoles?.join(', ') || 'No especificado'}`}
             </p>
           </div>
         </div>
@@ -86,6 +90,7 @@ const UnauthorizedAccess = ({ userRole, requiredRoles }) => (
 
 const ProtectedRoute = ({
   allowedRoles,
+  requiredPermission,
   children,
   requireAuth = true,
   fallbackPath = ROUTES.DASHBOARD,
@@ -94,16 +99,21 @@ const ProtectedRoute = ({
   const { user, isLoading, isAuthenticated } = useAuth();
   const location = useLocation();
 
-  // Mostrar carga mientras se verifica la autenticación
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center justify-center" style={{ width: '340px' }}>
+        <div
+          className="flex flex-col items-center justify-center"
+          style={{ width: '340px' }}
+        >
           <md-linear-progress
             indeterminate
             style={{ width: '100%', marginBottom: '24px' }}
           ></md-linear-progress>
-          <span className="text-secondary text-lg" style={{ textAlign: 'center' }}>
+          <span
+            className="text-secondary text-lg"
+            style={{ textAlign: 'center' }}
+          >
             {loadingMessage}
           </span>
         </div>
@@ -111,25 +121,41 @@ const ProtectedRoute = ({
     );
   }
 
-  // Si requiere autenticación y no está autenticado, redirigir al login
   if (requireAuth && !isAuthenticated) {
     return (
       <Navigate to={ROUTES.LOGIN} state={{ from: location.pathname }} replace />
     );
   }
 
-  // Si no requiere autenticación, mostrar el contenido directamente
   if (!requireAuth) {
     return children;
   }
 
-  // Verificar roles si se especificaron
-  if (allowedRoles && allowedRoles.length > 0) {
-    const userRole = user?.rol?.nombreRol;
+  const userRole = user?.rol?.nombreRol;
 
-    // Si no hay rol o el rol no está permitido
+  if (requiredPermission) {
+    if (!userRole) return <Navigate to={fallbackPath} replace />;
+
+    const userPermissions =
+      user?.rol?.rolesPermisos?.map(rp => rp.permiso.codigo) || [];
+    const hasPermission = userPermissions.includes(requiredPermission);
+
+    const isAdmin = userRole === 'Administrador';
+
+    if (hasPermission || isAdmin) {
+      return children;
+    }
+
+    return (
+      <UnauthorizedAccess
+        userRole={userRole}
+        requiredPermission={requiredPermission}
+      />
+    );
+  }
+
+  if (allowedRoles && allowedRoles.length > 0) {
     if (!userRole || !allowedRoles.includes(userRole)) {
-      // Si hay un rol pero no está permitido, mostrar error de acceso
       if (userRole) {
         return (
           <UnauthorizedAccess
@@ -138,7 +164,6 @@ const ProtectedRoute = ({
           />
         );
       } else {
-        // Si no hay rol, redirigir al dashboard (evitar flash)
         return <Navigate to={fallbackPath} replace />;
       }
     }

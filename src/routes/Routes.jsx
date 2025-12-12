@@ -34,23 +34,19 @@ const RoleRedirect = withLazyLoading(
 );
 
 const CompletarPerfilPage = withLazyLoading(
-  lazy(() =>
-    import('../features/conductores/pages/CompletarPerfilPage')
-  ),
+  lazy(() => import('../features/conductores/pages/CompletarPerfilPage')),
   'Cargando...'
 );
 
-// --- New Imports from Remote ---
 const Landing = withLazyLoading(
-    lazy(() => import('../features/landingPage/Landing')),
-    'Cargando landing...'
+  lazy(() => import('../features/landingPage/Landing')),
+  'Cargando landing...'
 );
 
 const ResultadosBusqueda = withLazyLoading(
-    lazy(() => import('../features/landingPage/ResultadosBusqueda')),
-    'Cargando resultados de búsqueda...'
+  lazy(() => import('../features/landingPage/ResultadosBusqueda')),
+  'Cargando resultados de búsqueda...'
 );
-// -----------------------------
 
 const LayoutWithErrorBoundary = withErrorBoundary(Layout, {
   title: 'Error de la Aplicación',
@@ -64,19 +60,27 @@ const LoginWithErrorBoundary = withErrorBoundary(Login, {
 });
 
 const LandingWithErrorBoundary = withErrorBoundary(Landing, {
-    title: 'Error de Landing',
-    message: 'No se pudo cargar la página principal.'
+  title: 'Error de Landing',
+  message: 'No se pudo cargar la página principal.',
 });
 
-const ResultadosBusquedaWithErrorBoundary = withErrorBoundary(ResultadosBusqueda, {
+const ResultadosBusquedaWithErrorBoundary = withErrorBoundary(
+  ResultadosBusqueda,
+  {
     title: 'Error de Resultados',
-    message: 'No se pudieron cargar los resultados de búsqueda.'
-});
+    message: 'No se pudieron cargar los resultados de búsqueda.',
+  }
+);
 
-const createProtectedRoute = (element, allowedRoles) => {
+const createProtectedRoute = (element, allowedRoles, requiredPermission) => {
   const route = {
     element: (
-      <ProtectedRoute allowedRoles={allowedRoles}>{element}</ProtectedRoute>
+      <ProtectedRoute
+        allowedRoles={allowedRoles}
+        requiredPermission={requiredPermission}
+      >
+        {element}
+      </ProtectedRoute>
     ),
   };
 
@@ -86,7 +90,7 @@ const createProtectedRoute = (element, allowedRoles) => {
 const mapRoutesWithProtection = (routes, requiredRoles) => {
   return routes.map(route => ({
     path: route.path,
-    ...createProtectedRoute(route.element, requiredRoles),
+    ...createProtectedRoute(route.element, requiredRoles, route.permission),
     handle: route.handle,
   }));
 };
@@ -107,33 +111,26 @@ const Routes = createBrowserRouter([
     ),
   },
 
-  // --- Landing Page (Root) ---
   {
     path: ROUTES.ROOT,
     element: <LandingWithErrorBoundary />,
-    errorElement: <NotFound />
+    errorElement: <NotFound />,
   },
 
-  // --- Search Results ---
   {
     path: '/busqueda',
     element: <ResultadosBusquedaWithErrorBoundary />,
-    errorElement: <NotFound />
+    errorElement: <NotFound />,
   },
 
-  // --- Main App (Protected/Layout) ---
   {
     element: <LayoutWithErrorBoundary />,
     errorElement: <NotFound />,
     children: [
       {
-        path: 'dashboard', // Was index, now dashboard
+        path: 'dashboard',
         element: <RoleRedirect />,
       },
-      
-      // Also catch index if they manage to get here via some internal link? 
-      // Or maybe existing bookmarks to / will hit Landing now, which is defined above.
-      // If we want dashboard to be accessible, it needs a path.
 
       ...mapRoutesWithProtection(adminRoutes, ADMIN_REQUIRED_ROLE),
 

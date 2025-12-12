@@ -32,7 +32,10 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
   const [selectedCategoria, setSelectedCategoria] = useState('');
   const [loadingCategoria, setLoadingCategoria] = useState(false);
   const [isContactoModalOpen, setIsContactoModalOpen] = useState(false);
-  const [contactoForm, setContactoForm] = useState({ correo: '', telefono: '' });
+  const [contactoForm, setContactoForm] = useState({
+    correo: '',
+    telefono: '',
+  });
   const [loadingContacto, setLoadingContacto] = useState(false);
 
   useEffect(() => {
@@ -42,7 +45,7 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
         .then(res => {
           if (res && res.data) {
             setFullUser(res.data);
-            // Si el usuario es conductor, cargar datos del conductor
+
             if (res.data?.rol?.nombreRol?.toLowerCase() === 'conductor') {
               loadConductorData(res.data.idUsuario);
             }
@@ -65,13 +68,14 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
     }
   }, [isOpen, user]);
 
-  const loadConductorData = async (idUsuario) => {
+  const loadConductorData = async idUsuario => {
     setLoadingConductor(true);
     try {
-      // Obtener todos los conductores y buscar el que coincida con el idUsuario
       const response = await conductorService.getConductores();
       const conductores = response.data || response;
-      const conductor = conductores.find(c => c.usuario?.idUsuario === idUsuario);
+      const conductor = conductores.find(
+        c => c.usuario?.idUsuario === idUsuario
+      );
       setConductorData(conductor || null);
     } catch (error) {
       console.error('Error al cargar datos del conductor:', error);
@@ -134,10 +138,9 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
         window.location.reload();
       }
     } catch (error) {
-
       alert(
         'Error al eliminar el usuario: ' +
-        (error.message || 'Error desconocido')
+          (error.message || 'Error desconocido')
       );
       setIsDeleteModalOpen(false);
     }
@@ -148,20 +151,20 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
     setUserToDelete(null);
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     if (!dateString) return 'No registrada';
-    // Si la fecha viene en formato ISO, extraer solo la parte de la fecha (YYYY-MM-DD)
+
     const dateOnly = dateString.split('T')[0];
     const [year, month, day] = dateOnly.split('-');
     const date = new Date(year, month - 1, day);
     return date.toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
-  const isExpired = (dateString) => {
+  const isExpired = dateString => {
     if (!dateString) return false;
     const dateOnly = dateString.split('T')[0];
     const [year, month, day] = dateOnly.split('-');
@@ -171,7 +174,7 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
     return date < today;
   };
 
-  const isNearExpiry = (dateString) => {
+  const isNearExpiry = dateString => {
     if (!dateString) return false;
     const dateOnly = dateString.split('T')[0];
     const [year, month, day] = dateOnly.split('-');
@@ -205,14 +208,16 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
     setLoadingCategoria(true);
     try {
       await conductorService.updateConductor(conductorData.idConductor, {
-        idCategoriaLicencia: selectedCategoria
+        idCategoriaLicencia: selectedCategoria,
       });
 
-      // Recargar los datos del conductor
       await loadConductorData(fullUser.idUsuario);
       setIsCategoriaModalOpen(false);
     } catch (error) {
-      alert('Error al actualizar la categoría: ' + (error.message || 'Error desconocido'));
+      alert(
+        'Error al actualizar la categoría: ' +
+          (error.message || 'Error desconocido')
+      );
     } finally {
       setLoadingCategoria(false);
     }
@@ -227,7 +232,7 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
     setIsContactoModalOpen(true);
     setContactoForm({
       correo: fullUser?.correo || '',
-      telefono: fullUser?.telefono || ''
+      telefono: fullUser?.telefono || '',
     });
   };
 
@@ -240,10 +245,9 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
     setLoadingContacto(true);
     try {
       await apiClient.put(`/usuarios/${fullUser.idUsuario}`, {
-        telefono: contactoForm.telefono.trim()
+        telefono: contactoForm.telefono.trim(),
       });
 
-      // Recargar los datos del usuario
       const response = await userService.getUserById(fullUser.idUsuario);
       setFullUser(response.data || response);
       setIsContactoModalOpen(false);
@@ -253,7 +257,10 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
       }
     } catch (error) {
       console.error('Error al actualizar el contacto:', error);
-      alert('Error al actualizar el contacto: ' + (error.message || 'Error desconocido'));
+      alert(
+        'Error al actualizar el contacto: ' +
+          (error.message || 'Error desconocido')
+      );
     } finally {
       setLoadingContacto(false);
     }
@@ -401,14 +408,12 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
           </div>
         </div>
 
-        {/* Información de licencia (solo para conductores) */}
         {isConductor && conductorData && (
           <div className="content-box-outline-3-small">
             <span className="subtitle1 text-primary font-light">
               Información de licencia
             </span>
             <div className="flex flex-col gap-2 mt-2">
-              {/* Estado de la licencia */}
               <div className="flex justify-between items-center content-box-outline-8-small">
                 <div className="flex items-center gap-2">
                   <div>
@@ -445,14 +450,15 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
                 )}
               </div>
 
-              {/* Detalles de licencia */}
               <div className="grid grid-cols gap-2">
                 <div className="p-4 content-box-outline-3-small rounded-lg">
                   <span className="subtitle1 text-primary">
                     Número de licencia
                   </span>
                   <p className="subtitle2 text-secondary">
-                    {conductorData.numeroLicencia || fullUser?.numDocumento || '-'}
+                    {conductorData.numeroLicencia ||
+                      fullUser?.numDocumento ||
+                      '-'}
                   </p>
 
                   <div
@@ -462,7 +468,8 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
                     <div className="flex flex-col gap-2 flex-1">
                       <span className="subtitle1 font-medium">Categoría</span>
                       <span className="body2 text-secondary">
-                        {conductorData.categoriaLicencia?.nombreCategoria || '-'}
+                        {conductorData.categoriaLicencia?.nombreCategoria ||
+                          '-'}
                       </span>
                     </div>
                     <div className="flex items-center">
@@ -470,7 +477,10 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
                         className="btn-add px-5"
                         onClick={handleCategoriaClick}
                       >
-                        <md-icon slot="icon" className="text-lg text-on-primary">
+                        <md-icon
+                          slot="icon"
+                          className="text-lg text-on-primary"
+                        >
                           steering_wheel_heat
                         </md-icon>
                         Actualizar categoría
@@ -480,7 +490,6 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
                 </div>
               </div>
 
-              {/* Observaciones */}
               {conductorData.observaciones && (
                 <div className="content-box-outline-3-small">
                   <span className="subtitle1 text-primary font-light">
@@ -495,7 +504,6 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
           </div>
         )}
 
-        {/* Mensaje si es conductor pero no tiene datos de licencia */}
         {isConductor && !conductorData && !loadingConductor && (
           <div className="content-box-outline-3-small bg-yellow/10 border-yellow/30">
             <div className="flex items-start gap-3">
@@ -505,7 +513,8 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
                   Perfil de conductor incompleto
                 </span>
                 <p className="subtitle2 text-secondary mt-1">
-                  Este usuario tiene rol de conductor pero no ha completado su información de licencia.
+                  Este usuario tiene rol de conductor pero no ha completado su
+                  información de licencia.
                 </p>
               </div>
             </div>
@@ -529,7 +538,7 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
 
         <div>
           {fullUser?.rol?.nombreRol?.toLowerCase() === 'administrador' ||
-            user?.rol?.nombreRol?.toLowerCase() === 'administrador' ? (
+          user?.rol?.nombreRol?.toLowerCase() === 'administrador' ? (
             <button
               className="btn btn-secondary font-medium flex text-secondary items-center opacity-50 btn-disabled"
               title="No se puede eliminar un administrador"
@@ -552,11 +561,10 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
         </div>
       </div>
 
-      {/* Modal para cambiar categoría */}
       <Modal
         isOpen={isCategoriaModalOpen}
         onClose={handleCategoriaCancel}
-        size='sm'
+        size="sm"
       >
         <main className="relative">
           {loadingCategoria && (
@@ -581,7 +589,9 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
 
             <div className="px-8 md:px-20">
               <div className="leading-tight mb-6">
-                <h2 className="h2 font-medium text-primary">Actualizar categoría</h2>
+                <h2 className="h2 font-medium text-primary">
+                  Actualizar categoría
+                </h2>
                 <p className="h5 text-secondary font-medium">
                   Selecciona la nueva categoría de licencia
                 </p>
@@ -596,13 +606,16 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
                     <md-icon className="text-sm">arrow_drop_down</md-icon>
                     <select
                       value={selectedCategoria}
-                      onChange={(e) => setSelectedCategoria(e.target.value)}
+                      onChange={e => setSelectedCategoria(e.target.value)}
                       className="select-filter w-full px-4 input bg-fill border rounded-lg text-primary focus:outline-none focus:border-primary transition-colors border-border"
                       disabled={loadingCategoria}
                     >
                       <option value="">Selecciona una categoría</option>
-                      {categorias.map((cat) => (
-                        <option key={cat.idCategoriaLicencia} value={cat.idCategoriaLicencia}>
+                      {categorias.map(cat => (
+                        <option
+                          key={cat.idCategoriaLicencia}
+                          value={cat.idCategoriaLicencia}
+                        >
                           {cat.nombreCategoria}
                         </option>
                       ))}
@@ -637,11 +650,10 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
         </main>
       </Modal>
 
-      {/* Modal para actualizar contacto */}
       <Modal
         isOpen={isContactoModalOpen}
         onClose={handleContactoCancel}
-        size='sm'
+        size="sm"
       >
         <main className="relative">
           {loadingContacto && (
@@ -666,7 +678,9 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
 
             <div className="px-8 md:px-20">
               <div className="leading-tight mb-6">
-                <h2 className="h2 font-medium text-primary">Actualizar contacto</h2>
+                <h2 className="h2 font-medium text-primary">
+                  Actualizar contacto
+                </h2>
                 <p className="h5 text-secondary font-medium">
                   Actualiza el teléfono de contacto
                 </p>
@@ -696,11 +710,25 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
                   <input
                     type="tel"
                     value={contactoForm.telefono}
-                    onChange={(e) => setContactoForm({ ...contactoForm, telefono: e.target.value })}
+                    onChange={e => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      if (val.length <= 10) {
+                        setContactoForm({
+                          ...contactoForm,
+                          telefono: val,
+                        });
+                      }
+                    }}
                     placeholder="Número de teléfono"
                     className="w-full px-4 py-3 input bg-fill border border-border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     disabled={loadingContacto}
                   />
+                  {contactoForm.telefono &&
+                    !/^3\d{9}$/.test(contactoForm.telefono) && (
+                      <span className="text-red-500 text-xs mt-1">
+                        Debe ser celular válido (10 dígitos, empieza con 3)
+                      </span>
+                    )}
                 </div>
 
                 <div className="flex justify-between items-center gap-2 pt-2">
@@ -716,7 +744,11 @@ const UserProfile = ({ user, isOpen, onClose, onUserUpdated }) => {
                     type="button"
                     onClick={handleContactoConfirm}
                     className="btn btn-primary py-3 font-medium text-subtitle1 w-1/2 flex items-center justify-center gap-2"
-                    disabled={loadingContacto || !contactoForm.telefono?.trim()}
+                    disabled={
+                      loadingContacto ||
+                      !contactoForm.telefono?.trim() ||
+                      !/^3\d{9}$/.test(contactoForm.telefono)
+                    }
                   >
                     {loadingContacto && (
                       <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>

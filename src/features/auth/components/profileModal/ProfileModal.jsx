@@ -42,7 +42,6 @@ const ProfileModal = ({ isOpen, onClose }) => {
       await refreshAuth();
       setIsEditUserModalOpen(false);
     } catch {
-      // Error handled by updateUser
     } finally {
       setEditUserLoading(false);
     }
@@ -67,9 +66,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
       await photoService.deleteProfilePhoto();
       await refreshAuth();
       setIsEditPhotoModalOpen(false);
-    } catch {
-      // Error handled by photoService
-    }
+    } catch {}
   };
 
   const handleFileChange = async e => {
@@ -81,7 +78,6 @@ const ProfileModal = ({ isOpen, onClose }) => {
       await refreshAuth();
       setIsEditPhotoModalOpen(false);
     } catch {
-      // Error handled by photoService
     } finally {
       setUploading(false);
     }

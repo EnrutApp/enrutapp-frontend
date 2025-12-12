@@ -15,7 +15,6 @@ const usePagination = (data, itemsPerPage = 10) => {
     }
   };
 
-  // Resetear a la página 1 cuando cambia la cantidad de datos o items por página
   useEffect(() => {
     setCurrentPage(1);
   }, [data.length, itemsPerPage]);

@@ -14,17 +14,26 @@ const Layout = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    // Solo redirigir si no está cargando y está autenticado
-    if (!isLoading && !verificando && isAuthenticated && requiereCompletar && location.pathname !== '/completar-perfil') {
+    if (
+      !isLoading &&
+      !verificando &&
+      isAuthenticated &&
+      requiereCompletar &&
+      location.pathname !== '/completar-perfil'
+    ) {
       navigate('/completar-perfil', { replace: true });
     }
-  }, [requiereCompletar, verificando, isLoading, isAuthenticated, navigate, location]);
+  }, [
+    requiereCompletar,
+    verificando,
+    isLoading,
+    isAuthenticated,
+    navigate,
+    location,
+  ]);
 
-  // Detectar cuando todo está listo para mostrar el contenido
   useEffect(() => {
     if (!isLoading && !verificando && isAuthenticated && user?.rol?.nombreRol) {
-      // Delay un poco más largo para asegurar que el componente lazy esté listo
-      // y evitar que se muestre la carga del lazy-loading
       const timer = setTimeout(() => {
         setIsInitialLoad(false);
       }, 300);
@@ -34,16 +43,21 @@ const Layout = () => {
     }
   }, [isLoading, verificando, isAuthenticated, user?.rol?.nombreRol]);
 
-  // Mostrar carga solo si se está verificando autenticación o perfil
   if (isLoading || verificando) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center justify-center" style={{ width: '340px' }}>
+        <div
+          className="flex flex-col items-center justify-center"
+          style={{ width: '340px' }}
+        >
           <md-linear-progress
             indeterminate
             style={{ width: '100%', marginBottom: '24px' }}
           ></md-linear-progress>
-          <span className="text-secondary text-lg" style={{ textAlign: 'center' }}>
+          <span
+            className="text-secondary text-lg"
+            style={{ textAlign: 'center' }}
+          >
             {isLoggingOut ? 'Saliendo...' : 'Cargando aplicación...'}
           </span>
         </div>
@@ -51,21 +65,25 @@ const Layout = () => {
     );
   }
 
-  // Si no está autenticado, redirigir al login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Si está autenticado pero faltan datos o está en carga inicial
   if (!user?.rol?.nombreRol || isInitialLoad) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center justify-center" style={{ width: '340px' }}>
+        <div
+          className="flex flex-col items-center justify-center"
+          style={{ width: '340px' }}
+        >
           <md-linear-progress
             indeterminate
             style={{ width: '100%', marginBottom: '24px' }}
           ></md-linear-progress>
-          <span className="text-secondary text-lg" style={{ textAlign: 'center' }}>
+          <span
+            className="text-secondary text-lg"
+            style={{ textAlign: 'center' }}
+          >
             {isLoggingOut ? 'Saliendo...' : 'Cargando aplicación...'}
           </span>
         </div>

@@ -18,18 +18,19 @@ export const ThemeProvider = ({ children }) => {
 
   const [systemTheme, setSystemTheme] = useState(() => {
     if (typeof window !== 'undefined') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
     }
     return 'light';
   });
 
-  // Detectar cambios en el tema del sistema
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-    const handleChange = (e) => {
+    const handleChange = e => {
       setSystemTheme(e.matches ? 'dark' : 'light');
     };
 
@@ -38,8 +39,7 @@ export const ThemeProvider = ({ children }) => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  // Guardar tema en localStorage
-  const handleSetTheme = (newTheme) => {
+  const handleSetTheme = newTheme => {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
   };
@@ -49,7 +49,6 @@ export const ThemeProvider = ({ children }) => {
     handleSetTheme(newTheme);
   };
 
-  // Aplicar el tema efectivo (auto usa el del sistema)
   useEffect(() => {
     const effectiveTheme = theme === 'auto' ? systemTheme : theme;
 

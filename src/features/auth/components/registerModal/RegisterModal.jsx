@@ -11,6 +11,7 @@ import { registerSchema } from '../../../../shared/utils/validationSchemas';
 import catalogService from '../../../../shared/services/catalogService';
 import useApi from '../../../../shared/hooks/useApi';
 import Modal from '../../../../shared/components/modal/Modal';
+import AddressAutocomplete from '../../../../shared/components/addressAutocomplete/AddressAutocomplete';
 
 const ModalRegister = ({ isOpen, onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -28,6 +29,7 @@ const ModalRegister = ({ isOpen, onClose }) => {
     trigger,
     watch,
     reset,
+    setValue,
   } = useForm({
     resolver: yupResolver(registerSchema),
     mode: 'onBlur',
@@ -415,6 +417,12 @@ const ModalRegister = ({ isOpen, onClose }) => {
                     id="phone"
                     placeholder="Aqui tu teléfono"
                     {...register('phone')}
+                    onChange={e => {
+                      const val = e.target.value
+                        .replace(/\D/g, '')
+                        .slice(0, 10);
+                      setValue('phone', val, { shouldValidate: true });
+                    }}
                     className={`w-full px-4 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:border-primary transition-colors ${errors.phone ? 'border-red-500' : 'border-border'}`}
                     aria-label="Teléfono"
                     aria-invalid={!!errors.phone}
@@ -473,18 +481,22 @@ const ModalRegister = ({ isOpen, onClose }) => {
                   </div>
 
                   <div className="flex flex-col w-full mx-auto max-w-md">
-                    <input
-                      type="text"
-                      id="address"
-                      placeholder="Aqui tu dirección"
-                      {...register('address')}
-                      className={`w-full px-4 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:border-primary transition-colors ${errors.address ? 'border-red-500' : 'border-border'}`}
-                      aria-label="Dirección"
-                      aria-invalid={!!errors.address}
-                      aria-describedby={
-                        errors.address ? 'address-error' : undefined
-                      }
-                    />
+                    <div className="relative">
+                      <AddressAutocomplete
+                        value={watch('address') || ''}
+                        onChange={val =>
+                          setValue('address', val, { shouldValidate: true })
+                        }
+                        onSelect={data =>
+                          setValue('address', data.address, {
+                            shouldValidate: true,
+                          })
+                        }
+                        placeholder="Aquí tu dirección"
+                        country="co"
+                      />
+                    </div>
+                    <input type="hidden" {...register('address')} />
                     {errors.address && (
                       <span
                         id="address-error"

@@ -2,6 +2,7 @@ import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/switch/switch.js';
 import '@material/web/checkbox/checkbox.js';
+import '@material/web/progress/linear-progress.js';
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import VehiculoProfile from './pages/VehiculoProfile';
@@ -13,7 +14,6 @@ import { vehiculoService } from './api/vehiculoService';
 import { useEffect, useMemo, useState } from 'react';
 import { resolveAssetUrl } from '../../shared/utils/url';
 
-// Estilos para animación de checkbox y tooltips
 const styles = `
   @keyframes checkboxAppear {
     0% {
@@ -94,7 +94,6 @@ const VehiculosPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('list');
 
-  // Estados para selección múltiple
   const [selectedVehicles, setSelectedVehicles] = useState([]);
   const [isDeleteMultipleModalOpen, setIsDeleteMultipleModalOpen] =
     useState(false);
@@ -111,8 +110,8 @@ const VehiculosPage = () => {
     } catch (err) {
       setError(
         err?.message ||
-        err?.response?.data?.message ||
-        'Error al cargar vehículos'
+          err?.response?.data?.message ||
+          'Error al cargar vehículos'
       );
     } finally {
       setLoading(false);
@@ -173,7 +172,6 @@ const VehiculosPage = () => {
       );
       await cargarVehiculos();
     } catch (err) {
-
     } finally {
       setIsDeleteModalOpen(false);
       setVehicleToDelete(null);
@@ -200,7 +198,6 @@ const VehiculosPage = () => {
       await vehiculoService.updateVehiculo(id, { estado: nuevoEstado });
       await cargarVehiculos();
     } catch (err) {
-
     } finally {
       setIsSwitchModalOpen(false);
       setVehicleToSwitch(null);
@@ -212,7 +209,6 @@ const VehiculosPage = () => {
     setVehicleToSwitch(null);
   };
 
-  // Funciones para selección múltiple
   const handleToggleSelectionMode = () => {
     setIsSelectionMode(!isSelectionMode);
     setSelectedVehicles([]);
@@ -264,7 +260,6 @@ const VehiculosPage = () => {
         await vehiculoService.deleteVehiculo(vehicleId);
         return { success: true, id: vehicleId };
       } catch (err) {
-
         return { success: false, id: vehicleId, error: err };
       }
     });
@@ -565,54 +560,78 @@ const VehiculosPage = () => {
                 )}
               </div>
 
-              <div className="flex justify-between items-center mt-6 mb-4">
-                <div className="flex items-center gap-3">
-                  {selectedVehicles.length > 0 ? (
-                    <>
+              <div className="flex justify-between items-center mt-4 mb-4">
+                <div className="flex gap-3">
+                  <div className="flex gap-1 bg-fill border border-border rounded-full p-1">
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`px-2 py-1 rounded-full transition-all ${
+                        viewMode === 'list'
+                          ? 'bg-primary text-on-primary'
+                          : 'text-secondary hover:text-primary'
+                      }`}
+                      title="Vista de lista"
+                    >
+                      <md-icon className="text-sm">view_list</md-icon>
+                    </button>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`px-2 py-1 rounded-full transition-all ${
+                        viewMode === 'grid'
+                          ? 'bg-primary text-on-primary'
+                          : 'text-secondary hover:text-primary'
+                      }`}
+                      title="Vista de tarjetas"
+                    >
+                      <md-icon className="text-sm">grid_view</md-icon>
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {selectedVehicles.length > 0 ? (
                       <span className="text-sm text-secondary">
                         {selectedVehicles.length} Seleccionados
                       </span>
-                    </>
-                  ) : (
-                    <span className="text-sm text-secondary">
-                      {loading
-                        ? 'Cargando vehículos...'
-                        : `Mostrando ${totalItems > 0 ? startIndex + 1 : 0}-${Math.min(startIndex + 8, totalItems)} de ${totalItems} vehículos`}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {showPagination && (
-                    <span className="text-xs text-secondary">
-                      Página {currentPage} de {totalPages}
-                    </span>
-                  )}
-
-                  <div className="flex bg-fill rounded-lg p-1 border border-border ml-2">
-                    <button
-                      className={`p-1 rounded-md transition-all ${viewMode === 'list'
-                          ? 'bg-background text-primary shadow-sm'
-                          : 'text-secondary hover:text-primary'
-                        }`}
-                      onClick={() => setViewMode('list')}
-                    >
-                      <md-icon className="text-xl">view_list</md-icon>
-                    </button>
-                    <button
-                      className={`p-1 rounded-md transition-all ${viewMode === 'grid'
-                          ? 'bg-background text-primary shadow-sm'
-                          : 'text-secondary hover:text-primary'
-                        }`}
-                      onClick={() => setViewMode('grid')}
-                    >
-                      <md-icon className="text-xl">grid_view</md-icon>
-                    </button>
+                    ) : (
+                      !loading && (
+                        <span className="text-sm text-secondary">
+                          {`Mostrando ${
+                            totalItems > 0 ? startIndex + 1 : 0
+                          }-${Math.min(
+                            startIndex + (viewMode === 'grid' ? 8 : 4),
+                            totalItems
+                          )} de ${totalItems} vehículos`}
+                        </span>
+                      )
+                    )}
                   </div>
                 </div>
+                {showPagination && (
+                  <span className="text-xs text-secondary">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                )}
               </div>
 
               <div className="mt-3">
-                {currentVehicles.length === 0 ? (
+                {loading ? (
+                  <div
+                    className="flex items-center justify-center w-full list-enter text-center content-box-outline-2-small"
+                    style={{ height: 'calc(60vh - 0px)' }}
+                  >
+                    <div
+                      className="flex flex-col items-center gap-3"
+                      style={{ width: '200px' }}
+                    >
+                      <md-icon className="text-secondary mb-4">
+                        directions_car
+                      </md-icon>
+                      <span className="text-secondary">
+                        Cargando vehículos...
+                      </span>
+                      <md-linear-progress indeterminate></md-linear-progress>
+                    </div>
+                  </div>
+                ) : currentVehicles.length === 0 ? (
                   <div
                     className="flex items-center justify-center w-full list-enter text-center content-box-outline-2-small"
                     style={{ height: 'calc(60vh - 0px)' }}
@@ -632,7 +651,13 @@ const VehiculosPage = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
+                  <div
+                    className={
+                      viewMode === 'grid'
+                        ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+                        : 'flex flex-col gap-3'
+                    }
+                  >
                     {currentVehicles.map((vehicle, index) => (
                       <div
                         key={index}
@@ -649,7 +674,9 @@ const VehiculosPage = () => {
                             }}
                           >
                             <md-checkbox
-                              checked={selectedVehicles.includes(vehicle.idVehiculo)}
+                              checked={selectedVehicles.includes(
+                                vehicle.idVehiculo
+                              )}
                               onChange={e => {
                                 e.stopPropagation();
                                 handleSelectVehicle(vehicle.idVehiculo);
@@ -661,116 +688,154 @@ const VehiculosPage = () => {
                         )}
 
                         {viewMode === 'grid' ? (
-                          <div className="flex flex-col gap-3">
-                            <div className="relative w-full h-40 rounded-xl overflow-hidden bg-surface border border-border">
-                              <img
-                                src={vehicle.image}
-                                alt={vehicle.name}
-                                className="w-full h-full object-cover"
-                                onError={e => {
-                                  e.target.style.display = 'none';
-                                  e.target.parentElement.innerHTML =
-                                    '<div class="w-full h-full flex items-center justify-center bg-fill text-secondary"><md-icon style="font-size: 48px;">broken_image</md-icon></div>';
-                                }}
-                              />
-                            </div>
-
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-start justify-between gap-2 pb-3">
+                          <div className="flex flex-col h-full">
+                            <div
+                              className="flex items-start justify-between gap-2 pb-3 cursor-pointer flex-1"
+                              onClick={e => {
+                                if (
+                                  !e.target.closest('button') &&
+                                  !e.target.closest('md-checkbox') &&
+                                  !e.target.closest('.action-buttons')
+                                ) {
+                                  handleOpenProfile(vehicle);
+                                }
+                              }}
+                            >
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <div className="flex items-center justify-center w-12 h-12 shrink-0">
+                                  {vehicle.image &&
+                                  !vehicle.image.includes('alaskan.png') ? (
+                                    <img
+                                      src={vehicle.image}
+                                      alt={vehicle.name}
+                                      className="rounded-lg w-12 h-12 object-cover shadow-lg"
+                                      onError={e => {
+                                        e.target.style.display = 'none';
+                                        e.target.parentElement.innerHTML =
+                                          '<div class="w-12 h-12 rounded-lg bg-surface flex items-center justify-center shadow-lg border border-border"><span class="material-symbols-outlined text-secondary">directions_car</span></div>';
+                                      }}
+                                    />
+                                  ) : (
+                                    <div className="w-12 h-12 rounded-lg bg-surface flex items-center justify-center shadow-lg border border-border">
+                                      <md-icon className="text-secondary">
+                                        directions_car
+                                      </md-icon>
+                                    </div>
+                                  )}
+                                </div>
                                 <div className="flex-1 min-w-0">
-                                  <h3 className="text-h5 font-bold text-primary truncate mb-1">
+                                  <h3 className="text-h5 font-bold text-primary truncate group-hover:text-primary/80 transition-colors">
                                     {vehicle.name}
                                   </h3>
-                                  <div className="flex items-center gap-2 text-body2">
-                                    <span className="text-secondary truncate">{vehicle.plate}</span>
+                                  <div className="flex items-center gap-1 text-body2">
+                                    <span className="text-secondary truncate text-xs">
+                                      {vehicle.plate}
+                                    </span>
                                   </div>
                                 </div>
-                                <span
-                                  className={`btn font-medium btn-sm flex items-center ${vehicle.status === 'Activo' ? 'btn-green' : 'btn-red'
-                                    }`}
-                                >
-                                  {vehicle.status === 'Activo' ? 'Activo' : 'Inactivo'}
-                                </span>
                               </div>
+                              <span
+                                className={`btn font-medium btn-sm flex items-center shrink-0 ${
+                                  vehicle.status === 'Activo'
+                                    ? 'btn-green'
+                                    : 'btn-red'
+                                }`}
+                              >
+                                {vehicle.status === 'Activo'
+                                  ? 'Activo'
+                                  : 'Inactivo'}
+                              </span>
+                            </div>
 
-                              <div className="flex-1 space-y-2 mb-3">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center">
-                                    <md-icon className="text-base text-primary">airline_seat_recline_normal</md-icon>
-                                  </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="text-xs text-secondary">Capacidad</span>
-                                    <span className="text-sm font-semibold text-primary truncate">{vehicle.capacity}</span>
-                                  </div>
+                            <div
+                              className="flex-1 space-y-2 mb-3 cursor-pointer"
+                              onClick={e => {
+                                if (
+                                  !e.target.closest('button') &&
+                                  !e.target.closest('md-checkbox') &&
+                                  !e.target.closest('.action-buttons')
+                                ) {
+                                  handleOpenProfile(vehicle);
+                                }
+                              }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center shrink-0">
+                                  <md-icon className="text-base text-primary">
+                                    airline_seat_recline_normal
+                                  </md-icon>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center">
-                                    <md-icon className="text-base text-primary">calendar_today</md-icon>
-                                  </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="text-xs text-secondary">Modelo</span>
-                                    <span className="text-sm font-semibold text-primary">{vehicle.model}</span>
-                                  </div>
+                                <div className="flex flex-col min-w-0 flex-1">
+                                  <span className="text-xs text-secondary">
+                                    Capacidad
+                                  </span>
+                                  <span className="text-sm font-semibold text-primary truncate">
+                                    {vehicle.capacity}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-fill flex items-center justify-center shrink-0">
+                                  <md-icon className="text-base text-primary">
+                                    calendar_today
+                                  </md-icon>
+                                </div>
+                                <div className="flex flex-col min-w-0 flex-1">
+                                  <span className="text-xs text-secondary">
+                                    Modelo
+                                  </span>
+                                  <span className="text-sm font-semibold text-primary truncate">
+                                    {vehicle.model}
+                                  </span>
                                 </div>
                               </div>
                             </div>
 
-                            <div className="flex gap-2">
-                              <div className="relative group flex-1">
-                                <button
-                                  className={`btn btn-sm-2 font-medium flex items-center gap-1 w-full justify-center ${vehicle.status === 'Activo' ? 'btn-outline' : 'btn-secondary'
-                                    }`}
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    handleSwitchClick(vehicle);
-                                  }}
-                                >
-                                  <md-icon className="text-sm">
-                                    {vehicle.status === 'Activo' ? 'block' : 'check'}
-                                  </md-icon>
-                                </button>
-                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                    <p className="text-xs text-primary">
-                                      {vehicle.status === 'Activo' ? 'Deshabilitar' : 'Habilitar'}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
+                            <div className="flex gap-2 mt-auto action-buttons">
+                              <button
+                                className={`btn btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95 ${
+                                  vehicle.status === 'Activo'
+                                    ? 'btn-outline'
+                                    : 'btn-secondary'
+                                }`}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleSwitchClick(vehicle);
+                                }}
+                                title={
+                                  vehicle.status === 'Activo'
+                                    ? 'Deshabilitar vehículo'
+                                    : 'Habilitar vehículo'
+                                }
+                              >
+                                <md-icon className="text-sm">
+                                  {vehicle.status === 'Activo'
+                                    ? 'block'
+                                    : 'check'}
+                                </md-icon>
+                              </button>
 
-                              <div className="relative group flex-1">
-                                <button
-                                  className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    handleOpenEdit(vehicle);
-                                  }}
-                                >
-                                  <md-icon className="text-sm">edit</md-icon>
-                                </button>
-                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                    <p className="text-xs text-primary">Editar</p>
-                                  </div>
-                                </div>
-                              </div>
+                              <button
+                                className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleOpenEdit(vehicle);
+                                }}
+                                title="Editar vehículo"
+                              >
+                                <md-icon className="text-sm">edit</md-icon>
+                              </button>
 
-                              <div className="relative group flex-1">
-                                <button
-                                  className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    handleDeleteClick(vehicle);
-                                  }}
-                                >
-                                  <md-icon className="text-sm">delete</md-icon>
-                                </button>
-                                <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                                  <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                    <p className="text-xs text-primary">Eliminar</p>
-                                  </div>
-                                </div>
-                              </div>
+                              <button
+                                className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95 hover:bg-red-500/20 hover:text-red-500"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleDeleteClick(vehicle);
+                                }}
+                                title="Eliminar vehículo"
+                              >
+                                <md-icon className="text-sm">delete</md-icon>
+                              </button>
                             </div>
                           </div>
                         ) : (
@@ -799,17 +864,26 @@ const VehiculosPage = () => {
                                 </div>
                                 <div className="flex items-center gap-2 mt-1">
                                   <span
-                                    className={`btn font-medium btn-sm flex items-center ${vehicle.status === 'Activo' ? 'btn-green' : 'btn-red'
-                                      }`}
+                                    className={`btn font-medium btn-sm flex items-center ${
+                                      vehicle.status === 'Activo'
+                                        ? 'btn-green'
+                                        : 'btn-red'
+                                    }`}
                                   >
-                                    {vehicle.status === 'Activo' ? 'Activo' : 'Inactivo'}
+                                    {vehicle.status === 'Activo'
+                                      ? 'Activo'
+                                      : 'Inactivo'}
                                   </span>
                                   <div className="flex items-center gap-1 text-xs text-secondary bg-fill px-2 py-1 rounded-md">
-                                    <md-icon className="text-sm">airline_seat_recline_normal</md-icon>
+                                    <md-icon className="text-sm">
+                                      airline_seat_recline_normal
+                                    </md-icon>
                                     <span>{vehicle.capacity}</span>
                                   </div>
                                   <div className="flex items-center gap-1 text-xs text-secondary bg-fill px-2 py-1 rounded-md">
-                                    <md-icon className="text-sm">calendar_today</md-icon>
+                                    <md-icon className="text-sm">
+                                      calendar_today
+                                    </md-icon>
                                     <span>{vehicle.model}</span>
                                   </div>
                                 </div>
@@ -818,14 +892,19 @@ const VehiculosPage = () => {
 
                             <div className="flex gap-2 items-center ml-4">
                               <button
-                                className={`btn btn-lg font-medium flex items-center gap-1 ${vehicle.status === 'Activo' ? 'btn-outline' : 'btn-secondary'
-                                  }`}
+                                className={`btn btn-lg font-medium flex items-center gap-1 ${
+                                  vehicle.status === 'Activo'
+                                    ? 'btn-outline'
+                                    : 'btn-secondary'
+                                }`}
                                 onClick={e => {
                                   e.stopPropagation();
                                   handleSwitchClick(vehicle);
                                 }}
                               >
-                                {vehicle.status === 'Activo' ? 'Deshabilitar' : 'Habilitar'}
+                                {vehicle.status === 'Activo'
+                                  ? 'Deshabilitar'
+                                  : 'Habilitar'}
                               </button>
 
                               <button
@@ -904,7 +983,7 @@ const VehiculosPage = () => {
         <AddVehiculoModal
           isOpen={isAddOpen}
           onClose={handleCloseAdd}
-          onConfirm={() => { }}
+          onConfirm={() => {}}
           onSubmitVehiculo={handleSubmitVehiculo}
         />
 

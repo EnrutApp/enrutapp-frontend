@@ -44,7 +44,7 @@ export const useMapInstance = ({
         style: selectedStyle,
         center: initialCenter,
         zoom: initialZoom,
-        pitch: 0, 
+        pitch: 0,
         bearing: 0,
         antialias: false,
         interactive: interactive,
@@ -53,7 +53,7 @@ export const useMapInstance = ({
         preserveDrawingBuffer: false,
         attributionControl: false,
         logoPosition: 'bottom-right',
-        fadeDuration: 100, 
+        fadeDuration: 100,
         crossSourceCollisions: false,
       });
 
@@ -65,7 +65,7 @@ export const useMapInstance = ({
         if (interactive) {
           map.addControl(
             new mapboxgl.NavigationControl({
-              visualizePitch: false, 
+              visualizePitch: false,
             }),
             'top-right'
           );
@@ -136,7 +136,7 @@ export const useMapInstance = ({
       mapRef.current.flyTo({
         center,
         zoom,
-        duration: options.duration || 600, 
+        duration: options.duration || 600,
         essential: true,
         ...options,
       });

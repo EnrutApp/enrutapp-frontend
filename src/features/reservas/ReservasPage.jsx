@@ -7,8 +7,11 @@ import ReservasProfile from './pages/ReservasProfile';
 import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import { useState } from 'react';
+import Avvvatars from 'avvvatars-react';
+import resolveAssetUrl from '../../shared/utils/url';
 
 const ReservasPage = () => {
+  const [viewMode, setViewMode] = useState('list');
   const [selectedReserva, setSelectedReserva] = useState(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -183,11 +186,40 @@ const ReservasPage = () => {
               </div>
             </div>
 
-            <div className="flex justify-between items-center mt-6 mb-4">
-              <span className="text-sm text-secondary">
-                Mostrando {startIndex + 1}-
-                {Math.min(startIndex + 3, totalItems)} de {totalItems} reservas
-              </span>
+            <div className="flex justify-between items-center mt-4 mb-4">
+              <div className="flex gap-3">
+                <div className="flex gap-1 bg-fill border border-border rounded-full p-1">
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`px-2 py-1 rounded-full transition-all ${
+                      viewMode === 'list'
+                        ? 'bg-primary text-on-primary'
+                        : 'text-secondary hover:text-primary'
+                    }`}
+                    title="Vista de lista"
+                  >
+                    <md-icon className="text-sm">view_list</md-icon>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`px-2 py-1 rounded-full transition-all ${
+                      viewMode === 'grid'
+                        ? 'bg-primary text-on-primary'
+                        : 'text-secondary hover:text-primary'
+                    }`}
+                    title="Vista de tarjetas"
+                  >
+                    <md-icon className="text-sm">grid_view</md-icon>
+                  </button>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-secondary">
+                    Mostrando {startIndex + 1}-
+                    {Math.min(startIndex + 3, totalItems)} de {totalItems}{' '}
+                    reservas
+                  </span>
+                </div>
+              </div>
               {showPagination && (
                 <span className="text-xs text-secondary">
                   Página {currentPage} de {totalPages}
@@ -196,72 +228,183 @@ const ReservasPage = () => {
             </div>
 
             <div className="mt-3">
-              {currentReservas.map((reserva, index) => (
-                <div
-                  key={index}
-                  className={`content-box-outline-4-small cursor-pointer hover:border-primary transition-colors ${index > 0 ? 'mt-2' : ''} ${reserva.estado !== 'Completado' ? 'opacity-60' : ''}`}
-                  onClick={() => handleOpenProfile(reserva)}
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="flex flex-col">
-                        <span>
-                          {reserva.fecha}, {reserva.hora} | {reserva.vehiculo}
-                        </span>
-                        <h1 className="h4">{reserva.pasajero}</h1>
+              {viewMode === 'list' ? (
+                currentReservas.map((reserva, index) => (
+                  <div
+                    key={index}
+                    className={`content-box-outline-4-small cursor-pointer hover:border-primary transition-colors ${
+                      index > 0 ? 'mt-2' : ''
+                    } ${reserva.estado !== 'Completado' ? 'opacity-60' : ''}`}
+                    onClick={() => handleOpenProfile(reserva)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="relative w-16 h-16 shrink-0">
+                          <Avvvatars
+                            value={reserva.pasajero}
+                            size={64}
+                            radius={10}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h1 className="h4 font-bold text-primary truncate">
+                            {reserva.pasajero}
+                          </h1>
+                          <div className="flex flex-col gap-1 mt-1">
+                            <span className="text-body2 text-secondary truncate">
+                              {reserva.fecha}, {reserva.hora} |{' '}
+                              {reserva.vehiculo}
+                            </span>
+                            <div className="flex gap-1 items-center">
+                              <span className="text-xs text-secondary">
+                                {reserva.origen} → {reserva.destino}
+                              </span>
+                              <button
+                                className={`btn font-medium btn-sm flex items-center ml-2 ${
+                                  reserva.estado === 'Pendiente'
+                                    ? 'btn-yellow'
+                                    : reserva.estado === 'Completado'
+                                      ? 'btn-green'
+                                      : 'btn-secondary'
+                                }`}
+                              >
+                                {reserva.estado}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex gap-1">
-                        <button className="btn btn-primary font-medium btn-sm-2 flex items-center">
-                          <md-icon slot="edit" className="text-sm">
-                            swap_horiz
-                          </md-icon>
-                        </button>
-                        <button className="btn btn-secondary font-medium btn-lg flex items-center">
-                          {reserva.origen}
-                        </button>
-                        <button className="btn btn-secondary font-medium btn-lg flex items-center">
-                          {reserva.destino}
+
+                      <div className="flex gap-2 items-center ml-4">
+                        <button
+                          className={`btn btn-secondary btn-lg font-medium flex items-center ${
+                            reserva.estado === 'Completado' ? 'hidden' : ''
+                          }`}
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleSwitchClick(reserva);
+                          }}
+                        >
+                          <md-icon className="text-sm">check</md-icon>
                         </button>
                         <button
-                          className={`btn font-medium btn-lg flex items-center ${reserva.estado === 'Pendiente' ? 'btn-yellow' : reserva.estado === 'Completado' ? 'btn-green' : 'btn-secondary'}`}
+                          className="btn btn-primary btn-lg font-medium flex items-center"
+                          onClick={e => e.stopPropagation()}
                         >
-                          <md-icon slot="edit" className="text-lg">
-                            error
-                          </md-icon>
-                          {reserva.estado}
+                          <md-icon className="text-sm">edit</md-icon>
+                          Editar
+                        </button>
+                        <button
+                          className="btn btn-secondary btn-lg font-medium flex items-center"
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleDeleteClick(reserva);
+                          }}
+                        >
+                          <md-icon className="text-sm">delete</md-icon>
                         </button>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <md-switch
-                        icons
-                        show-only-selected-icon
-                        selected={reserva.estado === 'Completado'}
-                        onClick={e => {
-                          e.stopPropagation();
-                          handleSwitchClick(reserva);
-                        }}
-                      ></md-switch>
-                      <button
-                        className="btn btn-secondary btn-lg font-medium flex items-center"
-                        onClick={e => {
-                          e.stopPropagation();
-                          handleDeleteClick(reserva);
-                        }}
-                      >
-                        <md-icon className="text-sm">delete</md-icon>
-                      </button>
-                      <button
-                        className="btn btn-primary btn-lg font-medium flex items-center"
-                        onClick={e => e.stopPropagation()}
-                      >
-                        <md-icon className="text-sm">edit</md-icon>
-                        Editar
-                      </button>
-                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {currentReservas.map((reserva, index) => (
+                    <div
+                      key={index}
+                      className={`content-box-outline-4-small cursor-pointer hover:shadow-md transition-shadow relative ${
+                        reserva.estado !== 'Completado' ? 'opacity-60' : ''
+                      }`}
+                      onClick={() => handleOpenProfile(reserva)}
+                    >
+                      <div className="flex items-start justify-between gap-2 pb-3">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <div className="relative w-12 h-12 shrink-0">
+                            <Avvvatars
+                              value={reserva.pasajero}
+                              size={48}
+                              radius={10}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-h5 font-bold text-primary truncate">
+                              {reserva.pasajero}
+                            </h3>
+                            <div className="flex items-center gap-1 text-body2">
+                              <span className="text-secondary truncate text-xs">
+                                {reserva.vehiculo}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <span
+                          className={`btn font-medium btn-sm flex items-center shrink-0 ${
+                            reserva.estado === 'Completado'
+                              ? 'btn-green'
+                              : 'btn-yellow'
+                          }`}
+                        >
+                          {reserva.estado}
+                        </span>
+                      </div>
+                      <div className="mt-3 mb-3 space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-secondary">
+                          <md-icon className="text-sm">location_on</md-icon>
+                          <span className="truncate">
+                            {reserva.origen} → {reserva.destino}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-secondary">
+                          <md-icon className="text-sm">event</md-icon>
+                          <span className="truncate">
+                            {reserva.fecha} - {reserva.hora}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="relative group flex-1">
+                          <button
+                            className={`btn btn-sm-2 font-medium flex items-center gap-1 w-full justify-center ${
+                              reserva.estado === 'Completado'
+                                ? 'btn-outline'
+                                : 'btn-secondary'
+                            }`}
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleSwitchClick(reserva);
+                            }}
+                          >
+                            <md-icon className="text-sm">
+                              {reserva.estado === 'Completado'
+                                ? 'block'
+                                : 'check'}
+                            </md-icon>
+                          </button>
+                        </div>
+                        <div className="relative group flex-1">
+                          <button
+                            className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
+                            onClick={e => e.stopPropagation()}
+                          >
+                            <md-icon className="text-sm">edit</md-icon>
+                          </button>
+                        </div>
+                        <div className="relative group flex-1">
+                          <button
+                            className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleDeleteClick(reserva);
+                            }}
+                          >
+                            <md-icon className="text-sm">delete</md-icon>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           </div>
           <Pagination

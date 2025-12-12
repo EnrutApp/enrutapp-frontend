@@ -5,15 +5,13 @@
 
 import { io } from 'socket.io-client';
 
-const RAW_ENV = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const RAW_ENV = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 let SOCKET_URL = RAW_ENV.replace('/api', '');
 
-// Si estamos en desarrollo y apuntando a Azure, usar el proxy
 if (import.meta.env.DEV && RAW_ENV.includes('azurewebsites.net')) {
   SOCKET_URL = '';
 }
 
-// Asegurar que SOCKET_URL no tenga trailing slash
 SOCKET_URL = SOCKET_URL.replace(/\/$/, '');
 
 console.log('🔌 Socket URL:', SOCKET_URL || '(Proxy/Relativo)');
@@ -133,14 +131,11 @@ class SocketService {
       return () => {};
     }
 
-    // Emitir suscripción
     this.socket.emit('subscribeToDriver', { driverId });
 
-    // Escuchar actualizaciones
     const eventName = 'driverLocationUpdate';
     this.socket.on(eventName, callback);
 
-    // Retornar función de limpieza
     return () => {
       this.socket?.off(eventName, callback);
       this.socket?.emit('unsubscribeFromDriver', { driverId });
@@ -248,6 +243,5 @@ class SocketService {
   }
 }
 
-// Exportar instancia singleton
 export const socketService = new SocketService();
 export default socketService;

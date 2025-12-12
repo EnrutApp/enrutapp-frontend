@@ -116,8 +116,7 @@ const MapBoxMap = memo(
         if (clickHandlerRef.current && map && !isUnmountedRef.current) {
           try {
             map.off('click', clickHandlerRef.current);
-          } catch (e) {
-          }
+          } catch (e) {}
           clickHandlerRef.current = null;
         }
         if (map && !isUnmountedRef.current) {
@@ -126,8 +125,7 @@ const MapBoxMap = memo(
             if (canvas) {
               canvas.style.cursor = '';
             }
-          } catch (e) {
-          }
+          } catch (e) {}
         }
         return;
       }
@@ -165,15 +163,13 @@ const MapBoxMap = memo(
         if (canvas) {
           canvas.style.cursor = 'crosshair';
         }
-      } catch (e) {
-      }
+      } catch (e) {}
 
       return () => {
         if (map && clickHandlerRef.current && !isUnmountedRef.current) {
           try {
             map.off('click', clickHandlerRef.current);
-          } catch (e) {
-          }
+          } catch (e) {}
           clickHandlerRef.current = null;
         }
         if (map && !isUnmountedRef.current) {
@@ -182,8 +178,7 @@ const MapBoxMap = memo(
             if (canvas) {
               canvas.style.cursor = '';
             }
-          } catch (e) {
-          }
+          } catch (e) {}
         }
       };
     }, [
@@ -292,9 +287,7 @@ const MapBoxMap = memo(
         {!isLoaded && (
           <div className="absolute top-4 right-4 z-30">
             <div className="content-box-outline-4-small rounded-lg px-3 py-2 flex items-center gap-2 shadow-lg">
-              <md-icon className="text-primary text-lg">
-                map
-              </md-icon>
+              <md-icon className="text-primary text-lg">map</md-icon>
               <p className="text-secondary text-xs font-medium">
                 Cargando mapa...
               </p>

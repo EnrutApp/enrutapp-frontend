@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import apiClient from '../../../../shared/services/apiService';
-import { MapBoxMap } from '../../../../shared/components/map';
+import ubicacionesService from '../../../ubicaciones/api/ubicacionesService';
+import GoogleMapComponent from '../../../../shared/components/map/components/GoogleMapComponent';
 import Modal from '../../../../shared/components/modal/Modal';
 import UbicacionAddQuick from '../../../ubicaciones/components/ubicacionAddModal/UbicacionAddQuick';
 import ParadaModal from './ParadaModal';
@@ -46,8 +47,8 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
   const [isEstadoVacioVisible, setIsEstadoVacioVisible] = useState(true);
   const [isUbicacionModalOpen, setIsUbicacionModalOpen] = useState(false);
   const [isParadaModalOpen, setIsParadaModalOpen] = useState(false);
-  const [tipoUbicacion, setTipoUbicacion] = useState(null); // 'origen' o 'destino'
-  const [paradas, setParadas] = useState([]); // Array de ubicaciones seleccionadas como paradas (máximo 5)
+  const [tipoUbicacion, setTipoUbicacion] = useState(null);
+  const [paradas, setParadas] = useState([]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -66,22 +67,18 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
       setError(null);
       setSuccess(false);
       setIsEstadoVacioVisible(true);
-      // Resetear el ref cuando se cierra el modal
+
       datosCargadosRef.current = false;
     }
   }, [isOpen]);
 
-  // Cargar datos de la ruta cuando está en modo edición
-  // Usar useRef para rastrear si ya se cargaron los datos iniciales
   const datosCargadosRef = useRef(false);
 
   useEffect(() => {
     if (isOpen && isEditMode && ruta) {
-      // Solo cargar datos iniciales una vez cuando se abre el modal o cambia la ruta
       const rutaId = ruta.idRuta;
       const ultimaRutaId = datosCargadosRef.current;
 
-      // Si es la misma ruta y ya se cargaron los datos, no resetear
       if (
         ultimaRutaId === rutaId &&
         origenSeleccionado &&
@@ -91,7 +88,7 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
       }
 
       datosCargadosRef.current = rutaId;
-      // Formatear el precio base con separadores de miles
+
       const precioFormateado = ruta.precioBase
         ? Number(ruta.precioBase).toLocaleString('es-CO')
         : '';
@@ -110,18 +107,15 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         estado: ruta.estado || 'Activa',
       });
 
-      // Cargar origen y destino cuando las ubicaciones estén disponibles
-      // Solo actualizar si no están ya establecidos para evitar reseteos
       setOrigenSeleccionado(prev => {
         if (prev && ubicaciones.length > 0) {
-          // Si ya hay un origen seleccionado, verificar que siga siendo válido
           const origenId =
             ruta.origen?.idUbicacion || ruta.origen?.ubicacion?.idUbicacion;
           if (origenId && prev.idUbicacion === origenId) {
-            return prev; // Mantener el actual si es el mismo
+            return prev;
           }
         }
-        // Actualizar solo si es necesario
+
         if (ubicaciones.length > 0) {
           const origenId =
             ruta.origen?.idUbicacion || ruta.origen?.ubicacion?.idUbicacion;
@@ -135,14 +129,13 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
 
       setDestinoSeleccionado(prev => {
         if (prev && ubicaciones.length > 0) {
-          // Si ya hay un destino seleccionado, verificar que siga siendo válido
           const destinoId =
             ruta.destino?.idUbicacion || ruta.destino?.ubicacion?.idUbicacion;
           if (destinoId && prev.idUbicacion === destinoId) {
-            return prev; // Mantener el actual si es el mismo
+            return prev;
           }
         }
-        // Actualizar solo si es necesario
+
         if (ubicaciones.length > 0) {
           const destinoId =
             ruta.destino?.idUbicacion || ruta.destino?.ubicacion?.idUbicacion;
@@ -154,7 +147,6 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         return ruta.destino?.ubicacion || null;
       });
 
-      // Cargar paradas - intentar siempre, incluso si ubicaciones no están cargadas
       if (
         ruta.paradas &&
         Array.isArray(ruta.paradas) &&
@@ -163,19 +155,18 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         const paradasUbicaciones = ruta.paradas
           .sort((a, b) => (a.orden || 0) - (b.orden || 0))
           .map(parada => {
-            // La parada puede venir con ubicacion ya incluida desde el backend
             if (parada.ubicacion) {
               const ubicacionParada = parada.ubicacion;
-              // Si ya tenemos ubicaciones cargadas, buscar la completa para asegurar que tenemos todos los campos
+
               if (ubicaciones.length > 0) {
                 const ubicacionCompleta = ubicaciones.find(
                   u => u.idUbicacion === ubicacionParada.idUbicacion
                 );
-                // Usar la ubicación completa si existe, sino usar la que viene en la parada
+
                 return (
                   ubicacionCompleta || {
                     ...ubicacionParada,
-                    // Asegurar que tenga todos los campos necesarios
+
                     idUbicacion: ubicacionParada.idUbicacion,
                     nombreUbicacion:
                       ubicacionParada.nombreUbicacion || ubicacionParada.nombre,
@@ -186,7 +177,7 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                   }
                 );
               }
-              // Si no hay ubicaciones cargadas, usar la que viene en la parada con estructura completa
+
               return {
                 ...ubicacionParada,
                 idUbicacion: ubicacionParada.idUbicacion,
@@ -198,7 +189,7 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                 estado: ubicacionParada.estado,
               };
             }
-            // Si no tiene ubicacion pero tenemos ubicaciones cargadas, buscar por idUbicacion
+
             if (parada.idUbicacion && ubicaciones.length > 0) {
               const ubicacionParada = ubicaciones.find(
                 u => u.idUbicacion === parada.idUbicacion
@@ -213,7 +204,6 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         setParadas([]);
       }
     } else if (isOpen && !isEditMode) {
-      // Resetear en modo creación
       setParadas([]);
       setOrigenSeleccionado(null);
       setDestinoSeleccionado(null);
@@ -224,24 +214,20 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
     if (!isOpen) return;
     const fetchUbicaciones = async () => {
       try {
-        const response = await apiClient.get('/ubicaciones');
-        const data = response?.data || response || [];
+        const data = await ubicacionesService.getAll();
 
-        // Mapear los datos para usar la estructura esperada por el resto del componente
-        const ubicacionesMapeadas = data
-          .filter(u => u.estado && u.latitud && u.longitud)
-          .map(u => ({
-            idUbicacion: u.id, // Mapear id a idUbicacion
-            nombreUbicacion: u.nombre, // Mapear nombre a nombreUbicacion
-            direccion: u.direccion,
-            latitud: u.latitud,
-            longitud: u.longitud,
-            estado: u.estado,
-          }));
-        
+        const ubicacionesMapeadas = data.map(u => ({
+          idUbicacion: u.idUbicacion,
+          nombreUbicacion: u.nombreUbicacion,
+          direccion: u.direccion,
+          latitud: u.latitud ? Number(u.latitud) : null,
+          longitud: u.longitud ? Number(u.longitud) : null,
+          estado: true,
+        }));
+
         setUbicaciones(ubicacionesMapeadas);
       } catch (error) {
-
+        console.error('Error fetching ubicaciones:', error);
         setError('No se pudieron cargar las ubicaciones');
       }
     };
@@ -250,33 +236,22 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
   }, [isOpen]);
 
   const handleUbicacionAdded = async nuevaUbicacion => {
-    // Refrescar la lista de ubicaciones después de agregar una nueva
     try {
-      const response = await apiClient.get('/ubicaciones');
-      const data = response?.data || response || [];
+      const data = await ubicacionesService.getAll();
 
-      // Mapear los datos para usar la estructura esperada
-      const ubicacionesMapeadas = data
-        .filter(u => u.estado && u.latitud && u.longitud)
-        .map(u => ({
-          idUbicacion: u.id,
-          nombreUbicacion: u.nombre,
-          direccion: u.direccion,
-          latitud: u.latitud,
-          longitud: u.longitud,
-          estado: u.estado,
-        }));
-      
+      const ubicacionesMapeadas = data.map(u => ({
+        idUbicacion: u.idUbicacion,
+        nombreUbicacion: u.nombreUbicacion,
+        direccion: u.direccion,
+        latitud: u.latitud ? Number(u.latitud) : null,
+        longitud: u.longitud ? Number(u.longitud) : null,
+        estado: true,
+      }));
+
       setUbicaciones(ubicacionesMapeadas);
 
-      // Si se creó una nueva ubicación y tenemos el tipo, seleccionarla automáticamente
       if (nuevaUbicacion && tipoUbicacion) {
-        // La respuesta puede venir en diferentes formatos
-        const idUbicacion =
-          nuevaUbicacion.idUbicacion ||
-          nuevaUbicacion.data?.idUbicacion ||
-          nuevaUbicacion.data?.id ||
-          nuevaUbicacion.id;
+        const idUbicacion = nuevaUbicacion.idUbicacion || nuevaUbicacion.id;
 
         if (idUbicacion) {
           const ubicacionCreada = ubicacionesMapeadas.find(
@@ -285,29 +260,28 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
 
           if (ubicacionCreada) {
             if (tipoUbicacion === 'origen') {
-              setFormData({
-                ...formData,
+              setFormData(prev => ({
+                ...prev,
                 idUbicacionOrigen: ubicacionCreada.idUbicacion,
-              });
+              }));
               setOrigenSeleccionado(ubicacionCreada);
-              // Ocultar estado vacío si ambos están seleccionados
+
               if (destinoSeleccionado) {
                 setIsEstadoVacioVisible(false);
               }
             } else if (tipoUbicacion === 'destino') {
-              setFormData({
-                ...formData,
+              setFormData(prev => ({
+                ...prev,
                 idUbicacionDestino: ubicacionCreada.idUbicacion,
-              });
+              }));
               setDestinoSeleccionado(ubicacionCreada);
-              // Ocultar estado vacío si ambos están seleccionados
+
               if (origenSeleccionado) {
                 setIsEstadoVacioVisible(false);
               }
             } else if (tipoUbicacion === 'parada') {
-              // Agregar como parada si no excede el límite
               if (paradas.length < 5) {
-                setParadas([...paradas, ubicacionCreada]);
+                setParadas(prev => [...prev, ubicacionCreada]);
               } else {
                 setError('Máximo 5 paradas permitidas');
               }
@@ -316,59 +290,47 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         }
       }
     } catch (error) {
-
+      console.error('Error updating ubicaciones list:', error);
     }
     setIsUbicacionModalOpen(false);
     setTipoUbicacion(null);
   };
 
   const handleParadaAdded = async ubicacion => {
-    // Cerrar el modal de paradas primero
     setIsParadaModalOpen(false);
 
-    // Refrescar ubicaciones por si se agregó una nueva
     try {
-      const response = await apiClient.get('/ubicaciones');
+      const response = await apiClient.get('/rutas/ubicaciones');
       const data = response?.data || response || [];
-      
-      // Mapear los datos para usar la estructura esperada
-      const ubicacionesMapeadas = data
-        .filter(u => u.estado && u.latitud && u.longitud)
-        .map(u => ({
-          idUbicacion: u.id,
-          nombreUbicacion: u.nombre,
-          direccion: u.direccion,
-          latitud: u.latitud,
-          longitud: u.longitud,
-          estado: u.estado,
-        }));
 
-      // Actualizar ubicaciones sin causar efectos secundarios
+      const ubicacionesMapeadas = data.map(u => ({
+        idUbicacion: u.idUbicacion,
+        nombreUbicacion: u.nombreUbicacion,
+        direccion: u.direccion,
+        latitud: u.latitud,
+        longitud: u.longitud,
+        estado: true,
+      }));
+
       setUbicaciones(prevUbicaciones => {
-        // Si la nueva lista tiene más ubicaciones, actualizar
-        // pero mantener las que ya estaban para evitar reseteos
         return ubicacionesMapeadas;
       });
 
-      // Buscar la ubicación actualizada (puede venir con id o idUbicacion)
       const idBuscado = ubicacion.idUbicacion || ubicacion.id;
       const ubicacionActualizada =
-        ubicacionesMapeadas.find(u => u.idUbicacion === idBuscado) ||
-        ubicacion;
+        ubicacionesMapeadas.find(u => u.idUbicacion === idBuscado) || ubicacion;
 
-      // Usar el estado actual de paradas de forma segura
       setParadas(prevParadas => {
         if (prevParadas.length >= 5) {
           setError('Máximo 5 paradas permitidas');
           return prevParadas;
         }
 
-        // Verificar que no esté ya en las paradas
         const yaExiste = prevParadas.some(
           p => p.idUbicacion === ubicacionActualizada.idUbicacion
         );
         if (!yaExiste) {
-          setError(null); // Limpiar errores previos
+          setError(null);
           return [...prevParadas, ubicacionActualizada];
         } else {
           setError('Esta ubicación ya está agregada como parada');
@@ -376,12 +338,10 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         }
       });
     } catch (error) {
-
       setError('Error al agregar la parada');
     }
   };
 
-  // Sensores para drag and drop
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -415,14 +375,15 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
     const idUbicacion = e.target.value;
     console.log('Origen seleccionado ID:', idUbicacion);
     console.log('Ubicaciones disponibles:', ubicaciones);
-    
+
     setFormData(prev => ({ ...prev, idUbicacionOrigen: idUbicacion }));
 
-    const ubicacion = ubicaciones.find(u => String(u.idUbicacion) === String(idUbicacion));
+    const ubicacion = ubicaciones.find(
+      u => String(u.idUbicacion) === String(idUbicacion)
+    );
     console.log('Ubicación encontrada para origen:', ubicacion);
     setOrigenSeleccionado(ubicacion || null);
 
-    // Ocultar estado vacío cuando se selecciona origen
     if (ubicacion && destinoSeleccionado) {
       setIsEstadoVacioVisible(false);
     }
@@ -432,14 +393,15 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
     const idUbicacion = e.target.value;
     console.log('Destino seleccionado ID:', idUbicacion);
     console.log('Ubicaciones disponibles:', ubicaciones);
-    
+
     setFormData(prev => ({ ...prev, idUbicacionDestino: idUbicacion }));
 
-    const ubicacion = ubicaciones.find(u => String(u.idUbicacion) === String(idUbicacion));
+    const ubicacion = ubicaciones.find(
+      u => String(u.idUbicacion) === String(idUbicacion)
+    );
     console.log('Ubicación encontrada para destino:', ubicacion);
     setDestinoSeleccionado(ubicacion || null);
 
-    // Ocultar estado vacío cuando se selecciona destino
     if (ubicacion && origenSeleccionado) {
       setIsEstadoVacioVisible(false);
     }
@@ -452,19 +414,16 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
       tiempo: routeData.durationFormatted,
     }));
     setError(null);
-    // Ocultar estado vacío cuando se calcula la ruta
+
     setIsEstadoVacioVisible(false);
   };
 
   const handleChange = e => {
     const { name, value } = e.target;
 
-    // Si es el campo de precio, formatear con separadores de miles
     if (name === 'precioBase') {
-      // Remover todos los caracteres que no sean dígitos
       const numericValue = value.replace(/[^\d]/g, '');
 
-      // Si hay valor, formatear con puntos como separadores de miles
       if (numericValue) {
         const formattedValue = parseInt(numericValue, 10).toLocaleString(
           'es-CO'
@@ -481,7 +440,6 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      // Convertir el precio formateado a número (remover puntos)
       const precioNumerico = formData.precioBase
         ? parseFloat(formData.precioBase.replace(/\./g, ''))
         : 0;
@@ -496,7 +454,6 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
       }
 
       if (isEditMode) {
-        // Modo edición: actualizar ruta existente
         if (!ruta) return;
 
         if (!formData.idUbicacionOrigen || !formData.idUbicacionDestino) {
@@ -511,7 +468,6 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         setLoading(true);
         setError(null);
 
-        // Obtener o crear origen
         let idOrigen;
         const origenId =
           formData.idUbicacionOrigen || origenSeleccionado?.idUbicacion;
@@ -520,18 +476,20 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
             `/rutas/origen/por-ubicacion/${origenId}`
           );
 
-          if (origenExistente?.data) {
-            idOrigen = origenExistente.data.idOrigen;
+          const origenData = origenExistente?.data || origenExistente;
+
+          if (origenData && origenData.idOrigen) {
+            idOrigen = origenData.idOrigen;
           } else {
             const nuevoOrigen = await apiClient.post('/rutas/origen', {
               idUbicacion: origenId,
               descripcion: `Origen: ${origenSeleccionado?.nombreUbicacion || 'Origen'}`,
             });
-            idOrigen = nuevoOrigen.data?.idOrigen || nuevoOrigen.idOrigen;
+            const nuevoOrigenData = nuevoOrigen?.data || nuevoOrigen;
+            idOrigen = nuevoOrigenData?.idOrigen;
           }
         }
 
-        // Obtener o crear destino
         let idDestino;
         const destinoId =
           formData.idUbicacionDestino || destinoSeleccionado?.idUbicacion;
@@ -540,14 +498,17 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
             `/rutas/destino/por-ubicacion/${destinoId}`
           );
 
-          if (destinoExistente?.data) {
-            idDestino = destinoExistente.data.idDestino;
+          const destinoData = destinoExistente?.data || destinoExistente;
+
+          if (destinoData && destinoData.idDestino) {
+            idDestino = destinoData.idDestino;
           } else {
             const nuevoDestino = await apiClient.post('/rutas/destino', {
               idUbicacion: destinoId,
               descripcion: `Destino: ${destinoSeleccionado?.nombreUbicacion || 'Destino'}`,
             });
-            idDestino = nuevoDestino.data?.idDestino || nuevoDestino.idDestino;
+            const nuevoDestinoData = nuevoDestino?.data || nuevoDestino;
+            idDestino = nuevoDestinoData?.idDestino;
           }
         }
 
@@ -558,9 +519,7 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
           precioBase: precioNumerico,
           tiempoEstimado: String(formData.tiempo),
           observaciones: formData.observaciones || '',
-          paradas: paradas.map(parada => ({
-            idUbicacion: parada.idUbicacion,
-          })),
+          paradas: paradas.map(p => p.idUbicacion),
         };
 
         await apiClient.patch(`/rutas/${ruta.idRuta}`, dataToUpdate);
@@ -570,7 +529,6 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
           onClose();
         }, 1000);
       } else {
-        // Modo creación: crear nueva ruta
         if (!formData.idUbicacionOrigen || !formData.idUbicacionDestino) {
           setError('Por favor selecciona origen y destino');
           return;
@@ -591,14 +549,17 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
             `/rutas/origen/por-ubicacion/${origenId}`
           );
 
-          if (origenExistente?.data) {
-            idOrigen = origenExistente.data.idOrigen;
+          const origenData = origenExistente?.data || origenExistente;
+
+          if (origenData && origenData.idOrigen) {
+            idOrigen = origenData.idOrigen;
           } else {
             const nuevoOrigen = await apiClient.post('/rutas/origen', {
               idUbicacion: origenId,
               descripcion: `Origen: ${origenSeleccionado?.nombreUbicacion || 'Origen'}`,
             });
-            idOrigen = nuevoOrigen.data?.idOrigen || nuevoOrigen.idOrigen;
+            const nuevoOrigenData = nuevoOrigen?.data || nuevoOrigen;
+            idOrigen = nuevoOrigenData?.idOrigen;
           }
         }
 
@@ -610,14 +571,17 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
             `/rutas/destino/por-ubicacion/${destinoId}`
           );
 
-          if (destinoExistente?.data) {
-            idDestino = destinoExistente.data.idDestino;
+          const destinoData = destinoExistente?.data || destinoExistente;
+
+          if (destinoData && destinoData.idDestino) {
+            idDestino = destinoData.idDestino;
           } else {
             const nuevoDestino = await apiClient.post('/rutas/destino', {
               idUbicacion: destinoId,
               descripcion: `Destino: ${destinoSeleccionado?.nombreUbicacion || 'Destino'}`,
             });
-            idDestino = nuevoDestino.data?.idDestino || nuevoDestino.idDestino;
+            const nuevoDestinoData = nuevoDestino?.data || nuevoDestino;
+            idDestino = nuevoDestinoData?.idDestino;
           }
         }
 
@@ -629,9 +593,7 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
           tiempoEstimado: String(formData.tiempo),
           estado: 'Activa',
           observaciones: formData.observaciones || '',
-          paradas: paradas.map(parada => ({
-            idUbicacion: parada.idUbicacion,
-          })),
+          paradas: paradas.map(p => p.idUbicacion),
         };
 
         await apiClient.post('/rutas', dataToSend);
@@ -642,13 +604,13 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         }, 1000);
       }
     } catch (err) {
-
+      console.error('Error submitting ruta:', err);
       setError(
         err.response?.data?.message ||
-        err.message ||
-        (isEditMode
-          ? 'Error al actualizar la ruta'
-          : 'Error al crear la ruta')
+          err.message ||
+          (isEditMode
+            ? 'Error al actualizar la ruta'
+            : 'Error al crear la ruta')
       );
     } finally {
       setLoading(false);
@@ -751,10 +713,12 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                       {ubicaciones
                         .filter(
                           u =>
-                            // Filtrar ubicaciones que ya están en paradas o es el destino
                             !paradas.some(
-                              p => String(p.idUbicacion) === String(u.idUbicacion)
-                            ) && String(u.idUbicacion) !== String(formData.idUbicacionDestino)
+                              p =>
+                                String(p.idUbicacion) === String(u.idUbicacion)
+                            ) &&
+                            String(u.idUbicacion) !==
+                              String(formData.idUbicacionDestino)
                         )
                         .map(ubicacion => (
                           <option
@@ -766,6 +730,15 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                         ))}
                     </select>
                   </div>
+                  {origenSeleccionado &&
+                    (!origenSeleccionado.latitud ||
+                      !origenSeleccionado.longitud) && (
+                      <p className="text-red text-xs mt-1 flex items-center gap-1">
+                        <md-icon className="text-sm">warning</md-icon>
+                        Esta ubicación no tiene coordenadas válidas y no se
+                        mostrará en el mapa.
+                      </p>
+                    )}
                 </div>
 
                 <div>
@@ -804,10 +777,12 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                       {ubicaciones
                         .filter(
                           u =>
-                            // Filtrar ubicaciones que ya están en paradas o es el origen
                             !paradas.some(
-                              p => String(p.idUbicacion) === String(u.idUbicacion)
-                            ) && String(u.idUbicacion) !== String(formData.idUbicacionOrigen)
+                              p =>
+                                String(p.idUbicacion) === String(u.idUbicacion)
+                            ) &&
+                            String(u.idUbicacion) !==
+                              String(formData.idUbicacionOrigen)
                         )
                         .map(ubicacion => (
                           <option
@@ -837,13 +812,21 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                         type="button"
                         onClick={() => {
                           console.log('Intentando agregar parada');
-                          console.log('origenSeleccionado:', origenSeleccionado);
-                          console.log('destinoSeleccionado:', destinoSeleccionado);
+                          console.log(
+                            'origenSeleccionado:',
+                            origenSeleccionado
+                          );
+                          console.log(
+                            'destinoSeleccionado:',
+                            destinoSeleccionado
+                          );
                           console.log('formData:', formData);
-                          
-                          const tieneOrigen = origenSeleccionado || formData.idUbicacionOrigen;
-                          const tieneDestino = destinoSeleccionado || formData.idUbicacionDestino;
-                          
+
+                          const tieneOrigen =
+                            origenSeleccionado || formData.idUbicacionOrigen;
+                          const tieneDestino =
+                            destinoSeleccionado || formData.idUbicacionDestino;
+
                           if (!tieneOrigen || !tieneDestino) {
                             setError(
                               'Primero debes seleccionar origen y destino'
@@ -1017,39 +1000,39 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
           </div>
 
           <div className="w-[58%] relative overflow-hidden rounded-r-3xl">
-            <MapBoxMap
+            <GoogleMapComponent
               origen={origenSeleccionado}
               destino={destinoSeleccionado}
               paradas={paradas}
               onRouteCalculated={handleRouteCalculated}
-              height="100%"
+              height="95vh"
               className="w-full"
-              showDefaultMap={!origenSeleccionado && !destinoSeleccionado}
-              mapStyle="streets-v12"
             />
-            {(!origenSeleccionado || !destinoSeleccionado) && (
-              <div className="absolute inset-0 flex items-center justify-center bg-background/60 rounded-r-3xl backdrop-blur-md z-20 transition-opacity duration-300 pointer-events-none">
-                <div className="content-box-outline-5-small max-w-md mx-auto">
-                  <div className="flex flex-col items-center p-6">
-                    <md-icon className="text-secondary text-3xl mb-4">
-                      route
-                    </md-icon>
-                    <div className="flex flex-col items-center gap-2 text-center justify-center">
-                      <h1 className="text-h5 text-primary font-semibold mb-1">
-                        {isEditMode
-                          ? 'Visualizando la ruta'
-                          : 'Comienza agregando una ruta'}
-                      </h1>
-                      <p className="text-sm text-secondary font-normal">
-                        {isEditMode
-                          ? 'La ruta se mostrará en el mapa una vez que se carguen los datos.'
-                          : 'Selecciona el origen y destino en el formulario a la izquierda para visualizar la ruta en el mapa.'}
-                      </p>
+            {!origenSeleccionado &&
+              !destinoSeleccionado &&
+              paradas.length === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center bg-background/60 rounded-r-3xl backdrop-blur-md z-20 transition-opacity duration-300 pointer-events-none">
+                  <div className="content-box-outline-5-small max-w-md mx-auto">
+                    <div className="flex flex-col items-center p-6">
+                      <md-icon className="text-secondary text-3xl mb-4">
+                        route
+                      </md-icon>
+                      <div className="flex flex-col items-center gap-2 text-center justify-center">
+                        <h1 className="text-h5 text-primary font-semibold mb-1">
+                          {isEditMode
+                            ? 'Visualizando la ruta'
+                            : 'Comienza agregando una ruta'}
+                        </h1>
+                        <p className="text-sm text-secondary font-normal">
+                          {isEditMode
+                            ? 'La ruta se mostrará en el mapa una vez que se carguen los datos.'
+                            : 'Selecciona el origen y destino en el formulario a la izquierda para visualizar la ruta en el mapa.'}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </div>
       </main>
@@ -1065,8 +1048,9 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         onConfirm={handleParadaAdded}
         ubicaciones={ubicaciones.filter(
           u =>
-            // Filtrar ubicaciones que ya están en paradas o son origen/destino
-            !paradas.some(p => String(p.idUbicacion) === String(u.idUbicacion)) &&
+            !paradas.some(
+              p => String(p.idUbicacion) === String(u.idUbicacion)
+            ) &&
             String(u.idUbicacion) !== String(formData.idUbicacionOrigen) &&
             String(u.idUbicacion) !== String(formData.idUbicacionDestino)
         )}

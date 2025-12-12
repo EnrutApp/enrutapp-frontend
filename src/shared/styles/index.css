@@ -654,7 +654,9 @@ md-icon {
   --md-filled-button-container-color: var(--border) !important;
   --md-filled-button-label-text-color: var(--text-secondary) !important;
   --md-filled-button-hover-label-text-color: var(--text-secondary) !important;
-  --md-filled-button-with-icon-hover-icon-color: var(--text-secondary) !important;
+  --md-filled-button-with-icon-hover-icon-color: var(
+    --text-secondary
+  ) !important;
   --md-filled-button-hover-container-color: var(--border) !important;
 }
 
@@ -665,7 +667,9 @@ md-icon {
   --md-filled-button-container-color: var(--border) !important;
   --md-filled-button-label-text-color: var(--text-secondary) !important;
   --md-filled-button-pressed-label-text-color: var(--text-secondary) !important;
-  --md-filled-button-with-icon-pressed-icon-color: var(--text-secondary) !important;
+  --md-filled-button-with-icon-pressed-icon-color: var(
+    --text-secondary
+  ) !important;
   --md-filled-button-pressed-container-color: var(--border) !important;
 }
 
@@ -677,7 +681,9 @@ md-icon {
   --md-filled-button-container-color: var(--border) !important;
   --md-filled-button-label-text-color: var(--text-secondary) !important;
   --md-filled-button-focus-label-text-color: var(--text-secondary) !important;
-  --md-filled-button-with-icon-focus-icon-color: var(--text-secondary) !important;
+  --md-filled-button-with-icon-focus-icon-color: var(
+    --text-secondary
+  ) !important;
   --md-filled-button-focus-container-color: var(--border) !important;
 }
 
@@ -719,7 +725,9 @@ md-icon {
   --md-filled-button-container-color: var(--border) !important;
   --md-filled-button-label-text-color: var(--text-secondary) !important;
   --md-filled-button-hover-label-text-color: var(--text-secondary) !important;
-  --md-filled-button-with-icon-hover-icon-color: var(--text-secondary) !important;
+  --md-filled-button-with-icon-hover-icon-color: var(
+    --text-secondary
+  ) !important;
   --md-filled-button-hover-container-color: var(--border) !important;
 }
 
@@ -730,7 +738,9 @@ md-icon {
   --md-filled-button-container-color: var(--border) !important;
   --md-filled-button-label-text-color: var(--text-secondary) !important;
   --md-filled-button-pressed-label-text-color: var(--text-secondary) !important;
-  --md-filled-button-with-icon-pressed-icon-color: var(--text-secondary) !important;
+  --md-filled-button-with-icon-pressed-icon-color: var(
+    --text-secondary
+  ) !important;
   --md-filled-button-pressed-container-color: var(--border) !important;
 }
 
@@ -742,7 +752,9 @@ md-icon {
   --md-filled-button-container-color: var(--border) !important;
   --md-filled-button-label-text-color: var(--text-secondary) !important;
   --md-filled-button-focus-label-text-color: var(--text-secondary) !important;
-  --md-filled-button-with-icon-focus-icon-color: var(--text-secondary) !important;
+  --md-filled-button-with-icon-focus-icon-color: var(
+    --text-secondary
+  ) !important;
   --md-filled-button-focus-container-color: var(--border) !important;
 }
 
@@ -898,7 +910,8 @@ md-icon {
   border-radius: 2px;
 }
 
-.select-wrapper input[type='text'].select-filter::-webkit-scrollbar-thumb:hover {
+.select-wrapper
+  input[type='text'].select-filter::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
 }
 
@@ -1393,11 +1406,13 @@ textarea {
 }
 
 /* Estilo personalizado para input date con icono secondary */
-input[type="date"].date-secondary::-webkit-calendar-picker-indicator {
-  filter: invert(62%) sepia(5%) saturate(582%) hue-rotate(192deg) brightness(93%) contrast(87%);
+input[type='date'].date-secondary::-webkit-calendar-picker-indicator {
+  filter: invert(62%) sepia(5%) saturate(582%) hue-rotate(192deg)
+    brightness(93%) contrast(87%);
   cursor: pointer;
 }
 
-.light input[type="date"].date-secondary::-webkit-calendar-picker-indicator {
-  filter: invert(62%) sepia(5%) saturate(211%) hue-rotate(192deg) brightness(93%) contrast(87%);
+.light input[type='date'].date-secondary::-webkit-calendar-picker-indicator {
+  filter: invert(62%) sepia(5%) saturate(211%) hue-rotate(192deg)
+    brightness(93%) contrast(87%);
 }

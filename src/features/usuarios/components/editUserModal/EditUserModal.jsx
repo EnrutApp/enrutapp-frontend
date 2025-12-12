@@ -3,12 +3,20 @@ import apiClient from '../../../../shared/services/apiService';
 import catalogService from '../../../../shared/services/catalogService';
 import { conductorService } from '../../../conductores/api/conductorService';
 import EditConductorModal from '../../../conductores/components/editConductorModal/EditConductorModal';
+import AddressAutocomplete from '../../../../shared/components/addressAutocomplete/AddressAutocomplete';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
 import { useState, useEffect } from 'react';
 
-const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) => {
+const EditUserModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  onSave,
+  itemData,
+  user,
+}) => {
   const data = itemData || user;
   const [form, setForm] = useState({});
   const [loading, setLoading] = useState(false);
@@ -28,7 +36,6 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
       setError(null);
       setFieldErrors({});
 
-      // Cargar datos del conductor si el usuario tiene rol de conductor
       const isConductor = data?.rol?.nombreRol?.toLowerCase() === 'conductor';
       if (isConductor && data.idUsuario) {
         loadConductorData(data.idUsuario);
@@ -38,12 +45,14 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
     }
   }, [isOpen, data]);
 
-  const loadConductorData = async (idUsuario) => {
+  const loadConductorData = async idUsuario => {
     setLoadingConductor(true);
     try {
       const response = await conductorService.getConductores();
       const conductores = response.data || response;
-      const conductor = conductores.find(c => c.usuario?.idUsuario === idUsuario);
+      const conductor = conductores.find(
+        c => c.usuario?.idUsuario === idUsuario
+      );
       setConductorData(conductor || null);
     } catch (error) {
       console.error('Error al cargar datos del conductor:', error);
@@ -98,12 +107,19 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
 
   const handleChange = e => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
 
-    // Si se cambia el rol, cargar datos del conductor si aplica
+    if (name === 'telefono') {
+      const numericValue = value.replace(/\D/g, '');
+      if (numericValue.length > 10) return;
+      setForm({ ...form, [name]: numericValue });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
+
     if (name === 'idRol' && data?.idUsuario) {
       const selectedRole = roles.find(r => r.idRol === value);
-      const isConductor = selectedRole?.nombreRol?.toLowerCase() === 'conductor';
+      const isConductor =
+        selectedRole?.nombreRol?.toLowerCase() === 'conductor';
 
       if (isConductor) {
         loadConductorData(data.idUsuario);
@@ -118,6 +134,22 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
     setError(null);
   };
 
+  const handleAddressSelect = addressData => {
+    if (addressData) {
+      setForm(prev => ({ ...prev, direccion: addressData.address }));
+      if (fieldErrors.direccion) {
+        setFieldErrors(prev => ({ ...prev, direccion: null }));
+      }
+    }
+  };
+
+  const handleAddressChange = newAddress => {
+    setForm(prev => ({ ...prev, direccion: newAddress }));
+    if (fieldErrors.direccion) {
+      setFieldErrors(prev => ({ ...prev, direccion: null }));
+    }
+  };
+
   const validateForm = () => {
     const errors = {};
 
@@ -126,6 +158,8 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
     }
     if (!form.telefono?.trim()) {
       errors.telefono = 'El teléfono es obligatorio';
+    } else if (!/^3\d{9}$/.test(form.telefono)) {
+      errors.telefono = 'El teléfono debe tener 10 dígitos y empezar por 3';
     }
     if (!form.direccion?.trim()) {
       errors.direccion = 'La dirección es obligatoria';
@@ -192,7 +226,6 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
       if (!response?.success)
         throw new Error(response?.message || 'Error al actualizar usuario');
 
-      // Usar onSave si es edición de perfil, sino onConfirm
       if (isProfileEdit && onSave) {
         await onSave(response?.data);
       } else if (onConfirm) {
@@ -210,10 +243,10 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
   const isAdminUser =
     form.rol?.nombreRol?.toLowerCase() === 'administrador' ||
     roles.find(r => r.idRol === form.idRol)?.nombreRol?.toLowerCase() ===
-    'administrador';
+      'administrador';
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={isProfileEdit ? "md" : "lg"}>
+    <Modal isOpen={isOpen} onClose={onClose} size={isProfileEdit ? 'md' : 'lg'}>
       <main className="relative">
         {loading && (
           <div className="absolute top-0 left-0 right-0 z-50 rounded-t-3xl overflow-hidden">
@@ -235,9 +268,11 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
             </button>
           </div>
 
-          <div className={isProfileEdit ? "px-4" : "px-8 md:px-20"}>
+          <div className={isProfileEdit ? 'px-4' : 'px-8 md:px-20'}>
             <div className="leading-tight mb-6">
-              <h2 className="h2 font-medium text-primary">Editar {isProfileEdit ? 'perfil' : 'usuario'}</h2>
+              <h2 className="h2 font-medium text-primary">
+                Editar {isProfileEdit ? 'perfil' : 'usuario'}
+              </h2>
               <p className="h5 text-secondary font-medium">
                 {isProfileEdit
                   ? 'Actualiza tu información personal'
@@ -276,10 +311,11 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
                     placeholder="Escribe el nombre completo"
                     value={form.nombre || ''}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${fieldErrors.nombre
-                      ? 'border-red focus:ring-red/20 focus:border-red'
-                      : 'border-border focus:ring-primary/20 focus:border-primary'
-                      }`}
+                    className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
+                      fieldErrors.nombre
+                        ? 'border-red focus:ring-red/20 focus:border-red'
+                        : 'border-border focus:ring-primary/20 focus:border-primary'
+                    }`}
                     disabled={loading}
                   />
                   {fieldErrors.nombre && (
@@ -341,17 +377,19 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
                     <input
                       id="direccion"
                       name="direccion"
-                      type="text"
-                      required
-                      placeholder="Dirección completa"
+                      type="hidden"
                       value={form.direccion || ''}
-                      onChange={handleChange}
-                      className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${fieldErrors.direccion
-                        ? 'border-red focus:ring-red/20 focus:border-red'
-                        : 'border-border focus:ring-primary/20 focus:border-primary'
-                        }`}
-                      disabled={loading}
                     />
+                    <div className="relative">
+                      <AddressAutocomplete
+                        value={form.direccion || ''}
+                        onChange={handleAddressChange}
+                        onSelect={handleAddressSelect}
+                        placeholder="Dirección completa"
+                        disabled={loading}
+                        country="co"
+                      />
+                    </div>
                     {fieldErrors.direccion && (
                       <span className="text-red-500 text-sm mt-1">
                         {fieldErrors.direccion}
@@ -408,10 +446,11 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
                     placeholder="Número de teléfono"
                     value={form.telefono || ''}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${fieldErrors.telefono
-                      ? 'border-red focus:ring-red/20 focus:border-red'
-                      : 'border-border focus:ring-primary/20 focus:border-primary'
-                      }`}
+                    className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
+                      fieldErrors.telefono
+                        ? 'border-red focus:ring-red/20 focus:border-red'
+                        : 'border-border focus:ring-primary/20 focus:border-primary'
+                    }`}
                     disabled={loading}
                   />
                   {fieldErrors.telefono && (
@@ -477,10 +516,11 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
                           value={form.idRol || ''}
                           onChange={handleChange}
                           disabled={isAdminUser || loading}
-                          className={`select-filter w-full px-4 input bg-fill border rounded-lg text-primary focus:outline-none focus:border-primary transition-colors ${isAdminUser
-                            ? 'opacity-50 cursor-not-allowed bg-surface'
-                            : ''
-                            } ${fieldErrors.idRol ? 'border-red-500' : 'border-border'}`}
+                          className={`select-filter w-full px-4 input bg-fill border rounded-lg text-primary focus:outline-none focus:border-primary transition-colors ${
+                            isAdminUser
+                              ? 'opacity-50 cursor-not-allowed bg-surface'
+                              : ''
+                          } ${fieldErrors.idRol ? 'border-red-500' : 'border-border'}`}
                         >
                           <option value="">Selecciona un rol</option>
                           {roles.map(r => (
@@ -502,51 +542,63 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
                       )}
                     </div>
 
-                    {/* Sección de información de conductor */}
-                    {!isProfileEdit && roles.find(r => r.idRol === form.idRol)?.nombreRol?.toLowerCase() === 'conductor' && (
-                      <div className="content-box-outline-4-small p-4 rounded-xl">
-                        <div className="flex items-start gap-3 mb-3">
-                          <md-icon className="text-primary">badge</md-icon>
-                          <div className="flex-1">
-                            <h4 className="subtitle1 font-medium text-primary mb-1">
-                              Información de conductor
-                            </h4>
-                            {loadingConductor ? (
-                              <p className="text-xs text-secondary">Cargando datos...</p>
-                            ) : conductorData ? (
-                              <div className="space-y-2">
+                    {!isProfileEdit &&
+                      roles
+                        .find(r => r.idRol === form.idRol)
+                        ?.nombreRol?.toLowerCase() === 'conductor' && (
+                        <div className="content-box-outline-4-small p-4 rounded-xl">
+                          <div className="flex items-start gap-3 mb-3">
+                            <md-icon className="text-primary">badge</md-icon>
+                            <div className="flex-1">
+                              <h4 className="subtitle1 font-medium text-primary mb-1">
+                                Información de conductor
+                              </h4>
+                              {loadingConductor ? (
                                 <p className="text-xs text-secondary">
-                                  <span className="font-medium">Categoría:</span>{' '}
-                                  {conductorData.categoriaLicencia?.nombreCategoria || 'Sin asignar'}
+                                  Cargando datos...
                                 </p>
+                              ) : conductorData ? (
+                                <div className="space-y-2">
+                                  <p className="text-xs text-secondary">
+                                    <span className="font-medium">
+                                      Categoría:
+                                    </span>{' '}
+                                    {conductorData.categoriaLicencia
+                                      ?.nombreCategoria || 'Sin asignar'}
+                                  </p>
+                                  <p className="text-xs text-secondary">
+                                    <span className="font-medium">
+                                      Vencimiento:
+                                    </span>{' '}
+                                    {conductorData.fechaVencimientoLicencia
+                                      ? new Date(
+                                          conductorData.fechaVencimientoLicencia
+                                        ).toLocaleDateString('es-ES')
+                                      : 'Sin fecha'}
+                                  </p>
+                                </div>
+                              ) : (
                                 <p className="text-xs text-secondary">
-                                  <span className="font-medium">Vencimiento:</span>{' '}
-                                  {conductorData.fechaVencimientoLicencia
-                                    ? new Date(conductorData.fechaVencimientoLicencia).toLocaleDateString('es-ES')
-                                    : 'Sin fecha'}
+                                  Este usuario aún no tiene información de
+                                  licencia registrada
                                 </p>
-                              </div>
-                            ) : (
-                              <p className="text-xs text-secondary">
-                                Este usuario aún no tiene información de licencia registrada
-                              </p>
-                            )}
+                              )}
+                            </div>
                           </div>
-                        </div>
 
-                        {conductorData && (
-                          <button
-                            type="button"
-                            onClick={() => setShowEditConductorModal(true)}
-                            className="btn btn-secondary w-full text-sm py-2"
-                            disabled={loading}
-                          >
-                            <md-icon className="text-sm mr-2">edit</md-icon>
-                            Editar información de conductor
-                          </button>
-                        )}
-                      </div>
-                    )}
+                          {conductorData && (
+                            <button
+                              type="button"
+                              onClick={() => setShowEditConductorModal(true)}
+                              className="btn btn-secondary w-full text-sm py-2"
+                              disabled={loading}
+                            >
+                              <md-icon className="text-sm mr-2">edit</md-icon>
+                              Editar información de conductor
+                            </button>
+                          )}
+                        </div>
+                      )}
                   </>
                 )}
               </div>
@@ -574,7 +626,11 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
                   {loading && (
                     <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   )}
-                  {loading ? 'Actualizando...' : (isProfileEdit ? 'Actualizar' : 'Actualizar usuario')}
+                  {loading
+                    ? 'Actualizando...'
+                    : isProfileEdit
+                      ? 'Actualizar'
+                      : 'Actualizar usuario'}
                 </button>
               </div>
             </form>
@@ -582,16 +638,15 @@ const EditUserModal = ({ isOpen, onClose, onConfirm, onSave, itemData, user }) =
         </div>
       </main>
 
-      {/* Modal de editar conductor */}
       {conductorData && (
         <EditConductorModal
           isOpen={showEditConductorModal}
           onClose={() => setShowEditConductorModal(false)}
           conductor={conductorData}
-          onUpdateConductor={async (updatedConductor) => {
+          onUpdateConductor={async updatedConductor => {
             setConductorData(updatedConductor);
             setShowEditConductorModal(false);
-            // Recargar datos del conductor
+
             if (data?.idUsuario) {
               await loadConductorData(data.idUsuario);
             }

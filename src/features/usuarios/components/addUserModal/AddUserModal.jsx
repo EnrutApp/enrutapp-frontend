@@ -1,6 +1,7 @@
 import Modal from '../../../../shared/components/modal/Modal';
 import apiClient from '../../../../shared/services/apiService';
 import catalogService from '../../../../shared/services/catalogService';
+import AddressAutocomplete from '../../../../shared/components/addressAutocomplete/AddressAutocomplete';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
@@ -73,7 +74,6 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
         })
         .catch(() => setTiposDoc([]));
 
-      // Cargar categorías de licencia
       apiClient
         .get('/categorias-licencia')
         .then(res => {
@@ -87,15 +87,21 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
 
   const handleChange = e => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
 
-    // Si se cambia el rol, verificar si es conductor
+    if (name === 'telefono') {
+      const numericValue = value.replace(/\D/g, '');
+      if (numericValue.length > 10) return;
+      setForm({ ...form, [name]: numericValue });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
+
     if (name === 'idRol') {
       const selectedRole = roles.find(r => r.idRol === value);
-      const esConductor = selectedRole?.nombreRol?.toLowerCase() === 'conductor';
+      const esConductor =
+        selectedRole?.nombreRol?.toLowerCase() === 'conductor';
       setIsConductor(esConductor);
 
-      // Reset license options if changing from conductor to another role
       if (!esConductor) {
         setShowLicenseOptions(false);
         setLicenseCompletionMethod(null);
@@ -107,6 +113,22 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
       setFieldErrors({ ...fieldErrors, [name]: null });
     }
     setError(null);
+  };
+
+  const handleAddressSelect = addressData => {
+    if (addressData) {
+      setForm(prev => ({ ...prev, direccion: addressData.address }));
+      if (fieldErrors.direccion) {
+        setFieldErrors(prev => ({ ...prev, direccion: null }));
+      }
+    }
+  };
+
+  const handleAddressChange = newAddress => {
+    setForm(prev => ({ ...prev, direccion: newAddress }));
+    if (fieldErrors.direccion) {
+      setFieldErrors(prev => ({ ...prev, direccion: null }));
+    }
   };
 
   const validateStep = step => {
@@ -130,6 +152,8 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
       }
       if (!form.telefono?.trim()) {
         errors.telefono = 'El teléfono es obligatorio';
+      } else if (!/^3\d{9}$/.test(form.telefono)) {
+        errors.telefono = 'El teléfono debe tener 10 dígitos y empezar por 3';
       }
       if (!form.direccion?.trim()) {
         errors.direccion = 'La dirección es obligatoria';
@@ -138,7 +162,6 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
         errors.idCiudad = 'Selecciona una ciudad';
       }
     } else if (step === 3 && !isClientMode) {
-      // Paso 3: Rol del usuario
       if (!form.idRol) {
         errors.idRol = 'Selecciona un rol';
       }
@@ -182,7 +205,6 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
           return;
         }
       } catch (err) {
-
         setError('Error al validar los datos');
         setLoading(false);
         return;
@@ -194,7 +216,6 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
     if (currentStep === 2) {
     }
 
-    // Si es paso 3 y es conductor, mostrar opciones de licencia
     if (currentStep === 3 && !isClientMode && isConductor) {
       setShowLicenseOptions(true);
       setError(null);
@@ -208,13 +229,11 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
   };
 
   const handlePrevStep = () => {
-    // Si está en opciones de licencia, volver al paso 3
     if (showLicenseOptions && !licenseCompletionMethod) {
       setShowLicenseOptions(false);
       return;
     }
 
-    // Si está en formulario de licencia, volver a opciones
     if (showLicenseOptions && licenseCompletionMethod === 'now') {
       setLicenseCompletionMethod(null);
       setLicenseForm({});
@@ -226,17 +245,15 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
-  const handleLicenseMethodSelect = (method) => {
+  const handleLicenseMethodSelect = method => {
     setLicenseCompletionMethod(method);
 
     if (method === 'invite') {
-      // Si elige invitación, ir directo a confirmación
       setCurrentStep(4);
     }
-    // Si elige 'now', quedarse en el mismo paso para mostrar formulario
   };
 
-  const handleLicenseFormChange = (e) => {
+  const handleLicenseFormChange = e => {
     const { name, value } = e.target;
     setLicenseForm({ ...licenseForm, [name]: value });
 
@@ -261,7 +278,6 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
       return;
     }
 
-    // Ir a confirmación
     setError(null);
     setFieldErrors({});
     setCurrentStep(4);
@@ -284,24 +300,24 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
 
     const requiredFields = isClientMode
       ? [
-        'nombre',
-        'correo',
-        'tipoDoc',
-        'numDocumento',
-        'telefono',
-        'direccion',
-        'idCiudad',
-      ]
+          'nombre',
+          'correo',
+          'tipoDoc',
+          'numDocumento',
+          'telefono',
+          'direccion',
+          'idCiudad',
+        ]
       : [
-        'nombre',
-        'correo',
-        'tipoDoc',
-        'numDocumento',
-        'telefono',
-        'direccion',
-        'idCiudad',
-        'idRol',
-      ];
+          'nombre',
+          'correo',
+          'tipoDoc',
+          'numDocumento',
+          'telefono',
+          'direccion',
+          'idCiudad',
+          'idRol',
+        ];
 
     for (const field of requiredFields) {
       if (!form[field]) {
@@ -314,7 +330,6 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
     const uuidRegex =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!form.tipoDoc || !uuidRegex.test(form.tipoDoc)) {
-
       setError('El tipo de documento seleccionado no es válido');
       setFieldErrors({ tipoDoc: 'Selecciona un tipo de documento válido' });
       setLoading(false);
@@ -345,9 +360,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
         setLoading(false);
         return;
       }
-    } catch (preErr) {
-
-    }
+    } catch (preErr) {}
 
     const password = generarPasswordAleatoria(10);
     setGeneratedPassword(password);
@@ -360,8 +373,6 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
       }
 
       if (!finalIdRol || !uuidRegex.test(finalIdRol)) {
-
-
         setError('El rol seleccionado no es válido');
         setFieldErrors({ idRol: 'Selecciona un rol válido' });
         setLoading(false);
@@ -385,11 +396,10 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
       if (!response?.success)
         throw new Error(response?.message || 'Error al agregar usuario');
 
-      // Si es conductor y eligió completar ahora, crear el conductor
       if (isConductor && licenseCompletionMethod === 'now') {
         const conductorPayload = {
           idUsuario: response.data.idUsuario,
-          numeroLicencia: form.numDocumento, // Usar el número de documento como licencia por defecto
+          numeroLicencia: form.numDocumento,
           idCategoriaLicencia: licenseForm.idCategoriaLicencia,
           fechaVencimientoLicencia: licenseForm.fechaVencimientoLicencia,
           observaciones: licenseForm.observaciones || null,
@@ -476,10 +486,11 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
             placeholder="Número de documento"
             value={form.numDocumento || ''}
             onChange={handleChange}
-            className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${fieldErrors.numDocumento
-              ? 'border-red focus:ring-red/20 focus:border-red'
-              : 'border-border focus:ring-primary/20 focus:border-primary'
-              }`}
+            className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
+              fieldErrors.numDocumento
+                ? 'border-red focus:ring-red/20 focus:border-red'
+                : 'border-border focus:ring-primary/20 focus:border-primary'
+            }`}
             disabled={loading}
           />
           {fieldErrors.numDocumento && (
@@ -502,10 +513,11 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
           placeholder="correo@ejemplo.com"
           value={form.correo || ''}
           onChange={handleChange}
-          className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${fieldErrors.correo
-            ? 'border-red focus:ring-red/20 focus:border-red'
-            : 'border-border focus:ring-primary/20 focus:border-primary'
-            }`}
+          className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
+            fieldErrors.correo
+              ? 'border-red focus:ring-red/20 focus:border-red'
+              : 'border-border focus:ring-primary/20 focus:border-primary'
+          }`}
           disabled={loading}
         />
         {fieldErrors.correo && (
@@ -539,10 +551,11 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
           placeholder="Escribe el nombre completo"
           value={form.nombre || ''}
           onChange={handleChange}
-          className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${fieldErrors.nombre
-            ? 'border-red focus:ring-red/20 focus:border-red'
-            : 'border-border focus:ring-primary/20 focus:border-primary'
-            }`}
+          className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
+            fieldErrors.nombre
+              ? 'border-red focus:ring-red/20 focus:border-red'
+              : 'border-border focus:ring-primary/20 focus:border-primary'
+          }`}
           disabled={loading}
         />
         {fieldErrors.nombre && (
@@ -567,10 +580,11 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
           placeholder="Número de teléfono"
           value={form.telefono || ''}
           onChange={handleChange}
-          className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${fieldErrors.telefono
-            ? 'border-red focus:ring-red/20 focus:border-red'
-            : 'border-border focus:ring-primary/20 focus:border-primary'
-            }`}
+          className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
+            fieldErrors.telefono
+              ? 'border-red focus:ring-red/20 focus:border-red'
+              : 'border-border focus:ring-primary/20 focus:border-primary'
+          }`}
           disabled={loading}
         />
         {fieldErrors.telefono && (
@@ -590,17 +604,19 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
         <input
           id="direccion"
           name="direccion"
-          type="text"
-          required
-          placeholder="Dirección completa"
+          type="hidden"
           value={form.direccion || ''}
-          onChange={handleChange}
-          className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${fieldErrors.direccion
-            ? 'border-red focus:ring-red/20 focus:border-red'
-            : 'border-border focus:ring-primary/20 focus:border-primary'
-            }`}
-          disabled={loading}
         />
+        <div className="relative">
+          <AddressAutocomplete
+            value={form.direccion || ''}
+            onChange={handleAddressChange}
+            onSelect={handleAddressSelect}
+            placeholder="Dirección completa o lugar"
+            disabled={loading}
+            country="co"
+          />
+        </div>
         {fieldErrors.direccion && (
           <span className="text-red-500 text-sm mt-1">
             {fieldErrors.direccion}
@@ -708,9 +724,12 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
               <md-icon className="text-blue text-xl">person_add</md-icon>
             </div>
             <div className="flex flex-col">
-              <h3 className="subtitle1 font-normal text-primary ">Crear nuevo usuario conductor</h3>
+              <h3 className="subtitle1 font-normal text-primary ">
+                Crear nuevo usuario conductor
+              </h3>
               <p className="text-secondary text-sm">
-                Registra un nuevo usuario con rol de conductor y configura sus datos de licencia en un solo proceso
+                Registra un nuevo usuario con rol de conductor y configura sus
+                datos de licencia en un solo proceso
               </p>
             </div>
             <md-icon className="text-secondary text-lg">call_made</md-icon>
@@ -726,10 +745,13 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
               <md-icon className="text-blue text-xl">mail</md-icon>
             </div>
             <div className="flex flex-col gap-4 justify-between">
-              <div className='flex-col'>
-                <h3 className="subtitle1 font-normal text-primary ">Enviar invitación al conductor</h3>
+              <div className="flex-col">
+                <h3 className="subtitle1 font-normal text-primary ">
+                  Enviar invitación al conductor
+                </h3>
                 <p className="text-secondary text-sm">
-                  El conductor recibirá un correo con sus credenciales y podrá completar sus datos de licencia al iniciar sesión
+                  El conductor recibirá un correo con sus credenciales y podrá
+                  completar sus datos de licencia al iniciar sesión
                 </p>
               </div>
             </div>
@@ -764,7 +786,10 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
           >
             <option value="">Selecciona una categoría</option>
             {categorias.map(cat => (
-              <option key={cat.idCategoriaLicencia} value={cat.idCategoriaLicencia}>
+              <option
+                key={cat.idCategoriaLicencia}
+                value={cat.idCategoriaLicencia}
+              >
                 {cat.nombreCategoria}
               </option>
             ))}
@@ -786,13 +811,16 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
           name="fechaVencimientoLicencia"
           value={licenseForm.fechaVencimientoLicencia || ''}
           onChange={handleLicenseFormChange}
-          className={`w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary ${fieldErrors.fechaVencimientoLicencia
-            ? 'border-red focus:ring-red/20 focus:border-red'
-            : 'border-border focus:ring-primary/20 focus:border-primary'
-            }`}
+          className={`w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary ${
+            fieldErrors.fechaVencimientoLicencia
+              ? 'border-red focus:ring-red/20 focus:border-red'
+              : 'border-border focus:ring-primary/20 focus:border-primary'
+          }`}
           disabled={loading}
         />
-        <span className="text-xs text-secondary mt-1">La fecha debe ser futura</span>
+        <span className="text-xs text-secondary mt-1">
+          La fecha debe ser futura
+        </span>
         {fieldErrors.fechaVencimientoLicencia && (
           <span className="text-red-500 text-sm mt-1">
             {fieldErrors.fechaVencimientoLicencia}
@@ -920,7 +948,6 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
             </div>
           )}
 
-          {/* Mostrar información de licencia si es conductor y se completó */}
           {isConductor && licenseCompletionMethod === 'now' && (
             <>
               <div className="flex items-start gap-3">
@@ -930,7 +957,11 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
                     Categoría de licencia
                   </p>
                   <p className="text-primary font-medium">
-                    {categorias.find(c => c.idCategoriaLicencia === licenseForm.idCategoriaLicencia)?.nombreCategoria || '-'}
+                    {categorias.find(
+                      c =>
+                        c.idCategoriaLicencia ===
+                        licenseForm.idCategoriaLicencia
+                    )?.nombreCategoria || '-'}
                   </p>
                 </div>
               </div>
@@ -943,11 +974,13 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
                   </p>
                   <p className="text-primary font-medium">
                     {licenseForm.fechaVencimientoLicencia
-                      ? new Date(licenseForm.fechaVencimientoLicencia).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })
+                      ? new Date(
+                          licenseForm.fechaVencimientoLicencia
+                        ).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })
                       : '-'}
                   </p>
                 </div>
@@ -969,7 +1002,6 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
             </>
           )}
 
-          {/* Indicador de invitación pendiente */}
           {isConductor && licenseCompletionMethod === 'invite' && (
             <div className="lex flex-col md:flex-row gap-6 mt-2 p-4 rounded-xl bg-background border border-border">
               <md-icon className="text-blue mt-1">mail</md-icon>
@@ -978,7 +1010,8 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
                   Invitación pendiente
                 </p>
                 <p className="text-secondary text-xs">
-                  El conductor completará sus datos de licencia al iniciar sesión por primera vez
+                  El conductor completará sus datos de licencia al iniciar
+                  sesión por primera vez
                 </p>
               </div>
             </div>
@@ -1039,8 +1072,10 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
               Se ha enviado un correo a{' '}
               <span className="font-medium text-primary">{form.correo}</span>{' '}
               con las credenciales de acceso
-              {isConductor && licenseCompletionMethod === 'invite' &&
-                ' y las instrucciones para completar su perfil de conductor'}.
+              {isConductor &&
+                licenseCompletionMethod === 'invite' &&
+                ' y las instrucciones para completar su perfil de conductor'}
+              .
             </p>
           </div>
         </div>
@@ -1193,10 +1228,11 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
                         <div
                           className={`
                                                     flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 transform
-                                                    ${currentStep >= step
-                              ? 'bg-primary text-on-primary shadow-md scale-110 ring-4 ring-primary/20'
-                              : 'bg-fill text-secondary scale-100'
-                            }
+                                                    ${
+                                                      currentStep >= step
+                                                        ? 'bg-primary text-on-primary shadow-md scale-110 ring-4 ring-primary/20'
+                                                        : 'bg-fill text-secondary scale-100'
+                                                    }
                                                     ${currentStep === step ? 'animate-pulse' : ''}
                                                     font-semibold
                                                 `}
@@ -1220,9 +1256,20 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
                 <div>
                   {currentStep === 1 && renderStep1()}
                   {currentStep === 2 && renderStep2()}
-                  {currentStep === 3 && !isClientMode && !showLicenseOptions && renderStep3()}
-                  {currentStep === 3 && !isClientMode && showLicenseOptions && !licenseCompletionMethod && renderLicenseOptions()}
-                  {currentStep === 3 && !isClientMode && showLicenseOptions && licenseCompletionMethod === 'now' && renderLicenseForm()}
+                  {currentStep === 3 &&
+                    !isClientMode &&
+                    !showLicenseOptions &&
+                    renderStep3()}
+                  {currentStep === 3 &&
+                    !isClientMode &&
+                    showLicenseOptions &&
+                    !licenseCompletionMethod &&
+                    renderLicenseOptions()}
+                  {currentStep === 3 &&
+                    !isClientMode &&
+                    showLicenseOptions &&
+                    licenseCompletionMethod === 'now' &&
+                    renderLicenseForm()}
                   {((currentStep === 3 && isClientMode) ||
                     (currentStep === 4 && !isClientMode)) &&
                     renderConfirmation()}
@@ -1233,7 +1280,6 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
                     </div>
                   )}
 
-                  {/* Solo mostrar botones Anterior/Siguiente si no está en opciones de licencia o formulario de licencia */}
                   {!(showLicenseOptions && currentStep === 3) && (
                     <div className="flex justify-between items-center gap-2 pt-2 mt-8">
                       <button

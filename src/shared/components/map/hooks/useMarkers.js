@@ -100,9 +100,7 @@ export const useMarkers = (map, isLoaded) => {
         markersRef.current.click.remove();
         markersRef.current.click = null;
       }
-    } catch (err) {
-
-    }
+    } catch (err) {}
   }, []);
 
   const addOrigenMarker = useCallback(
@@ -121,8 +119,7 @@ export const useMarkers = (map, isLoaded) => {
         })
           .setLngLat([lng, lat])
           .addTo(map);
-      } catch (err) {
-      }
+      } catch (err) {}
     },
     [map, isLoaded]
   );
@@ -143,8 +140,7 @@ export const useMarkers = (map, isLoaded) => {
         })
           .setLngLat([lng, lat])
           .addTo(map);
-      } catch (err) {
-      }
+      } catch (err) {}
     },
     [map, isLoaded]
   );
@@ -168,8 +164,7 @@ export const useMarkers = (map, isLoaded) => {
 
           markersRef.current.paradas.push(marker);
         });
-      } catch (err) {
-      }
+      } catch (err) {}
     },
     [map, isLoaded]
   );
@@ -190,8 +185,7 @@ export const useMarkers = (map, isLoaded) => {
         })
           .setLngLat([lng, lat])
           .addTo(map);
-      } catch (err) {
-      }
+      } catch (err) {}
     },
     [map, isLoaded]
   );
