@@ -9,6 +9,11 @@ const HomeConductor = withLazyLoading(
   'Cargando dashboard del conductor...'
 );
 
+const CalendarioPage = withLazyLoading(
+  lazy(() => import('../../features/calendario/CalendarioPage')),
+  'Cargando calendario...'
+);
+
 const RutasConductor = withLazyLoading(
   lazy(() => import('../../features/rutas/pages/RutasConductor')),
   'Cargando rutas del conductor...'
@@ -66,6 +71,11 @@ const ConductorHomeWithErrorBoundary = withErrorBoundary(HomeConductor, {
   message: 'No se pudo cargar el dashboard del conductor',
 });
 
+const CalendarioWithErrorBoundary = withErrorBoundary(CalendarioPage, {
+  title: 'Error en Calendario',
+  message: 'No se pudo cargar el calendario',
+});
+
 const RutasConductorWithErrorBoundary = withErrorBoundary(RutasConductor, {
   title: 'Error en Rutas del Conductor',
   message: 'No se pudo cargar las rutas del conductor',
@@ -93,12 +103,7 @@ export const conductorRoutes = [
   },
   {
     path: ROUTES.CONDUCTOR.CALENDARIO,
-    element: (
-      <PendingPage
-        title="Calendario"
-        description="Gestiona tu calendario de trabajo y horarios disponibles"
-      />
-    ),
+    element: <CalendarioWithErrorBoundary />,
     handle: {
       crumb: () => 'Calendario',
     },

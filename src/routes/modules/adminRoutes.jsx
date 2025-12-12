@@ -73,20 +73,10 @@ const Tracking = withLazyLoading(
   'Cargando tracking de conductores...'
 );
 
-const Viajes = withLazyLoading(
-  lazy(() => import('../../features/viajes/ViajesPage')),
-  'Cargando gestión de viajes...'
+const CalendarioPage = withLazyLoading(
+  lazy(() => import('../../features/calendario/CalendarioPage')),
+  'Cargando calendario...'
 );
-
-const ViajeDetails = withLazyLoading(
-  lazy(() => import('../../features/viajes/ViajeDetailsPage')),
-  'Cargando detalles del viaje...'
-);
-
-const ViajeDetailsWithErrorBoundary = withErrorBoundary(ViajeDetails, {
-  title: 'Error en Detalles del Viaje',
-  message: 'No se pudo cargar los detalles del viaje',
-});
 
 const AdminHomeWithErrorBoundary = withErrorBoundary(HomeAdmin, {
   title: 'Error en Dashboard',
@@ -271,6 +261,16 @@ export const adminRoutes = [
       crumb: () => 'Viajes',
     },
     permission: 'VER_VIAJES',
+  },
+  {
+    path: ROUTES.ADMIN.CALENDARIO,
+    element: withErrorBoundary(CalendarioPage, {
+      title: 'Error en Calendario',
+      message: 'No se pudo cargar el calendario',
+    })(),
+    handle: {
+      crumb: () => 'Calendario',
+    },
   },
 ];
 

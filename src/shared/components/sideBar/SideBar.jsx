@@ -277,6 +277,11 @@ const SideBar = () => {
             icon: 'my_location',
           },
           {
+            path: '/admin/calendario',
+            label: 'Calendario',
+            icon: 'calendar_month',
+          },
+          {
             path: '/admin/encomiendas',
             label: 'Encomiendas',
             icon: 'inventory_2',
