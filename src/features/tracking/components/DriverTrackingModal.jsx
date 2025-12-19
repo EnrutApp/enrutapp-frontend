@@ -14,6 +14,9 @@ import DriverTrackingMap from './DriverTrackingMap';
 import useDriverTracking from '../../../shared/hooks/useDriverTracking';
 
 const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
+  const resolvedDriverId =
+    driverId || conductor?.usuario?.idUsuario || conductor?.idConductor;
+
   const {
     location,
     isConnected,
@@ -21,7 +24,7 @@ const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
     error,
     disconnect,
     isDriverOnline,
-  } = useDriverTracking(driverId || conductor?.idConductor);
+  } = useDriverTracking(resolvedDriverId);
 
   const [lastUpdate, setLastUpdate] = useState(null);
 
@@ -39,14 +42,14 @@ const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
 
   const driverName = conductor
     ? `${conductor.usuario?.nombre || ''} ${conductor.usuario?.apellido || ''}`.trim() ||
-      `Conductor #${conductor.idConductor}`
-    : `Conductor #${driverId}`;
+    `Conductor #${resolvedDriverId}`
+    : `Conductor #${resolvedDriverId}`;
 
   const driverLabel = conductor
     ? `${conductor.usuario?.nombre || ''} ${conductor.usuario?.apellido || ''}`.trim()
     : null;
 
-  const isOnline = isDriverOnline(driverId || conductor?.idConductor);
+  const isOnline = isDriverOnline(resolvedDriverId);
 
   const formatTime = date => {
     if (!date) return 'N/A';
@@ -73,11 +76,10 @@ const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
           </div>
 
           <div
-            className={`px-3 py-1.5 rounded-full border flex items-center gap-2 ${
-              isOnline
-                ? 'bg-green border-green text-green'
-                : 'bg-red border-red text-red'
-            }`}
+            className={`px-3 py-1.5 rounded-full border flex items-center gap-2 ${isOnline
+              ? 'bg-green border-green text-green'
+              : 'bg-red border-red text-red'
+              }`}
           >
             <span className="text-xs font-medium">
               {isOnline ? 'En línea' : 'Desconectado'}
@@ -90,7 +92,7 @@ const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
             <div className="w-full h-[400px] rounded-xl overflow-hidden border border-border">
               <DriverTrackingMap
                 locations={location ? [location] : []}
-                selectedDriverId={driverId || conductor?.idConductor}
+                selectedDriverId={resolvedDriverId}
                 isConnected={isConnected}
                 isLoading={isLoading}
                 height="100%"
