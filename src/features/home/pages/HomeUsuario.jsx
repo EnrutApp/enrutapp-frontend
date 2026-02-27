@@ -14,7 +14,7 @@ const HomeUsuario = () => {
       cupos: '3 Cupos disponibles',
       origen: 'Medellín',
       destino: 'Quibdó',
-      estado: 'Comprar'
+      estado: 'Comprar',
     },
     {
       id: 2,
@@ -22,8 +22,8 @@ const HomeUsuario = () => {
       cupos: '4 Cupos disponibles',
       origen: 'Quibdó',
       destino: 'Medellín',
-      estado: 'Comprar'
-    }
+      estado: 'Comprar',
+    },
   ];
 
   const acciones = [
@@ -31,20 +31,20 @@ const HomeUsuario = () => {
       id: 1,
       titulo: 'Comprar tiquetes',
       descripcion: 'Aquí podrás comprar un tiquete para hoy o mañana.',
-      icon: 'shopping_cart'
+      icon: 'shopping_cart',
     },
     {
       id: 2,
       titulo: 'Hacer reserva',
       descripcion: 'Aquí podrás fletar un viaje sea para cuando sea.',
-      icon: 'event_note'
+      icon: 'event_note',
     },
     {
       id: 3,
       titulo: 'Enviar encomiendo',
       descripcion: 'Envíla una encomiendo a alguien.',
-      icon: 'local_shipping'
-    }
+      icon: 'local_shipping',
+    },
   ];
 
   return (
@@ -74,11 +74,13 @@ const HomeUsuario = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            {viajesToday.map((viaje) => (
+            {viajesToday.map(viaje => (
               <div key={viaje.id} className="content-box-outline-2-small">
                 <div className="flex flex-col gap-2">
                   <div className="flex flex-col">
-                    <span className="subtitle2">{viaje.hora} | {viaje.cupos}</span>
+                    <span className="subtitle2">
+                      {viaje.hora} | {viaje.cupos}
+                    </span>
                     <h2 className="h5">
                       {viaje.origen}•{viaje.destino}
                     </h2>
@@ -105,7 +107,7 @@ const HomeUsuario = () => {
         </div>
 
         <div className="flex flex-col gap-3">
-          {acciones.map((accion) => (
+          {acciones.map(accion => (
             <button
               key={accion.id}
               className="bg-primary text-on-primary content-box-small hover:shadow-lg transition-shadow text-left"

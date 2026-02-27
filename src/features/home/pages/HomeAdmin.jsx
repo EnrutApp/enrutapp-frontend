@@ -141,7 +141,7 @@ const HomeAdmin = () => {
         const res = await turnoService.getTurnos();
         const data = Array.isArray(res)
           ? res
-          : res?.data ?? res?.data?.data ?? [];
+          : (res?.data ?? res?.data?.data ?? []);
         if (!mounted) return;
         setTurnos(Array.isArray(data) ? data : []);
       } catch (e) {
@@ -168,7 +168,9 @@ const HomeAdmin = () => {
         if (Number.isNaN(fecha.getTime())) return false;
         return inRange(fecha, todayStart, tomorrowStart);
       })
-      .sort((a, b) => parseHoraToMinutes(a?.hora) - parseHoraToMinutes(b?.hora));
+      .sort(
+        (a, b) => parseHoraToMinutes(a?.hora) - parseHoraToMinutes(b?.hora)
+      );
   }, [turnos, todayStart, tomorrowStart]);
 
   const turnosEstaSemana = useMemo(() => {
@@ -199,9 +201,12 @@ const HomeAdmin = () => {
     if (loading) return 'Cargando…';
     const nowCount = turnosEstaSemana.length;
     const prevCount = turnosSemanaPasada.length;
-    if (nowCount === 0 && prevCount === 0) return 'Aún no hay turnos esta semana';
-    if (nowCount > prevCount) return 'Esta semana está más ocupada que la pasada';
-    if (nowCount < prevCount) return 'Esta semana está más tranquila que la pasada';
+    if (nowCount === 0 && prevCount === 0)
+      return 'Aún no hay turnos esta semana';
+    if (nowCount > prevCount)
+      return 'Esta semana está más ocupada que la pasada';
+    if (nowCount < prevCount)
+      return 'Esta semana está más tranquila que la pasada';
     return 'Esta semana está igual que la pasada';
   }, [loading, turnosEstaSemana.length, turnosSemanaPasada.length]);
 
@@ -259,7 +264,9 @@ const HomeAdmin = () => {
           for (const t of results) {
             if (!t) continue;
             const pasajes = Array.isArray(t.pasajes) ? t.pasajes : [];
-            const encomiendas = Array.isArray(t.encomiendas) ? t.encomiendas : [];
+            const encomiendas = Array.isArray(t.encomiendas)
+              ? t.encomiendas
+              : [];
             const totalPasajes = pasajes.reduce(
               (acc, p) => acc + toNumber(p?.precio),
               0
@@ -331,12 +338,14 @@ const HomeAdmin = () => {
             ) : (
               turnosHoy.slice(0, 6).map(t => {
                 const rutaLabel = t?.ruta
-                  ? `${t.ruta.origen?.ubicacion?.nombreUbicacion || 'Origen'} - ${t.ruta.destino?.ubicacion?.nombreUbicacion || 'Destino'
-                  }`
+                  ? `${t.ruta.origen?.ubicacion?.nombreUbicacion || 'Origen'} - ${
+                      t.ruta.destino?.ubicacion?.nombreUbicacion || 'Destino'
+                    }`
                   : 'Ruta';
 
                 const conductorNombre = t?.conductor?.usuario
-                  ? `${t.conductor.usuario.nombre || ''} ${t.conductor.usuario.apellido || ''
+                  ? `${t.conductor.usuario.nombre || ''} ${
+                      t.conductor.usuario.apellido || ''
                     }`.trim() || 'Sin conductor'
                   : 'Sin conductor';
 
@@ -346,7 +355,9 @@ const HomeAdmin = () => {
                   <div key={t.idTurno} className="content-box-outline-2-small">
                     <div className="flex flex-col gap-2">
                       <div className="flex flex-col">
-                        <span className="subtitle2">{hora} | {rutaLabel}</span>
+                        <span className="subtitle2">
+                          {hora} | {rutaLabel}
+                        </span>
                         <h2 className="h5">{conductorNombre}</h2>
                       </div>
                       <div className="flex gap-2">
@@ -372,9 +383,7 @@ const HomeAdmin = () => {
       <div className="flex-1 max-w-md content-box-outline-small">
         <div className="mb-4">
           <h1 className="h4 font-light text-primary">Resumen semanal</h1>
-          <p className="text-secondary subtitle2">
-            {mensajeSemana}
-          </p>
+          <p className="text-secondary subtitle2">{mensajeSemana}</p>
         </div>
 
         <div className="flex flex-col gap-3">
@@ -401,7 +410,9 @@ const HomeAdmin = () => {
                 disabled={loading}
               >
                 <md-icon slot="icon" className="text-sm">
-                  {viajesSemanaDiff >= 0 ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
+                  {viajesSemanaDiff >= 0
+                    ? 'keyboard_arrow_up'
+                    : 'keyboard_arrow_down'}
                 </md-icon>
                 {loading
                   ? '—'
@@ -426,7 +437,9 @@ const HomeAdmin = () => {
                       key={r.iso}
                       className="flex justify-between items-center"
                     >
-                      <span className="subtitle2 text-secondary">{r.label}</span>
+                      <span className="subtitle2 text-secondary">
+                        {r.label}
+                      </span>
                       <span className="subtitle2 text-primary font-medium">
                         {r.count}
                       </span>

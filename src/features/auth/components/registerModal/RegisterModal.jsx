@@ -74,7 +74,10 @@ const ModalRegister = ({ isOpen, onClose }) => {
           client_id: clientId,
           callback: async response => {
             try {
-              await loginWithGoogle({ idToken: response.credential, remember: false });
+              await loginWithGoogle({
+                idToken: response.credential,
+                remember: false,
+              });
               handleClose();
               navigate('/dashboard', { replace: true });
             } catch {
@@ -446,8 +449,11 @@ const ModalRegister = ({ isOpen, onClose }) => {
                     </button>
 
                     <div
-                      className={`absolute inset-0 z-10 ${isGoogleReady ? 'opacity-0' : 'opacity-0 pointer-events-none'
-                        }`}
+                      className={`absolute inset-0 z-10 ${
+                        isGoogleReady
+                          ? 'opacity-0'
+                          : 'opacity-0 pointer-events-none'
+                      }`}
                     >
                       <div
                         ref={googleButtonRef}

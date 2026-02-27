@@ -122,14 +122,17 @@ const TurnosProfile = ({ turno, isOpen, onClose, onEdit, onDelete }) => {
       <div className="flex flex-col gap-3 flex-1">
         <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
           <div className="content-box-outline-3-small">
-            <span className="subtitle1 text-primary font-light">Programación</span>
+            <span className="subtitle1 text-primary font-light">
+              Programación
+            </span>
             <span className="subtitle1 text-secondary mt-1">
-              Fecha: {formatFechaLarga(raw.fecha || turno.fechaRaw || turno.fecha)}
+              Fecha:{' '}
+              {formatFechaLarga(raw.fecha || turno.fechaRaw || turno.fecha)}
             </span>
             <span className="subtitle1 text-secondary mt-1">
               Hora: {raw.hora || turno.hora}
             </span>
-            <div className='mt-2'>
+            <div className="mt-2">
               <span className="px-3 py-1 rounded-full bg-background border border-border text-[11px] text-secondary">
                 {estadoLabel}
               </span>
@@ -156,7 +159,8 @@ const TurnosProfile = ({ turno, isOpen, onClose, onEdit, onDelete }) => {
           <div className="content-box-outline-3-small">
             <span className="subtitle1 text-primary font-light">Conductor</span>
             <span className="subtitle1 text-secondary mt-1">
-              Documento: {raw.conductor?.usuario?.numDocumento || 'No registrado'}
+              Documento:{' '}
+              {raw.conductor?.usuario?.numDocumento || 'No registrado'}
             </span>
             <span className="subtitle1 text-secondary mt-1">
               Teléfono: {raw.conductor?.usuario?.telefono || 'No registrado'}

@@ -85,19 +85,70 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
     }
   }, [isOpen]);
 
+  const validateField = (name, value) => {
+    let error = null;
+    switch (name) {
+      case 'numDocumento':
+        if (!value?.toString().trim())
+          error = 'El número de documento es obligatorio';
+        else if (value.toString().length < 6)
+          error = 'El número de documento debe tener al menos 6 dígitos';
+        break;
+      case 'nombre':
+        if (!value?.trim()) error = 'El nombre es obligatorio';
+        else if (value.trim().length < 2)
+          error = 'El nombre debe tener al menos 2 caracteres';
+        break;
+      case 'direccion':
+        if (!value?.trim()) error = 'La dirección es obligatoria';
+        else if (value.trim().length < 2)
+          error = 'La dirección debe tener al menos 2 caracteres';
+        break;
+      case 'correo':
+        if (!value?.trim()) error = 'El correo es obligatorio';
+        else if (!value.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/))
+          error = 'El correo no es válido';
+        break;
+      case 'telefono':
+        if (!value?.toString().trim()) error = 'El teléfono es obligatorio';
+        else if (!/^3\d{9}$/.test(value))
+          error = 'El teléfono debe tener 10 dígitos y empezar por 3';
+        break;
+      case 'tipoDoc':
+        if (!value) error = 'Selecciona un tipo de documento';
+        break;
+      case 'idCiudad':
+        if (!value) error = 'Selecciona una ciudad';
+        break;
+      case 'idRol':
+        if (!isClientMode && !value) error = 'Selecciona un rol';
+        break;
+      case 'idCategoriaLicencia':
+        if (!value) error = 'Selecciona una categoría';
+        break;
+      case 'fechaVencimientoLicencia':
+        if (!value) error = 'Ingresa la fecha de vencimiento';
+        break;
+    }
+    return error;
+  };
+
   const handleChange = e => {
     const { name, value } = e.target;
+    let newValue = value;
 
-    if (name === 'telefono') {
-      const numericValue = value.replace(/\D/g, '');
-      if (numericValue.length > 10) return;
-      setForm({ ...form, [name]: numericValue });
-    } else {
-      setForm({ ...form, [name]: value });
+    if (name === 'telefono' || name === 'numDocumento') {
+      newValue = value.replace(/\D/g, '');
+      if (name === 'telefono' && newValue.length > 10) return;
+      if (name === 'numDocumento' && newValue.length > 15) return;
+    } else if (name === 'nombre') {
+      newValue = value.replace(/[0-9]/g, '');
     }
 
+    setForm({ ...form, [name]: newValue });
+
     if (name === 'idRol') {
-      const selectedRole = roles.find(r => r.idRol === value);
+      const selectedRole = roles.find(r => r.idRol === newValue);
       const esConductor =
         selectedRole?.nombreRol?.toLowerCase() === 'conductor';
       setIsConductor(esConductor);
@@ -109,62 +160,49 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
       }
     }
 
-    if (fieldErrors[name]) {
-      setFieldErrors({ ...fieldErrors, [name]: null });
-    }
+    const fieldError = validateField(name, newValue);
+    setFieldErrors(prev => ({ ...prev, [name]: fieldError }));
     setError(null);
+  };
+
+  const handleBlur = e => {
+    const { name, value } = e.target;
+    const fieldError = validateField(name, value);
+    if (fieldError) {
+      setFieldErrors(prev => ({ ...prev, [name]: fieldError }));
+    }
   };
 
   const handleAddressSelect = addressData => {
     if (addressData) {
       setForm(prev => ({ ...prev, direccion: addressData.address }));
-      if (fieldErrors.direccion) {
-        setFieldErrors(prev => ({ ...prev, direccion: null }));
-      }
+      const fieldError = validateField('direccion', addressData.address);
+      setFieldErrors(prev => ({ ...prev, direccion: fieldError }));
     }
   };
 
   const handleAddressChange = newAddress => {
     setForm(prev => ({ ...prev, direccion: newAddress }));
-    if (fieldErrors.direccion) {
-      setFieldErrors(prev => ({ ...prev, direccion: null }));
-    }
+    const fieldError = validateField('direccion', newAddress);
+    setFieldErrors(prev => ({ ...prev, direccion: fieldError }));
   };
 
   const validateStep = step => {
     const errors = {};
 
     if (step === 1) {
-      if (!form.tipoDoc) {
-        errors.tipoDoc = 'Selecciona un tipo de documento';
-      }
-      if (!form.numDocumento?.trim()) {
-        errors.numDocumento = 'El número de documento es obligatorio';
-      }
-      if (!form.correo?.trim()) {
-        errors.correo = 'El correo es obligatorio';
-      } else if (!form.correo.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/)) {
-        errors.correo = 'El correo no es válido';
-      }
+      ['tipoDoc', 'numDocumento', 'correo'].forEach(field => {
+        const err = validateField(field, form[field]);
+        if (err) errors[field] = err;
+      });
     } else if (step === 2) {
-      if (!form.nombre?.trim()) {
-        errors.nombre = 'El nombre es obligatorio';
-      }
-      if (!form.telefono?.trim()) {
-        errors.telefono = 'El teléfono es obligatorio';
-      } else if (!/^3\d{9}$/.test(form.telefono)) {
-        errors.telefono = 'El teléfono debe tener 10 dígitos y empezar por 3';
-      }
-      if (!form.direccion?.trim()) {
-        errors.direccion = 'La dirección es obligatoria';
-      }
-      if (!form.idCiudad) {
-        errors.idCiudad = 'Selecciona una ciudad';
-      }
+      ['nombre', 'telefono', 'direccion', 'idCiudad'].forEach(field => {
+        const err = validateField(field, form[field]);
+        if (err) errors[field] = err;
+      });
     } else if (step === 3 && !isClientMode) {
-      if (!form.idRol) {
-        errors.idRol = 'Selecciona un rol';
-      }
+      const err = validateField('idRol', form.idRol);
+      if (err) errors.idRol = err;
     }
 
     return errors;
@@ -257,9 +295,8 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
     const { name, value } = e.target;
     setLicenseForm({ ...licenseForm, [name]: value });
 
-    if (fieldErrors[name]) {
-      setFieldErrors({ ...fieldErrors, [name]: null });
-    }
+    const fieldError = validateField(name, value);
+    setFieldErrors(prev => ({ ...prev, [name]: fieldError }));
   };
 
   const handleLicenseFormSubmit = () => {
@@ -449,6 +486,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
                   required
                   value={form.tipoDoc || ''}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   className={`select-filter w-full px-4 input bg-fill border rounded-lg text-primary focus:outline-none focus:border-primary transition-colors ${fieldErrors.tipoDoc ? 'border-red-500' : 'border-border'}`}
                   disabled={loading}
                 >
@@ -486,6 +524,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
             placeholder="Número de documento"
             value={form.numDocumento || ''}
             onChange={handleChange}
+            onBlur={handleBlur}
             className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
               fieldErrors.numDocumento
                 ? 'border-red focus:ring-red/20 focus:border-red'
@@ -513,6 +552,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
           placeholder="correo@ejemplo.com"
           value={form.correo || ''}
           onChange={handleChange}
+          onBlur={handleBlur}
           className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
             fieldErrors.correo
               ? 'border-red focus:ring-red/20 focus:border-red'
@@ -551,6 +591,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
           placeholder="Escribe el nombre completo"
           value={form.nombre || ''}
           onChange={handleChange}
+          onBlur={handleBlur}
           className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
             fieldErrors.nombre
               ? 'border-red focus:ring-red/20 focus:border-red'
@@ -580,6 +621,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
           placeholder="Número de teléfono"
           value={form.telefono || ''}
           onChange={handleChange}
+          onBlur={handleBlur}
           className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
             fieldErrors.telefono
               ? 'border-red focus:ring-red/20 focus:border-red'
@@ -639,6 +681,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
             required
             value={form.idCiudad || ''}
             onChange={handleChange}
+            onBlur={handleBlur}
             className={`select-filter w-full px-4 input bg-fill border rounded-lg text-primary focus:outline-none focus:border-primary transition-colors ${fieldErrors.idCiudad ? 'border-red-500' : 'border-border'}`}
             disabled={loading}
           >
@@ -681,6 +724,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
             required
             value={form.idRol || ''}
             onChange={handleChange}
+            onBlur={handleBlur}
             className={`select-filter w-full px-4 input bg-fill border rounded-lg text-primary focus:outline-none focus:border-primary transition-colors ${fieldErrors.idRol ? 'border-red-500' : 'border-border'}`}
             disabled={loading}
           >
@@ -781,6 +825,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
             name="idCategoriaLicencia"
             value={licenseForm.idCategoriaLicencia || ''}
             onChange={handleLicenseFormChange}
+            onBlur={handleBlur}
             className={`select-filter w-full px-4 input bg-fill border rounded-lg text-primary focus:outline-none focus:border-primary transition-colors ${fieldErrors.idCategoriaLicencia ? 'border-red-500' : 'border-border'}`}
             disabled={loading}
           >
@@ -811,6 +856,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
           name="fechaVencimientoLicencia"
           value={licenseForm.fechaVencimientoLicencia || ''}
           onChange={handleLicenseFormChange}
+          onBlur={handleBlur}
           className={`w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary ${
             fieldErrors.fechaVencimientoLicencia
               ? 'border-red focus:ring-red/20 focus:border-red'

@@ -1,6 +1,6 @@
-import React, { memo, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import "@material/web/icon/icon.js";
+import React, { memo, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import '@material/web/icon/icon.js';
 
 const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
     asientos.push({
       id: seatId,
       row: 1,
-      position: "A",
+      position: 'A',
       occupied: false,
       isDriver: true,
     });
@@ -26,9 +26,9 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
 
     // Agregar asientos pasajeros
     for (let i = 1; i < cantidadAsientos; i++) {
-      const row = Math.ceil((i) / 2) + 1;
-      const position = i % 2 === 1 ? "A" : "B";
-      
+      const row = Math.ceil(i / 2) + 1;
+      const position = i % 2 === 1 ? 'A' : 'B';
+
       asientos.push({
         id: seatId,
         row,
@@ -42,13 +42,13 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
     return asientos;
   }, [viaje]);
 
-  const toggleSeat = (seatId) => {
-    const seat = generateSeats.find((s) => s.id === seatId);
+  const toggleSeat = seatId => {
+    const seat = generateSeats.find(s => s.id === seatId);
     if (seat.occupied || seat.isDriver) return;
 
-    setSelectedSeats((prev) =>
+    setSelectedSeats(prev =>
       prev.includes(seatId)
-        ? prev.filter((id) => id !== seatId)
+        ? prev.filter(id => id !== seatId)
         : [...prev, seatId]
     );
   };
@@ -61,9 +61,12 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 p-6 flex items-center justify-between">
           <div>
-            <h2 className="text-white text-2xl font-bold">Selecciona tus sillas</h2>
+            <h2 className="text-white text-2xl font-bold">
+              Selecciona tus sillas
+            </h2>
             <p className="text-blue-100 text-sm mt-1">
-              {viaje.horaSalida} - {viaje.origenTerminal} a {viaje.destinoTerminal}
+              {viaje.horaSalida} - {viaje.origenTerminal} a{' '}
+              {viaje.destinoTerminal}
             </p>
           </div>
           <button
@@ -96,22 +99,28 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
                 {/* Fila delantera */}
                 <div className="flex justify-center gap-8">
                   {generateSeats
-                    .filter((s) => s.row === 1)
-                    .map((seat) => (
+                    .filter(s => s.row === 1)
+                    .map(seat => (
                       <button
                         key={seat.id}
                         onClick={() => toggleSeat(seat.id)}
                         disabled={seat.occupied || seat.isDriver}
                         className={`w-16 h-16 rounded-lg font-bold text-sm transition-all transform hover:scale-105 flex items-center justify-center border-2 ${
                           seat.occupied
-                            ? "bg-red-300 border-red-500 text-gray-700 cursor-not-allowed"
+                            ? 'bg-red-300 border-red-500 text-gray-700 cursor-not-allowed'
                             : seat.isDriver
-                            ? "bg-gray-400 border-gray-600 text-gray-600 cursor-not-allowed"
-                            : selectedSeats.includes(seat.id)
-                            ? "bg-green-500 border-green-700 text-white shadow-lg scale-105"
-                            : "bg-blue-200 border-blue-400 text-gray-800 hover:border-blue-600"
+                              ? 'bg-gray-400 border-gray-600 text-gray-600 cursor-not-allowed'
+                              : selectedSeats.includes(seat.id)
+                                ? 'bg-green-500 border-green-700 text-white shadow-lg scale-105'
+                                : 'bg-blue-200 border-blue-400 text-gray-800 hover:border-blue-600'
                         }`}
-                        title={seat.isDriver ? "Conductor" : seat.occupied ? "Ocupado" : `Asiento ${seat.id}`}
+                        title={
+                          seat.isDriver
+                            ? 'Conductor'
+                            : seat.occupied
+                              ? 'Ocupado'
+                              : `Asiento ${seat.id}`
+                        }
                       >
                         {seat.isDriver ? (
                           <md-icon className="text-2xl">directions_car</md-icon>
@@ -125,22 +134,28 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
                 {/* Fila trasera */}
                 <div className="flex justify-center gap-8 flex-wrap">
                   {generateSeats
-                    .filter((s) => s.row > 1)
-                    .map((seat) => (
+                    .filter(s => s.row > 1)
+                    .map(seat => (
                       <button
                         key={seat.id}
                         onClick={() => toggleSeat(seat.id)}
                         disabled={seat.occupied || seat.isDriver}
                         className={`w-16 h-16 rounded-lg font-bold text-sm transition-all transform hover:scale-105 flex items-center justify-center border-2 ${
                           seat.occupied
-                            ? "bg-red-300 border-red-500 text-gray-700 cursor-not-allowed"
+                            ? 'bg-red-300 border-red-500 text-gray-700 cursor-not-allowed'
                             : seat.isDriver
-                            ? "bg-gray-400 border-gray-600 text-gray-600 cursor-not-allowed"
-                            : selectedSeats.includes(seat.id)
-                            ? "bg-green-500 border-green-700 text-white shadow-lg scale-105"
-                            : "bg-blue-200 border-blue-400 text-gray-800 hover:border-blue-600"
+                              ? 'bg-gray-400 border-gray-600 text-gray-600 cursor-not-allowed'
+                              : selectedSeats.includes(seat.id)
+                                ? 'bg-green-500 border-green-700 text-white shadow-lg scale-105'
+                                : 'bg-blue-200 border-blue-400 text-gray-800 hover:border-blue-600'
                         }`}
-                        title={seat.isDriver ? "Conductor" : seat.occupied ? "Ocupado" : `Asiento ${seat.id}`}
+                        title={
+                          seat.isDriver
+                            ? 'Conductor'
+                            : seat.occupied
+                              ? 'Ocupado'
+                              : `Asiento ${seat.id}`
+                        }
                       >
                         {seat.isDriver ? (
                           <md-icon className="text-2xl">directions_car</md-icon>
@@ -185,7 +200,10 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <p className="text-2xl font-bold text-gray-900">
-                    {generateSeats.filter((s) => !s.occupied && !s.isDriver).length}
+                    {
+                      generateSeats.filter(s => !s.occupied && !s.isDriver)
+                        .length
+                    }
                   </p>
                   <p className="text-xs text-gray-600">Disponibles</p>
                 </div>
@@ -197,7 +215,7 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900">
-                    {generateSeats.filter((s) => s.occupied).length}
+                    {generateSeats.filter(s => s.occupied).length}
                   </p>
                   <p className="text-xs text-gray-600">Ocupados</p>
                 </div>
@@ -210,19 +228,18 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
             <div className="bg-gray-50 rounded-xl p-6 mb-6">
               <div className="flex justify-between items-center mb-3">
                 <span className="text-gray-700 font-semibold">
-                  {selectedSeats.length} {selectedSeats.length === 1 ? "Silla" : "Sillas"}
+                  {selectedSeats.length}{' '}
+                  {selectedSeats.length === 1 ? 'Silla' : 'Sillas'}
                 </span>
                 <span className="text-2xl font-bold text-blue-600">
-                  {new Intl.NumberFormat("es-CO", {
-                    style: "currency",
-                    currency: "COP",
+                  {new Intl.NumberFormat('es-CO', {
+                    style: 'currency',
+                    currency: 'COP',
                     minimumFractionDigits: 0,
                   }).format(totalPrice)}
                 </span>
               </div>
-              <p className="text-sm text-gray-600">
-                Elige al menos 1 silla
-              </p>
+              <p className="text-sm text-gray-600">Elige al menos 1 silla</p>
             </div>
           )}
 
@@ -239,8 +256,8 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
               onClick={() => navigate('/login')}
               className={`flex-1 font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 ${
                 selectedSeats.length === 0
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700 text-white"
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700 text-white'
               }`}
             >
               <md-icon>check</md-icon>
@@ -253,6 +270,6 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
   );
 });
 
-SeatsModal.displayName = "SeatsModal";
+SeatsModal.displayName = 'SeatsModal';
 
 export default SeatsModal;

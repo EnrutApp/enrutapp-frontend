@@ -187,27 +187,30 @@ const ContratosPage = () => {
                     <div className="flex gap-1 bg-fill border border-border rounded-full p-1">
                       <button
                         onClick={() => setViewMode('list')}
-                        className={`px-2 py-1 rounded-full transition-all ${viewMode === 'list'
-                          ? 'bg-primary text-on-primary'
-                          : 'text-secondary hover:text-primary'
-                          }`}
+                        className={`px-2 py-1 rounded-full transition-all ${
+                          viewMode === 'list'
+                            ? 'bg-primary text-on-primary'
+                            : 'text-secondary hover:text-primary'
+                        }`}
                         title="Vista de lista"
                       >
                         <md-icon className="text-sm">view_list</md-icon>
                       </button>
                       <button
                         onClick={() => setViewMode('grid')}
-                        className={`px-2 py-1 rounded-full transition-all ${viewMode === 'grid'
-                          ? 'bg-primary text-on-primary'
-                          : 'text-secondary hover:text-primary'
-                          }`}
+                        className={`px-2 py-1 rounded-full transition-all ${
+                          viewMode === 'grid'
+                            ? 'bg-primary text-on-primary'
+                            : 'text-secondary hover:text-primary'
+                        }`}
                         title="Vista de tarjetas"
                       >
                         <md-icon className="text-sm">grid_view</md-icon>
                       </button>
                     </div>
                     <span className="text-sm text-secondary">
-                      {filteredItems.length} contrato{filteredItems.length === 1 ? '' : 's'}
+                      {filteredItems.length} contrato
+                      {filteredItems.length === 1 ? '' : 's'}
                     </span>
                   </div>
 
@@ -279,7 +282,9 @@ const ContratosPage = () => {
                                     Ruta
                                   </span>
                                   <span className="text-xs font-semibold text-primary truncate">
-                                    {(it.origen || '-') + ' → ' + (it.destino || '-')}
+                                    {(it.origen || '-') +
+                                      ' → ' +
+                                      (it.destino || '-')}
                                   </span>
                                 </div>
                               </div>
@@ -307,7 +312,9 @@ const ContratosPage = () => {
                                   className="btn btn-primary btn-sm-2 font-medium flex items-center gap-1 w-full justify-center"
                                   onClick={e => handleView(e, it)}
                                 >
-                                  <md-icon className="text-sm">visibility</md-icon>
+                                  <md-icon className="text-sm">
+                                    visibility
+                                  </md-icon>
                                 </button>
                                 <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
                                   <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
@@ -324,11 +331,15 @@ const ContratosPage = () => {
                                     handleDownload(it);
                                   }}
                                 >
-                                  <md-icon className="text-sm">download</md-icon>
+                                  <md-icon className="text-sm">
+                                    download
+                                  </md-icon>
                                 </button>
                                 <div className="tooltip-smart absolute left-1/2 transform -translate-x-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
                                   <div className="bg-background border border-border rounded-lg shadow-2xl p-2 whitespace-nowrap">
-                                    <p className="text-xs text-primary">Descargar</p>
+                                    <p className="text-xs text-primary">
+                                      Descargar
+                                    </p>
                                   </div>
                                 </div>
                               </div>
@@ -338,7 +349,9 @@ const ContratosPage = () => {
                           <div className="flex justify-between items-center">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                               <div className="w-16 h-16 rounded-lg bg-surface shrink-0 flex items-center justify-center">
-                                <md-icon className="text-primary">description</md-icon>
+                                <md-icon className="text-primary">
+                                  description
+                                </md-icon>
                               </div>
 
                               <div className="flex-1 min-w-0">
@@ -353,14 +366,20 @@ const ContratosPage = () => {
 
                                 <div className="flex items-center gap-2 mt-1">
                                   <div className="flex items-center gap-1 text-xs text-secondary bg-fill px-2 py-1 rounded-md">
-                                    <md-icon className="text-sm">calendar_today</md-icon>
+                                    <md-icon className="text-sm">
+                                      calendar_today
+                                    </md-icon>
                                     <span>{getFecha(it)}</span>
                                   </div>
 
                                   <div className="hidden md:flex items-center gap-1 text-xs text-secondary bg-fill px-2 py-1 rounded-md min-w-0">
-                                    <md-icon className="text-sm">alt_route</md-icon>
+                                    <md-icon className="text-sm">
+                                      alt_route
+                                    </md-icon>
                                     <span className="truncate max-w-[320px]">
-                                      {(it.origen || '-') + ' → ' + (it.destino || '-')}
+                                      {(it.origen || '-') +
+                                        ' → ' +
+                                        (it.destino || '-')}
                                     </span>
                                   </div>
                                 </div>
@@ -372,7 +391,9 @@ const ContratosPage = () => {
                                 className="btn btn-primary btn-lg font-medium flex items-center gap-1"
                                 onClick={e => handleView(e, it)}
                               >
-                                <md-icon className="text-sm">visibility</md-icon>
+                                <md-icon className="text-sm">
+                                  visibility
+                                </md-icon>
                                 Ver
                               </button>
                               <button

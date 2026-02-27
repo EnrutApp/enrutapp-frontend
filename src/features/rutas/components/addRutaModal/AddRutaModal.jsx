@@ -612,10 +612,10 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
       console.error('Error submitting ruta:', err);
       setError(
         err.response?.data?.message ||
-        err.message ||
-        (isEditMode
-          ? 'Error al actualizar la ruta'
-          : 'Error al crear la ruta')
+          err.message ||
+          (isEditMode
+            ? 'Error al actualizar la ruta'
+            : 'Error al crear la ruta')
       );
     } finally {
       setLoading(false);
@@ -723,7 +723,7 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                                 String(p.idUbicacion) === String(u.idUbicacion)
                             ) &&
                             String(u.idUbicacion) !==
-                            String(formData.idUbicacionDestino)
+                              String(formData.idUbicacionDestino)
                         )
                         .map(ubicacion => (
                           <option
@@ -787,7 +787,7 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
                                 String(p.idUbicacion) === String(u.idUbicacion)
                             ) &&
                             String(u.idUbicacion) !==
-                            String(formData.idUbicacionOrigen)
+                              String(formData.idUbicacionOrigen)
                         )
                         .map(ubicacion => (
                           <option

@@ -1,5 +1,5 @@
-import React, { memo } from "react";
-import "@material/web/icon/icon.js";
+import React, { memo } from 'react';
+import '@material/web/icon/icon.js';
 
 const Footer = memo(({ scrollToSection }) => {
   const currentYear = new Date().getFullYear();
@@ -11,15 +11,21 @@ const Footer = memo(({ scrollToSection }) => {
           {/* Logo y descripción */}
           <div className="gap-4 flex flex-col">
             <img src="/logoLaTribu.png" alt="logo" width={82} />
-            <p className="text-gray-400 text-sm">Tu compañero de viaje confiable desde hace más de 20 años.</p>
+            <p className="text-gray-400 text-sm">
+              Tu compañero de viaje confiable desde hace más de 20 años.
+            </p>
           </div>
 
           {/* Enlaces */}
           <div>
             <h5 className="font-bold mb-4">Enlaces</h5>
             <ul className="space-y-2 text-sm text-gray-400">
-              {["Inicio", "Nosotros", "Destinos", "Beneficios"].map((link) => (
-                <li key={link} onClick={() => scrollToSection(link.toLowerCase())} className="hover:text-white cursor-pointer transition-colors">
+              {['Inicio', 'Nosotros', 'Destinos', 'Beneficios'].map(link => (
+                <li
+                  key={link}
+                  onClick={() => scrollToSection(link.toLowerCase())}
+                  className="hover:text-white cursor-pointer transition-colors"
+                >
                   {link}
                 </li>
               ))}
@@ -57,13 +63,15 @@ const Footer = memo(({ scrollToSection }) => {
         </div>
 
         <div className="border-t border-gray-800 pt-6 text-center">
-          <p className="text-gray-500 text-sm">© {currentYear} La Tribu. Todos los derechos reservados.</p>
+          <p className="text-gray-500 text-sm">
+            © {currentYear} La Tribu. Todos los derechos reservados.
+          </p>
         </div>
       </div>
     </footer>
   );
 });
 
-Footer.displayName = "Footer";
+Footer.displayName = 'Footer';
 
 export default Footer;
