@@ -10,10 +10,8 @@ import '@material/web/button/filled-tonal-button.js';
 import '@material/web/button/outlined-button.js';
 import '@material/web/textfield/outlined-text-field.js';
 import '@material/web/progress/circular-progress.js';
-import DriverTrackingMap from './components/DriverTrackingMap';
 import useDriverTracking from '../../shared/hooks/useDriverTracking';
 import conductorService from '../conductores/api/conductorService';
-import Avvvatars from 'avvvatars-react';
 import { resolveAssetUrl } from '../../shared/utils/url';
 
 const TrackingPage = () => {

@@ -1,4 +1,3 @@
-import Modal from '../../../../shared/components/modal/Modal';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
@@ -106,6 +105,7 @@ const time24ToAmPm = hhmm => {
   return `${hour12}:${String(mm).padStart(2, '0')} ${period}`;
 };
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const AddTurnoModal = ({ isOpen, onClose, onConfirm, onSubmitTurno }) => {
   const [conductores, setConductores] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);

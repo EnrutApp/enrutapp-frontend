@@ -19,6 +19,7 @@ const RutasConductor = withLazyLoading(
   'Cargando rutas del conductor...'
 );
 
+// eslint-disable-next-line react-refresh/only-export-components, unused-imports/no-unused-vars
 const PendingPage = ({ title, description }) => (
   <div className="min-h-screen flex items-center justify-center bg-background p-4">
     <div className="text-center p-8 content-box-outline-4-small rounded-xl max-w-md animate-fade-in">
@@ -66,16 +67,19 @@ const PendingPage = ({ title, description }) => (
   </div>
 );
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ConductorHomeWithErrorBoundary = withErrorBoundary(HomeConductor, {
   title: 'Error en Dashboard del Conductor',
   message: 'No se pudo cargar el dashboard del conductor',
 });
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const CalendarioWithErrorBoundary = withErrorBoundary(CalendarioPage, {
   title: 'Error en Calendario',
   message: 'No se pudo cargar el calendario',
 });
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const RutasConductorWithErrorBoundary = withErrorBoundary(RutasConductor, {
   title: 'Error en Rutas del Conductor',
   message: 'No se pudo cargar las rutas del conductor',

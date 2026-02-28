@@ -8,7 +8,6 @@ import '@material/web/switch/switch.js';
 import { useState } from 'react';
 import { vehiculoService } from '../api/vehiculoService';
 import { resolveAssetUrl } from '../../../shared/utils/url';
-import DeleteModal from '../../../shared/components/modal/deleteModal/DeleteModal';
 
 const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
   const [isClosing, setIsClosing] = useState(false);
@@ -55,6 +54,7 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
     }, 200);
   };
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const handleEstadoChange = async () => {
     try {
       const nuevoEstado = !vehicleData.estado;
@@ -62,6 +62,7 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
         estado: nuevoEstado,
       });
       setVehicleData({ ...vehicleData, estado: nuevoEstado });
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       alert('Error al cambiar el estado del vehículo');
     }

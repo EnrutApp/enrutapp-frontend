@@ -1,14 +1,13 @@
 import { useCallback, useRef, useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
 
-const MAPBOX_TOKEN =
-  import.meta.env.VITE_MAPBOX_TOKEN ||
-  'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 export const useRouteCalculation = (map, isLoaded) => {
   const routeCalculationCache = useRef(new Map());
   const abortControllerRef = useRef(null);
   const isUnmountedRef = useRef(false);
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const debounceTimerRef = useRef(null);
 
   const getCacheKey = useCallback(
@@ -32,7 +31,8 @@ export const useRouteCalculation = (map, isLoaded) => {
       if (map.getSource('route')) {
         map.removeSource('route');
       }
-    } catch (err) {}
+      // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
+    } catch (err) { }
   }, [map, isLoaded]);
 
   const calculateRoute = useCallback(
@@ -127,7 +127,8 @@ export const useRouteCalculation = (map, isLoaded) => {
           if (onRouteCalculated && !isUnmountedRef.current) {
             onRouteCalculated(cachedData.info);
           }
-        } catch (err) {}
+          // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
+        } catch (err) { }
 
         return cachedData.info;
       }
@@ -245,7 +246,8 @@ export const useRouteCalculation = (map, isLoaded) => {
           if (onRouteCalculated && !isUnmountedRef.current) {
             onRouteCalculated(routeInfo);
           }
-        } catch (err) {}
+          // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
+        } catch (err) { }
 
         return routeInfo;
       } catch (err) {
@@ -267,6 +269,7 @@ export const useRouteCalculation = (map, isLoaded) => {
         abortControllerRef.current.abort();
       }
       clearRoute();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       routeCalculationCache.current.clear();
     };
   }, [clearRoute]);

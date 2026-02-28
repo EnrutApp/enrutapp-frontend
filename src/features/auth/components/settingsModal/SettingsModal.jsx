@@ -1,4 +1,3 @@
-import Modal from '../../../../shared/components/modal/Modal';
 import { useTheme } from '../../../../shared/context/ThemeContext';
 import '@material/web/icon/icon.js';
 import '@material/web/switch/switch.js';

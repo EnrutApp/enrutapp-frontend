@@ -9,8 +9,6 @@ import '@material/web/button/filled-button.js';
 import '@material/web/button/filled-tonal-button.js';
 import '@material/web/button/text-button.js';
 import '@material/web/progress/circular-progress.js';
-import Modal from '../../../shared/components/modal/Modal';
-import DriverTrackingMap from './DriverTrackingMap';
 import useDriverTracking from '../../../shared/hooks/useDriverTracking';
 
 const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
@@ -21,7 +19,9 @@ const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
     location,
     isConnected,
     isLoading,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     error,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     disconnect,
     isDriverOnline,
   } = useDriverTracking(resolvedDriverId);

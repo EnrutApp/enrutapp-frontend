@@ -1,4 +1,3 @@
-import Modal from '../../../../shared/components/modal/Modal';
 import '@material/web/icon/icon.js';
 import '@material/web/progress/linear-progress.js';
 import { useEffect, useRef, useState } from 'react';
@@ -106,6 +105,7 @@ export default function EditVehiculoModal({
           setTipos(Array.isArray(t?.data) ? t.data : t);
           setMarcas(Array.isArray(m?.data) ? m.data : m);
           setConductores(Array.isArray(c?.data) ? c.data : c);
+        // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
         } catch (e) {
         } finally {
           setLoadingCatalogs(false);
@@ -641,6 +641,7 @@ export default function EditVehiculoModal({
                       </span>
                       <md-switch
                         selected={!form.isExternalOwner}
+                        // eslint-disable-next-line unused-imports/no-unused-vars
                         onClick={e => {
                           handleSwitchChange({
                             target: { selected: !form.isExternalOwner },

@@ -3,16 +3,9 @@ import '@material/web/button/filled-button.js';
 import '@material/web/switch/switch.js';
 import '@material/web/checkbox/checkbox.js';
 import '@material/web/progress/linear-progress.js';
-import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
-import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
-import AddUserModal from '../usuarios/components/addUserModal/AddUserModal';
-import EditUserModal from '../usuarios/components/editUserModal/EditUserModal';
-import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
-import ClienteProfile from './pages/ClienteProfile';
 import { useEffect, useMemo, useState } from 'react';
 import userService from '../usuarios/api/userService';
-import Avvvatars from 'avvvatars-react';
 import resolveAssetUrl from '../../shared/utils/url';
 
 const styles = `
@@ -201,6 +194,7 @@ const ClientesPage = () => {
         alert(res?.message || 'No se pudo cambiar el estado del cliente');
       }
       await fetchClientes();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (err) {
       alert('Error al cambiar el estado del cliente');
     } finally {

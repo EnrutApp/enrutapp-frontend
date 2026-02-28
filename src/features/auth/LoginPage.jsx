@@ -7,8 +7,6 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuth } from '../../shared/context/AuthContext';
 import { loginSchema } from '../../shared/utils/validationSchemas';
-import ModalRegister from './components/registerModal/RegisterModal';
-import ResetPasswordModal from './components/resetPasswordModal/ResetPasswordModal';
 
 const Login = () => {
   const handleKeyDown = e => {
@@ -125,6 +123,7 @@ const Login = () => {
   const onSubmit = async data => {
     try {
       await login({ ...data, remember: data.remember || false });
+    // eslint-disable-next-line no-empty
     } catch {}
   };
 

@@ -100,6 +100,7 @@ export const useMarkers = (map, isLoaded) => {
         markersRef.current.click.remove();
         markersRef.current.click = null;
       }
+    // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
     } catch (err) {}
   }, []);
 
@@ -119,6 +120,7 @@ export const useMarkers = (map, isLoaded) => {
         })
           .setLngLat([lng, lat])
           .addTo(map);
+      // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
       } catch (err) {}
     },
     [map, isLoaded]
@@ -140,6 +142,7 @@ export const useMarkers = (map, isLoaded) => {
         })
           .setLngLat([lng, lat])
           .addTo(map);
+      // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
       } catch (err) {}
     },
     [map, isLoaded]
@@ -153,6 +156,7 @@ export const useMarkers = (map, isLoaded) => {
         markersRef.current.paradas.forEach(marker => marker.remove());
         markersRef.current.paradas = [];
 
+        // eslint-disable-next-line unused-imports/no-unused-vars
         paradas.forEach((parada, index) => {
           const el = getMarkerElement('parada', color);
           const marker = new mapboxgl.Marker({
@@ -164,6 +168,7 @@ export const useMarkers = (map, isLoaded) => {
 
           markersRef.current.paradas.push(marker);
         });
+      // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
       } catch (err) {}
     },
     [map, isLoaded]
@@ -185,6 +190,7 @@ export const useMarkers = (map, isLoaded) => {
         })
           .setLngLat([lng, lat])
           .addTo(map);
+      // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
       } catch (err) {}
     },
     [map, isLoaded]

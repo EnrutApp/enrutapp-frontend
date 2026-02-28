@@ -1,7 +1,5 @@
-import Modal from '../../../../shared/components/modal/Modal';
 import apiClient from '../../../../shared/services/apiService';
 import catalogService from '../../../../shared/services/catalogService';
-import AddressAutocomplete from '../../../../shared/components/addressAutocomplete/AddressAutocomplete';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
@@ -13,11 +11,13 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [generatedPassword, setGeneratedPassword] = useState(null);
   const [ciudades, setCiudades] = useState([]);
   const [success, setSuccess] = useState(false);
   const [roles, setRoles] = useState([]);
   const [tiposDoc, setTiposDoc] = useState([]);
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isConductor, setIsConductor] = useState(false);
   const [showLicenseOptions, setShowLicenseOptions] = useState(false);
@@ -242,6 +242,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
           setLoading(false);
           return;
         }
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (err) {
         setError('Error al validar los datos');
         setLoading(false);
@@ -251,6 +252,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
       }
     }
 
+    // eslint-disable-next-line no-empty
     if (currentStep === 2) {
     }
 
@@ -397,6 +399,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
         setLoading(false);
         return;
       }
+    // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
     } catch (preErr) {}
 
     const password = generarPasswordAleatoria(10);

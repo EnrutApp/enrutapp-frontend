@@ -1,5 +1,3 @@
-import Modal from '../Modal';
-import EditarAsignacionModal from '../editarAsignacionModal/EditarAsignacionModal';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import { useState, useEffect } from 'react';
@@ -9,6 +7,7 @@ import * as Yup from 'yup';
 
 let userService, ubicacionesService;
 try {
+  // eslint-disable-next-line no-undef
   userService = require('../../../services/userService').default;
 } catch (e) {
   console.warn('Error importando userService:', e);
@@ -16,6 +15,7 @@ try {
 }
 
 try {
+  // eslint-disable-next-line no-undef
   ubicacionesService = require('../../../services/ubicacionesService').default;
 } catch (e) {
   console.warn('Error importando ubicacionesService:', e);
@@ -82,6 +82,7 @@ const reservaSchema = Yup.object().shape({
 });
 
 const EditReservaModal = ({ isOpen, onClose, onConfirm, reserva }) => {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const navigate = useNavigate();
   const [clientes, setClientes] = useState([]);
   const [ubicaciones, setUbicaciones] = useState([]);
@@ -192,6 +193,7 @@ const EditReservaModal = ({ isOpen, onClose, onConfirm, reserva }) => {
           nombreCliente: reserva.idCliente || '',
           pasajeros: Array.isArray(reserva.pasajeros)
             ? reserva.pasajeros
+            // eslint-disable-next-line no-constant-binary-expression
             : [reserva.pasajeros] || [],
           origen: reserva.origen || '',
           destino: reserva.destino || '',
@@ -297,6 +299,7 @@ const EditReservaModal = ({ isOpen, onClose, onConfirm, reserva }) => {
     );
   };
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const getMinDate = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

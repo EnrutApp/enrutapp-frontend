@@ -3,13 +3,8 @@ import '@material/web/button/filled-button.js';
 import '@material/web/checkbox/checkbox.js';
 import '@material/web/progress/linear-progress.js';
 import '@material/web/switch/switch.js';
-import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
-import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
-import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import { useState } from 'react';
-import EncomiendaProfile from './pages/EncomiendasProfile';
-import Avvvatars from 'avvvatars-react';
 
 const EncomiendasPage = () => {
   const [viewMode, setViewMode] = useState('list');

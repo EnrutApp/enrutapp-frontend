@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import Modal from '../../../../shared/components/modal/Modal';
+import { useState, useEffect } from 'react';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/button/text-button.js';
@@ -18,6 +17,7 @@ const ManagePermissionsModal = ({ isOpen, onClose, roleData }) => {
     if (isOpen && roleData) {
       loadData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, roleData]);
 
   const loadData = async () => {

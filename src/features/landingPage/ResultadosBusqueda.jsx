@@ -1,8 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import '@material/web/icon/icon.js';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import CityAutocomplete from './components/CityAutocomplete';
-import SeatsModal from './components/SeatsModal';
 import viajeService from '../../shared/services/viajeService';
 import ubicacionesService from '../ubicaciones/api/ubicacionesService';
 
@@ -15,12 +13,14 @@ const getTodayDate = () => {
   return `${year}-${month}-${day}`;
 };
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const [scrolled, setScrolled] = useState(false);
   const [filtroHorario, setFiltroHorario] = useState('todos');
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [seatsModalOpen, setSeatsModalOpen] = useState(false);
@@ -120,6 +120,7 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
           setUbicacionesItems(mapped);
           setUbicacionesReady(true);
         }
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (_) {
         if (mounted) {
           setUbicacionesItems([]);

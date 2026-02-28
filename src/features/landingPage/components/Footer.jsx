@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import '@material/web/icon/icon.js';
 
 const Footer = memo(({ scrollToSection }) => {

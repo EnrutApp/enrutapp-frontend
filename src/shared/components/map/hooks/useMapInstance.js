@@ -2,9 +2,7 @@ import { useRef, useEffect, useCallback, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { useMapContext } from '../context/MapContext';
 
-const MAPBOX_TOKEN =
-  import.meta.env.VITE_MAPBOX_TOKEN ||
-  'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 const STYLE_MAP = {
   'streets-v12': 'mapbox://styles/mapbox/streets-v12',
@@ -13,6 +11,7 @@ const STYLE_MAP = {
   'satellite-streets-v12': 'mapbox://styles/mapbox/satellite-streets-v12',
 };
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const stylePreloadCache = new Map();
 
 export const useMapInstance = ({
@@ -91,6 +90,7 @@ export const useMapInstance = ({
       mapRef.current = map;
       hasInitialized.current = true;
       registerMap(mapId, map);
+      // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (err) {
       if (isUnmountedRef.current) return;
       setError('Error al inicializar el mapa');
@@ -120,6 +120,7 @@ export const useMapInstance = ({
           ) {
             mapRef.current.remove();
           }
+          // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
         } catch (err) {
         } finally {
           mapRef.current = null;
@@ -127,6 +128,7 @@ export const useMapInstance = ({
         }
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapId, unregisterMap]);
 
   const flyTo = useCallback(

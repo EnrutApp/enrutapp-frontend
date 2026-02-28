@@ -102,8 +102,8 @@ const ALL_CITIES = Object.entries(COLOMBIAN_CITIES).flatMap(([dept, cities]) =>
 const CityAutocomplete = memo(
   ({
     value = '',
-    onChange = () => {},
-    onSelect = () => {},
+    onChange = () => { },
+    onSelect = () => { },
     items = null,
     placeholder = 'Buscar ciudad',
     className = '',
@@ -303,7 +303,7 @@ const CityAutocomplete = memo(
                 </div>
 
                 {/* Ciudades del departamento */}
-                {cities.map((suggestion, cityIndex) => {
+                {cities.map((suggestion) => {
                   const globalIndex = suggestions.indexOf(suggestion);
                   const isSelected = globalIndex === selectedIndex;
 
@@ -312,11 +312,10 @@ const CityAutocomplete = memo(
                       key={`${dept}-${suggestion.city}`}
                       type="button"
                       onClick={() => handleSelect(suggestion)}
-                      className={`w-full text-left px-4 py-3 transition-colors border-b border-border last:border-b-0 flex items-start gap-3 ${
-                        isSelected
+                      className={`w-full text-left px-4 py-3 transition-colors border-b border-border last:border-b-0 flex items-start gap-3 ${isSelected
                           ? 'bg-primary text-on-primary'
                           : 'hover:bg-background text-primary'
-                      }`}
+                        }`}
                     >
                       <md-icon
                         className={`text-lg shrink-0 mt-0.5 ${isSelected ? 'text-on-primary' : 'text-secondary'}`}

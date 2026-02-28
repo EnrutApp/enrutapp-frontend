@@ -1,13 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import apiClient from '../../../../shared/services/apiService';
 import ubicacionesService from '../../../ubicaciones/api/ubicacionesService';
-import GoogleMapComponent from '../../../../shared/components/map/components/GoogleMapComponent';
-import Modal from '../../../../shared/components/modal/Modal';
-import UbicacionAddQuick from '../../../ubicaciones/components/ubicacionAddModal/UbicacionAddQuick';
-import ParadaModal from './ParadaModal';
-import SortableParadaItem from './SortableParadaItem';
 import {
-  DndContext,
   closestCenter,
   KeyboardSensor,
   PointerSensor,
@@ -16,7 +10,6 @@ import {
 } from '@dnd-kit/core';
 import {
   arrayMove,
-  SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
@@ -45,6 +38,7 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [isEstadoVacioVisible, setIsEstadoVacioVisible] = useState(true);
   const [isUbicacionModalOpen, setIsUbicacionModalOpen] = useState(false);
   const [isParadaModalOpen, setIsParadaModalOpen] = useState(false);
@@ -213,6 +207,7 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
       setOrigenSeleccionado(null);
       setDestinoSeleccionado(null);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, isEditMode, ruta?.idRuta]);
 
   useEffect(() => {
@@ -317,6 +312,7 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         estado: true,
       }));
 
+      // eslint-disable-next-line unused-imports/no-unused-vars
       setUbicaciones(prevUbicaciones => {
         return ubicacionesMapeadas;
       });
@@ -342,6 +338,7 @@ const AddRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
           return prevParadas;
         }
       });
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       setError('Error al agregar la parada');
     }

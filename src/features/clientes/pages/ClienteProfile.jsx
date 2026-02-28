@@ -6,10 +6,7 @@ import '@material/web/button/text-button.js';
 import '@material/web/iconbutton/filled-tonal-icon-button.js';
 import '@material/web/switch/switch.js';
 import { useEffect, useState } from 'react';
-import DeleteModal from '../../../shared/components/modal/deleteModal/DeleteModal';
-import EditUserModal from '../../usuarios/components/editUserModal/EditUserModal';
 import userService from '../../usuarios/api/userService';
-import Avvvatars from 'avvvatars-react';
 import resolveAssetUrl from '../../../shared/utils/url';
 
 const ClienteProfile = ({ cliente, isOpen, onClose, onClienteUpdated }) => {

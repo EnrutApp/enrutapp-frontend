@@ -6,8 +6,6 @@ import '@material/web/button/text-button.js';
 import '@material/web/iconbutton/filled-tonal-icon-button.js';
 import '@material/web/switch/switch.js';
 import { useState } from 'react';
-import DeleteModal from '../../../shared/components/modal/deleteModal/DeleteModal';
-import DeleteWithDependenciesModal from '../../../shared/components/modal/deleteModal/DeleteWithDependenciesModal';
 
 const RolProfile = ({
   role,
@@ -61,6 +59,7 @@ const RolProfile = ({
       setRoleToDelete(null);
       setDependenciesList([]);
       handleClose();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (err) {
       setIsDeleteWithDependenciesModalOpen(false);
       setRoleToDelete(null);
@@ -75,6 +74,7 @@ const RolProfile = ({
       setIsDeleteModalOpen(false);
       setRoleToDelete(null);
       handleClose();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (err) {
       setIsDeleteModalOpen(false);
       setRoleToDelete(null);

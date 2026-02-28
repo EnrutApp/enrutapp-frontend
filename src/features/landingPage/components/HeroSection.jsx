@@ -1,6 +1,5 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import '@material/web/icon/icon.js';
-import CityAutocomplete from './CityAutocomplete';
 
 /**
  * Validar que una ciudad no esté vacía
@@ -28,7 +27,9 @@ const HeroSection = memo(
     handleTipoViaje,
     today,
     ubicacionesItems = [],
+    // eslint-disable-next-line unused-imports/no-unused-vars
     ubicacionesReady = false,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     scrollToSection,
   }) => {
     // Manejador para el campo origen

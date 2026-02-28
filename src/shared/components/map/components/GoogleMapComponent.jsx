@@ -1,4 +1,3 @@
-import { GoogleMap, Marker, DirectionsRenderer } from '@react-google-maps/api';
 import { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import '@material/web/icon/icon.js';
 import { useGoogleMaps } from '../../../context/GoogleMapsLoader';
@@ -27,6 +26,7 @@ const GoogleMapComponent = ({
   className = '',
   onMapClick = null,
   allowClickSelection = false,
+  // eslint-disable-next-line unused-imports/no-unused-vars
   showDefaultMap = false,
   initialCenter = null,
   initialZoom = 14,
@@ -34,6 +34,7 @@ const GoogleMapComponent = ({
   interactive = true,
 }) => {
   const { isLoaded } = useGoogleMaps();
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [map, setMap] = useState(null);
   const [directions, setDirections] = useState(null);
   const directionsService = useRef(null);
@@ -154,6 +155,7 @@ const GoogleMapComponent = ({
         }
       }
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [origen, destino, paradas, onRouteCalculated, isLoaded]);
 
   if (!isLoaded) {

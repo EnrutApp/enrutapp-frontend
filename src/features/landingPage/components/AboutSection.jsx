@@ -1,6 +1,7 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import '@material/web/icon/icon.js';
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const AboutSection = memo(({ scrollToSection }) => {
   return (
     <section id="nosotros" className="px-4 md:px-20 py-10 bg-white">

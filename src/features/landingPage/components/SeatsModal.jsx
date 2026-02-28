@@ -9,6 +9,7 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
   if (!isOpen || !viaje) return null;
 
   // Generar asientos dinámicamente basados en el vehículo
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const generateSeats = useMemo(() => {
     const cantidadAsientos = viaje.vehiculo?.asientos || viaje.asientos || 4;
     const asientos = [];

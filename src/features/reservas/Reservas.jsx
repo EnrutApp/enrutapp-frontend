@@ -1,11 +1,6 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/switch/switch.js';
-import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
-import AddReservaModal from '../../shared/components/modal/addReservaModal/AddReservaModal';
-import EditReservaModal from '../../shared/components/modal/editReservaModal/EditReservaModal';
-import ReservasProfile from './pages/ReservasProfile';
-import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import reservaService from '../../shared/services/reservaService';
 import { useState, useEffect } from 'react';

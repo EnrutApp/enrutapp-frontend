@@ -52,6 +52,7 @@ const isTokenValid = token => {
     }
 
     return true;
+  // eslint-disable-next-line unused-imports/no-unused-vars
   } catch (error) {
     return false;
   }
@@ -65,6 +66,7 @@ const getToken = () => {
         window.sessionStorage?.getItem('access_token')
       );
     }
+  // eslint-disable-next-line unused-imports/no-unused-vars
   } catch (_) {
     return null;
   }
@@ -83,6 +85,7 @@ const clearAuthData = () => {
       window.sessionStorage?.removeItem('user');
       window.sessionStorage?.removeItem('token_expires_in');
     }
+  // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
   } catch (_) {}
 };
 

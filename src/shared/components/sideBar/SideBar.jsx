@@ -1,11 +1,7 @@
-import Avvvatars from 'avvvatars-react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import LogoutModal from '../../../features/auth/components/logoutModal/LogoutModal';
-import SettingsModal from '../../../features/auth/components/settingsModal/SettingsModal';
-import ProfileModal from '../../../features/auth/components/profileModal/ProfileModal';
 import '@material/web/icon/icon.js';
 import '@material/web/menu/menu.js';
 import '@material/web/menu/menu-item.js';

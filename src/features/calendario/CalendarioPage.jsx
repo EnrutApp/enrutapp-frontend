@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import '@material/web/icon/icon.js';
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
 

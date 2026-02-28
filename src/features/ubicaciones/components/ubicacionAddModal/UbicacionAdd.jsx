@@ -1,6 +1,3 @@
-import Modal from '../../../../shared/components/modal/Modal';
-import AddressAutocomplete from '../../../../shared/components/addressAutocomplete/AddressAutocomplete';
-import GoogleMapComponent from '../../../../shared/components/map/components/GoogleMapComponent';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
@@ -24,8 +21,10 @@ const UbicacionAdd = ({
   const [errorNombre, setErrorNombre] = useState('');
   const [coordenadasEncontradas, setCoordenadasEncontradas] = useState(false);
   const [direccionFijada, setDireccionFijada] = useState(false);
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [isEstadoVacioVisible, setIsEstadoVacioVisible] = useState(true);
   const [isMensajeInicialVisible, setIsMensajeInicialVisible] = useState(true);
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [userLocation, setUserLocation] = useState(null);
   const [mapCenter, setMapCenter] = useState(null);
   const [mapZoom, setMapZoom] = useState(null);
@@ -97,6 +96,7 @@ const UbicacionAdd = ({
         setUserLocation({ lat: latitude, lng: longitude });
         setMapCenter([longitude, latitude]);
         setMapZoom(14);
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (error) {
         setMapCenter(null);
         setMapZoom(null);
@@ -115,6 +115,7 @@ const UbicacionAdd = ({
     }
   };
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const handleDesfijarDireccion = () => {
     setDireccionFijada(false);
     setCoordenadasEncontradas(false);

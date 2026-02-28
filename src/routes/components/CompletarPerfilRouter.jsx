@@ -1,6 +1,4 @@
 import { useAuth } from '../../shared/context/AuthContext';
-import CompletarPerfilConductorPage from '../../features/conductores/pages/CompletarPerfilPage';
-import CompletarPerfilClientePage from '../../features/clientes/pages/CompletarPerfilClientePage';
 
 const CompletarPerfilRouter = () => {
   const { user } = useAuth();

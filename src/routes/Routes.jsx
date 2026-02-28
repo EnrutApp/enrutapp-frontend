@@ -4,7 +4,6 @@ import { lazy } from 'react';
 import { ROUTES, USER_ROLES } from './constants/routeConstants';
 import { withErrorBoundary } from './components/RouteErrorBoundary';
 import { withLazyLoading } from './components/LazyLoadingFallback';
-import ProtectedRoute from './components/ProtectedRoute';
 
 import { adminRoutes, ADMIN_REQUIRED_ROLE } from './modules/adminRoutes';
 import {
@@ -23,16 +22,19 @@ const Login = withLazyLoading(
   'Cargando inicio de sesión...'
 );
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const NotFound = withLazyLoading(
   lazy(() => import('../features/notFound/NotFound')),
   'Página no encontrada...'
 );
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const RoleRedirect = withLazyLoading(
   lazy(() => import('./components/RoleRedirect')),
   'Redirigiendo...'
 );
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const CompletarPerfilRouter = withLazyLoading(
   lazy(() => import('./components/CompletarPerfilRouter')),
   'Cargando...'
@@ -48,22 +50,26 @@ const ResultadosBusqueda = withLazyLoading(
   'Cargando resultados de búsqueda...'
 );
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const LayoutWithErrorBoundary = withErrorBoundary(Layout, {
   title: 'Error de la Aplicación',
   message:
     'Ha ocurrido un error en la aplicación. Por favor, recarga la página.',
 });
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const LoginWithErrorBoundary = withErrorBoundary(Login, {
   title: 'Error de Inicio de Sesión',
   message: 'No se pudo cargar el formulario de inicio de sesión.',
 });
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const LandingWithErrorBoundary = withErrorBoundary(Landing, {
   title: 'Error de Landing',
   message: 'No se pudo cargar la página principal.',
 });
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ResultadosBusquedaWithErrorBoundary = withErrorBoundary(
   ResultadosBusqueda,
   {
@@ -148,4 +154,5 @@ const Routes = createBrowserRouter([
 
 export default Routes;
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { ROUTES, USER_ROLES } from './constants/routeConstants';

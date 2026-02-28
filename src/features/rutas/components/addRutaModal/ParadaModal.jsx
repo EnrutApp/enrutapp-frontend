@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import Modal from '../../../../shared/components/modal/Modal';
-import UbicacionAddQuick from '../../../ubicaciones/components/ubicacionAddModal/UbicacionAddQuick';
 import ubicacionesService from '../../../ubicaciones/api/ubicacionesService';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';

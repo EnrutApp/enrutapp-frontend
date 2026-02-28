@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, useEffect, useState } from 'react';
 import '@material/web/icon/icon.js';
 import '@material/web/progress/linear-progress.js';
 
@@ -10,6 +10,7 @@ const loadMapboxCSS = () => {
   }
 };
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const MapBoxMap = lazy(() => {
   loadMapboxCSS();
   return import('./MapBoxMap');

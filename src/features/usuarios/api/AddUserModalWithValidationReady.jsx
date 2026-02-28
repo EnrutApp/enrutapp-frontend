@@ -5,24 +5,16 @@
  * Copia este archivo directamente o adaptalo a tu AddUserModal
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import Modal from '../../../../shared/components/modal/Modal';
 import apiClient from '../../../../shared/services/apiService';
 import catalogService from '../../../../shared/services/catalogService';
 
 // Importa los componentes con entrada restringida
-import {
-  DocumentNumberInput,
-  LettersOnlyInput,
-  PhoneNumberInput,
-  AlphanumericRestrictInput,
-  SelectInput,
-  DateInput,
-  EmailInput,
-} from './FormInputsRestricted';
+
+
 
 // Importa los esquemas
 import {
@@ -81,7 +73,9 @@ const AddUserModalWithValidation = ({
   // ==========================================
   const {
     register,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     handleSubmit,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     formState: { errors, isDirty, isValid },
     watch,
     trigger,
@@ -198,6 +192,7 @@ const AddUserModalWithValidation = ({
           setLoading(false);
           return;
         }
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (err) {
         setError('Error al validar los datos');
         setLoading(false);

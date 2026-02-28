@@ -4,6 +4,7 @@ const HomeUsuario = () => {
   const today = new Date();
   const day = today.getDate();
   const month = today.toLocaleString('es-ES', { month: 'long' });
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const weekday = today.toLocaleString('es-ES', { weekday: 'long' });
 
   // Datos de ejemplo para viajes de hoy

@@ -10,8 +10,6 @@ import apiClient from '../../../../shared/services/apiService';
 import { registerSchema } from '../../../../shared/utils/validationSchemas';
 import catalogService from '../../../../shared/services/catalogService';
 import useApi from '../../../../shared/hooks/useApi';
-import Modal from '../../../../shared/components/modal/Modal';
-import AddressAutocomplete from '../../../../shared/components/addressAutocomplete/AddressAutocomplete';
 
 const ModalRegister = ({ isOpen, onClose }) => {
   const [showPassword, setShowPassword] = useState(false);

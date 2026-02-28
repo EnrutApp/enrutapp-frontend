@@ -3,17 +3,10 @@ import '@material/web/button/filled-button.js';
 import '@material/web/switch/switch.js';
 import '@material/web/checkbox/checkbox.js';
 import '@material/web/progress/linear-progress.js';
-import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
-import ConductorProfile from './pages/ConductorProfile';
-import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
-import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
-import AddConductorModalNew from './components/addConductorModal/AddConductorModalNew';
-import EditConductorModal from './components/editConductorModal/EditConductorModal';
 import conductorService from './api/conductorService';
 import userService from '../usuarios/api/userService';
 import { useState, useEffect } from 'react';
-import Avvvatars from 'avvvatars-react';
 import resolveAssetUrl from '../../shared/utils/url';
 
 const styles = `
@@ -164,6 +157,7 @@ const ConductoresPage = () => {
     setIsAddModalOpen(true);
   };
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const handleAddConductor = async data => {
     try {
       await conductorService.createConductor(data);

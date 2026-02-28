@@ -72,6 +72,7 @@ const chunk = (arr, size) => {
 };
 
 const FinanzasPage = () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const now = new Date();
   const [selectedMonthIndex, setSelectedMonthIndex] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
@@ -103,6 +104,7 @@ const FinanzasPage = () => {
         const data = Array.isArray(response) ? response : response?.data || [];
         if (!mounted) return;
         setTurnos(Array.isArray(data) ? data : []);
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (e) {
         if (!mounted) return;
         setError('No se pudieron cargar los datos de finanzas.');

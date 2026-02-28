@@ -2,14 +2,9 @@ import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/checkbox/checkbox.js';
 import '@material/web/progress/linear-progress.js';
-import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
-import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
-import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import { useEffect, useState } from 'react';
 import apiClient from '../../shared/services/apiService';
-import RutaProfilePage from './pages/RutaProfilePage';
-import AddRutaModal from './components/addRutaModal/AddRutaModal';
 
 const styles = `
   @keyframes checkboxAppear {
@@ -101,6 +96,7 @@ const RutasPage = () => {
       const rutaCompleta = await apiClient.get(`/rutas/${ruta.idRuta}`);
       setSelectedRuta(rutaCompleta?.data || rutaCompleta || ruta);
       setIsProfileOpen(true);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       setSelectedRuta(ruta);
       setIsProfileOpen(true);
@@ -123,6 +119,7 @@ const RutasPage = () => {
       setIsDeleteModalOpen(false);
       setRutaToDelete(null);
       fetchRutas();
+    // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
     } catch (error) {}
   };
 
@@ -142,6 +139,7 @@ const RutasPage = () => {
       setIsSwitchModalOpen(false);
       setRutaToSwitch(null);
       fetchRutas();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       setIsSwitchModalOpen(false);
       setRutaToSwitch(null);
@@ -713,6 +711,7 @@ const RutasPage = () => {
                                       rutaCompleta?.data || rutaCompleta || ruta
                                     );
                                     setIsAddModalOpen(true);
+                                  // eslint-disable-next-line unused-imports/no-unused-vars
                                   } catch (error) {
                                     setRutaToEdit(ruta);
                                     setIsAddModalOpen(true);
@@ -863,6 +862,7 @@ const RutasPage = () => {
                                       rutaCompleta?.data || rutaCompleta || ruta
                                     );
                                     setIsAddModalOpen(true);
+                                  // eslint-disable-next-line unused-imports/no-unused-vars
                                   } catch (error) {
                                     setRutaToEdit(ruta);
                                     setIsAddModalOpen(true);
@@ -914,6 +914,7 @@ const RutasPage = () => {
                 );
                 setRutaToEdit(rutaCompleta?.data || rutaCompleta || ruta);
                 setIsAddModalOpen(true);
+              // eslint-disable-next-line unused-imports/no-unused-vars
               } catch (error) {
                 setRutaToEdit(ruta);
                 setIsAddModalOpen(true);

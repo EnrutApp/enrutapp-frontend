@@ -2,15 +2,8 @@ import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
 import '@material/web/checkbox/checkbox.js';
-import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
-import AddTurnoModal from './components/addTurnoModal/AddTurnoModal';
-import EditTurnoModal from './components/editTurnoModal/EditTurnoModal';
-import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
-import TurnosProfile from './pages/TurnosProfile';
 import { useState, useEffect } from 'react';
-import Avvvatars from 'avvvatars-react';
-import resolveAssetUrl from '../../shared/utils/url';
 import { turnoService } from './api/turnoService';
 
 const styles = `

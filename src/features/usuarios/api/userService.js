@@ -2,6 +2,7 @@ import apiClient from '../../../shared/services/apiService';
 
 export const userService = {
   cambiarEstado: async (idUsuario, estado) => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiClient.patch('/auth/estado', {
         idUsuario,
@@ -13,6 +14,7 @@ export const userService = {
     }
   },
   updateUser: async data => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiClient.patch('/auth/update', data);
       return response;
@@ -21,6 +23,7 @@ export const userService = {
     }
   },
   getUsers: async () => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiClient.get('/usuarios');
       return response;
@@ -30,6 +33,7 @@ export const userService = {
   },
 
   getClientes: async () => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiClient.get('/usuarios', {
         params: { rol: 'cliente' },
@@ -41,6 +45,7 @@ export const userService = {
   },
 
   getUserById: async id => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiClient.get(`/usuarios/${id}`);
       return response;
@@ -50,6 +55,7 @@ export const userService = {
   },
 
   createUser: async userData => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiClient.post('/usuarios', {
         correo: userData.email,
@@ -90,6 +96,7 @@ export const userService = {
   },
 
   verificarPerfilCliente: async () => {
+    // eslint-disable-next-line no-useless-catch
     try {
       return await apiClient.get('/usuarios/verificar-perfil/me');
     } catch (error) {
@@ -98,6 +105,7 @@ export const userService = {
   },
 
   completarPerfilCliente: async data => {
+    // eslint-disable-next-line no-useless-catch
     try {
       return await apiClient.post('/usuarios/completar-perfil/me', data);
     } catch (error) {

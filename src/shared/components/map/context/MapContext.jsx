@@ -43,6 +43,7 @@ export const MapProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useMapContext = () => {
   const context = useContext(MapContext);
   if (!context) {

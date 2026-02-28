@@ -1,4 +1,3 @@
-import Modal from '../../../../shared/components/modal/Modal';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';

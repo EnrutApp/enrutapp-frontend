@@ -1,8 +1,6 @@
-import { Outlet, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import SideBar from '../shared/components/sideBar/SideBar';
 import { useAuth } from '../shared/context/AuthContext';
-import { useLoading } from '../shared/context/LoadingContext';
 import { useRequireConductorProfile } from '../features/conductores/hooks/useRequireConductorProfile';
 import '@material/web/progress/linear-progress.js';
 

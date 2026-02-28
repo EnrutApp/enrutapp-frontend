@@ -3,19 +3,11 @@ import '@material/web/button/filled-button.js';
 import '@material/web/switch/switch.js';
 import '@material/web/checkbox/checkbox.js';
 import '@material/web/progress/linear-progress.js';
-import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
-import UserProfile from './pages/UsuarioProfilePage';
-import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
-import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
-import AddUserModal from './components/addUserModal/AddUserModal';
-import EditUserModal from './components/editUserModal/EditUserModal';
-import EditConductorModal from '../conductores/components/editConductorModal/EditConductorModal';
 import { useState, useEffect } from 'react';
 import userService from './api/userService';
 import { conductorService } from '../conductores/api/conductorService';
 import useApi from '../../shared/hooks/useApi';
-import Avvvatars from 'avvvatars-react';
 import resolveAssetUrl from '../../shared/utils/url';
 
 const styles = `
@@ -104,18 +96,18 @@ const UsuariosPage = () => {
 
   const filteredUsers = users
     ? users.filter(user => {
-        const matchesSearch =
-          user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.numDocumento.includes(searchTerm);
+      const matchesSearch =
+        user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.numDocumento.includes(searchTerm);
 
-        const matchesStatus =
-          statusFilter === 'Todos' ||
-          (statusFilter === 'Activos' && user.estado) ||
-          (statusFilter === 'Inactivos' && !user.estado);
+      const matchesStatus =
+        statusFilter === 'Todos' ||
+        (statusFilter === 'Activos' && user.estado) ||
+        (statusFilter === 'Inactivos' && !user.estado);
 
-        return matchesSearch && matchesStatus;
-      })
+      return matchesSearch && matchesStatus;
+    })
     : [];
 
   const sortedUsers = filteredUsers.sort((a, b) => {
@@ -199,6 +191,7 @@ const UsuariosPage = () => {
       }
       fetchUsers();
       setIsSwitchModalOpen(false);
+      // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       alert('Error al cambiar el estado del usuario');
       setIsSwitchModalOpen(false);
@@ -597,22 +590,20 @@ const UsuariosPage = () => {
                   <div className="flex gap-1 bg-fill border border-border rounded-full p-1">
                     <button
                       onClick={() => setViewMode('list')}
-                      className={`px-2 py-1 rounded-full transition-all ${
-                        viewMode === 'list'
+                      className={`px-2 py-1 rounded-full transition-all ${viewMode === 'list'
                           ? 'bg-primary text-on-primary'
                           : 'text-secondary hover:text-primary'
-                      }`}
+                        }`}
                       title="Vista de lista"
                     >
                       <md-icon className="text-sm">view_list</md-icon>
                     </button>
                     <button
                       onClick={() => setViewMode('grid')}
-                      className={`px-2 py-1 rounded-full transition-all ${
-                        viewMode === 'grid'
+                      className={`px-2 py-1 rounded-full transition-all ${viewMode === 'grid'
                           ? 'bg-primary text-on-primary'
                           : 'text-secondary hover:text-primary'
-                      }`}
+                        }`}
                       title="Vista de tarjetas"
                     >
                       <md-icon className="text-sm">grid_view</md-icon>
@@ -741,16 +732,16 @@ const UsuariosPage = () => {
                                       <>
                                         {conductor?.categoriaLicencia
                                           ?.nombreCategoria && (
-                                          <button className="btn btn-outline btn-lg font-medium flex items-center">
-                                            <md-icon className="text-sm">
-                                              badge
-                                            </md-icon>
-                                            {
-                                              conductor.categoriaLicencia
-                                                .nombreCategoria
-                                            }
-                                          </button>
-                                        )}
+                                            <button className="btn btn-outline btn-lg font-medium flex items-center">
+                                              <md-icon className="text-sm">
+                                                badge
+                                              </md-icon>
+                                              {
+                                                conductor.categoriaLicencia
+                                                  .nombreCategoria
+                                              }
+                                            </button>
+                                          )}
 
                                         {informacionIncompleta && (
                                           <button className="btn btn-lg font-medium flex items-center btn-red">
@@ -788,7 +779,7 @@ const UsuariosPage = () => {
                           </div>
                           <div className="flex gap-2 items-center">
                             {user.rol?.nombreRol?.toLowerCase() ===
-                            'administrador' ? (
+                              'administrador' ? (
                               <div
                                 className="btn btn-secondary btn-lg font-medium flex items-center gap-1 opacity-50 btn-disabled"
                                 title="No se puede deshabilitar un administrador"
@@ -819,7 +810,7 @@ const UsuariosPage = () => {
                             </button>
 
                             {user.rol?.nombreRol?.toLowerCase() ===
-                            'administrador' ? (
+                              'administrador' ? (
                               <div
                                 className="btn btn-secondary btn-lg font-medium flex items-center gap-1 opacity-50 btn-disabled"
                                 title="No se puede eliminar un administrador"
@@ -844,7 +835,7 @@ const UsuariosPage = () => {
                   </>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pb-[17px]">
-                    {currentUsers.map((user, index) => {
+                    {currentUsers.map((user) => {
                       const isConductor =
                         user.rol?.nombreRol?.toLowerCase() === 'conductor';
                       const conductor = isConductor
@@ -869,9 +860,8 @@ const UsuariosPage = () => {
                       return (
                         <div
                           key={user.idUsuario}
-                          className={`content-box-outline-4-small relative group ${
-                            !user.estado ? 'opacity-60' : ''
-                          } hover:shadow-lg transition-all duration-200 hover:-translate-y-1`}
+                          className={`content-box-outline-4-small relative group ${!user.estado ? 'opacity-60' : ''
+                            } hover:shadow-lg transition-all duration-200 hover:-translate-y-1`}
                         >
                           {isSelectionMode &&
                             user.rol?.nombreRol !== 'Administrador' && (
@@ -938,9 +928,8 @@ const UsuariosPage = () => {
                                 </div>
                               </div>
                               <span
-                                className={`btn font-medium btn-sm flex items-center shrink-0 ${
-                                  user.estado ? 'btn-green' : 'btn-red'
-                                }`}
+                                className={`btn font-medium btn-sm flex items-center shrink-0 ${user.estado ? 'btn-green' : 'btn-red'
+                                  }`}
                               >
                                 {user.estado ? 'Activo' : 'Inactivo'}
                               </span>
@@ -994,16 +983,16 @@ const UsuariosPage = () => {
                                 <div className="flex flex-wrap gap-1 mt-2">
                                   {conductor?.categoriaLicencia
                                     ?.nombreCategoria && (
-                                    <span className="btn btn-outline btn-sm font-medium flex items-center text-xs px-2 py-1">
-                                      <md-icon className="text-xs">
-                                        drive_eta
-                                      </md-icon>
-                                      {
-                                        conductor.categoriaLicencia
-                                          .nombreCategoria
-                                      }
-                                    </span>
-                                  )}
+                                      <span className="btn btn-outline btn-sm font-medium flex items-center text-xs px-2 py-1">
+                                        <md-icon className="text-xs">
+                                          drive_eta
+                                        </md-icon>
+                                        {
+                                          conductor.categoriaLicencia
+                                            .nombreCategoria
+                                        }
+                                      </span>
+                                    )}
                                   {informacionIncompleta && (
                                     <span className="btn btn-sm font-medium flex items-center btn-red text-xs px-2 py-1">
                                       <md-icon className="text-xs">
@@ -1035,7 +1024,7 @@ const UsuariosPage = () => {
 
                             <div className="flex gap-2 mt-auto action-buttons">
                               {user.rol?.nombreRol?.toLowerCase() ===
-                              'administrador' ? (
+                                'administrador' ? (
                                 <div
                                   className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 flex-1 opacity-50 btn-disabled justify-center"
                                   title="No se puede deshabilitar un administrador"
@@ -1044,11 +1033,10 @@ const UsuariosPage = () => {
                                 </div>
                               ) : (
                                 <button
-                                  className={`btn btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95 ${
-                                    user.estado
+                                  className={`btn btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95 ${user.estado
                                       ? 'btn-outline'
                                       : 'btn-secondary'
-                                  }`}
+                                    }`}
                                   onClick={e => {
                                     e.stopPropagation();
                                     handleSwitchClick(user);
@@ -1077,7 +1065,7 @@ const UsuariosPage = () => {
                               </button>
 
                               {user.rol?.nombreRol?.toLowerCase() ===
-                              'administrador' ? (
+                                'administrador' ? (
                                 <div
                                   className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 flex-1 opacity-50 btn-disabled justify-center"
                                   title="No se puede eliminar un administrador"

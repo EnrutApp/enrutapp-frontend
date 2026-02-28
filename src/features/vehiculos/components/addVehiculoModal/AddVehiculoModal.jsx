@@ -1,4 +1,3 @@
-import Modal from '../../../../shared/components/modal/Modal';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
@@ -60,6 +59,7 @@ export default function AddVehiculoModal({
   });
   const fileRef = useRef(null);
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const totalSteps = 5;
 
   useEffect(() => {
@@ -77,6 +77,7 @@ export default function AddVehiculoModal({
         setTipos(Array.isArray(t?.data) ? t.data : t);
         setMarcas(Array.isArray(m?.data) ? m.data : m);
         setConductores(Array.isArray(c?.data) ? c.data : c);
+      // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
       } catch (e) {
       } finally {
         if (mounted) setLoadingCatalogs(false);
@@ -1095,6 +1096,7 @@ export default function AddVehiculoModal({
                               <md-switch
                                 selected={!form.isExternalOwner}
                                 onClick={e => {
+                                  // eslint-disable-next-line unused-imports/no-unused-vars
                                   const isInternal = !e.target.selected;
 
                                   handleSwitchChange({

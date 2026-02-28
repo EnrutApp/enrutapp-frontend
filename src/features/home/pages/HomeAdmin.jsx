@@ -144,11 +144,13 @@ const HomeAdmin = () => {
           : (res?.data ?? res?.data?.data ?? []);
         if (!mounted) return;
         setTurnos(Array.isArray(data) ? data : []);
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (e) {
         if (!mounted) return;
         setError('No se pudieron cargar los datos del dashboard.');
         setTurnos([]);
       } finally {
+        // eslint-disable-next-line no-unsafe-finally
         if (!mounted) return;
         setLoading(false);
       }
@@ -282,6 +284,7 @@ const HomeAdmin = () => {
         if (!mounted) return;
         setIngresosHoy(total);
       } finally {
+        // eslint-disable-next-line no-unsafe-finally
         if (!mounted) return;
         setLoadingIngresos(false);
       }

@@ -6,10 +6,7 @@
  * en los componentes de páginas principales
  */
 
-import React, { useState } from 'react';
-import AddUserModalWithValidation from '../../usuarios/api/AddUserModalWithValidationReady';
-import AddContratoModalWithValidation from '../../contratos/api/AddContratoModalWithValidation';
-import AddVehiculoModalWithValidation from '../../vehiculos/api/AddVehiculoModalWithValidation';
+import { useState } from 'react';
 
 /**
  * EJEMPLO: Componente de Página con Múltiples Formularios

@@ -4,7 +4,6 @@ import '@material/web/progress/linear-progress.js';
 
 import { useEffect, useMemo, useState } from 'react';
 
-import Modal from '../../../shared/components/modal/Modal';
 import { turnoService } from '../../turnos/api/turnoService';
 import userService from '../../usuarios/api/userService';
 import contratosService from '../../contratos/api/contratosService';
@@ -17,6 +16,7 @@ const toIsoDate = value => {
   if (!value) return '';
   try {
     return new Date(value).toISOString().slice(0, 10);
+  // eslint-disable-next-line unused-imports/no-unused-vars
   } catch (_) {
     return '';
   }
@@ -266,6 +266,7 @@ const ContratoQuickCreateModal = ({ isOpen, onClose, ruta, navigate }) => {
             );
             return;
           }
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (_) {
           // Si falla buscar el existente, cae al alert normal.
         }

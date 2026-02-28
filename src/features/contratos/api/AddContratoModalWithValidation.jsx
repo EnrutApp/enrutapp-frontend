@@ -6,16 +6,12 @@
  * y componentes de entrada restringida
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import Modal from '../../../shared/components/modal/Modal';
 import apiClient from '../../../shared/services/apiService';
-import {
-  LettersOnlyInput,
-  AlphanumericRestrictInput,
-  DateInput,
-} from '../../usuarios/api/FormInputsRestricted';
+
+
 import { contratoSchema } from '../../usuarios/api/usuariosValidationSchemas';
 
 /**
@@ -34,10 +30,12 @@ const AddContratoModalWithValidation = ({ isOpen, onClose, onConfirm }) => {
   // ==========================================
   const {
     register,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     handleSubmit,
     formState: { errors },
     reset,
     getValues,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     clearErrors,
   } = useForm({
     resolver: yupResolver(contratoSchema),

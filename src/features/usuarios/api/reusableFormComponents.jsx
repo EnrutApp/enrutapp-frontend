@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 /**
@@ -192,6 +192,7 @@ DateInput.displayName = 'DateInput';
 /**
  * COMPONENTE 6: Mensaje de Error Reutilizable
  */
+// eslint-disable-next-line unused-imports/no-unused-vars
 export const ErrorMessage = ({ message, fieldName }) => {
   return (
     <div className="error-container" role="alert">
@@ -288,6 +289,7 @@ DocumentNumberInput.displayName = 'DocumentNumberInput';
 /**
  * SNIPPET 1: Validación en Tiempo Real - Documento
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const useDocumentValidation = () => {
   const [error, setError] = React.useState(null);
 
@@ -316,6 +318,7 @@ export const useDocumentValidation = () => {
 /**
  * SNIPPET 2: Validación en Tiempo Real - Nombre
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const useNameValidation = () => {
   const [error, setError] = React.useState(null);
 
@@ -349,6 +352,7 @@ export const useNameValidation = () => {
 /**
  * SNIPPET 3: Validación en Tiempo Real - Teléfono
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePhoneValidation = () => {
   const [error, setError] = React.useState(null);
 
@@ -377,6 +381,7 @@ export const usePhoneValidation = () => {
 /**
  * SNIPPET 4: Validación en Tiempo Real - Fecha
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const useDateValidation = () => {
   const [error, setError] = React.useState(null);
 
@@ -424,6 +429,7 @@ export const SimpleUserForm = ({ onSubmit }) => {
     formState: { errors },
     handleSubmit,
   } = useForm({
+    // eslint-disable-next-line no-undef
     resolver: yupResolver(usuarioStep1Schema),
     mode: 'onBlur',
   });

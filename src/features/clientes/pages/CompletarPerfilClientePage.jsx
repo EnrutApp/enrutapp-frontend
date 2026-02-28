@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import '@material/web/icon/icon.js';
@@ -10,7 +10,6 @@ import useApi from '../../../shared/hooks/useApi';
 import catalogService from '../../../shared/services/catalogService';
 import apiClient from '../../../shared/services/apiService';
 import userService from '../../usuarios/api/userService';
-import AddressAutocomplete from '../../../shared/components/addressAutocomplete/AddressAutocomplete';
 
 const schema = yup.object().shape({
   tipoDoc: yup.string().required('El tipo de documento es obligatorio'),
@@ -106,6 +105,7 @@ function CompletarPerfilClientePage() {
       if (response.success) {
         try {
           await updateProfile();
+        // eslint-disable-next-line no-empty
         } catch {}
         window.location.href = '/dashboard';
       } else {

@@ -7,16 +7,10 @@ import '@material/web/iconbutton/filled-tonal-icon-button.js';
 import '@material/web/switch/switch.js';
 import '@material/web/progress/linear-progress.js';
 import { useState, useEffect } from 'react';
-import DeleteModal from '../../../shared/components/modal/deleteModal/DeleteModal';
-import EditConductorModal from '../components/editConductorModal/EditConductorModal';
-import AddConductorModalNew from '../components/addConductorModal/AddConductorModalNew';
 import { conductorService } from '../api/conductorService';
 import { obtenerCategoriasLicencia } from '../../../shared/services/categoriasLicenciaApi';
 import apiClient from '../../../shared/services/apiService';
-import Avvvatars from 'avvvatars-react';
 import { resolveAssetUrl } from '../../../shared/utils/url';
-import Modal from '../../../shared/components/modal/Modal';
-import DriverTrackingModal from '../../tracking/components/DriverTrackingModal';
 
 const ConductorProfile = ({
   conductor,

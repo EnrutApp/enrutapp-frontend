@@ -174,6 +174,7 @@ const ContratoCreatePage = () => {
       pasajerosFromPasajes = data.map(p => ({
         documento: p?.documentoPasajero || '',
       }));
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
       pasajerosFromPasajes = [];
     }
@@ -342,6 +343,7 @@ const ContratoCreatePage = () => {
             );
             return;
           }
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (_) {
           // Si falla buscar el existente, cae al alert normal.
         }

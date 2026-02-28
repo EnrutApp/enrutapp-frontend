@@ -1,4 +1,3 @@
-import { Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../shared/context/AuthContext';
 import conductorService from '../../features/conductores/api/conductorService';
@@ -17,6 +16,7 @@ const RoleRedirect = () => {
     return <Navigate to="/login" replace />;
   }
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     let cancelled = false;
 

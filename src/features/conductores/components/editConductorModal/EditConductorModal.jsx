@@ -1,5 +1,3 @@
-import Modal from '../../../../shared/components/modal/Modal';
-import AddressAutocomplete from '../../../../shared/components/addressAutocomplete/AddressAutocomplete';
 import apiClient from '../../../../shared/services/apiService';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';

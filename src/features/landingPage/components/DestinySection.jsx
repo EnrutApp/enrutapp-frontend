@@ -1,6 +1,7 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import '@material/web/icon/icon.js';
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const DestinySection = memo(({ setFormData, scrollToSection, children }) => {
   return (
     <section

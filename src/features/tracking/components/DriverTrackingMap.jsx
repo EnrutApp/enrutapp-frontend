@@ -1,5 +1,4 @@
-import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
-import { useCallback, useEffect, useState, useMemo, useRef, memo } from 'react';
+import { useCallback, useEffect, useState, memo } from 'react';
 import '@material/web/icon/icon.js';
 import { useGoogleMaps } from '../../../shared/context/GoogleMapsLoader';
 
@@ -13,6 +12,7 @@ const DriverTrackingMap = memo(
   ({
     locations = [],
     selectedDriverId = null,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     driverInfo = null,
     getDriverLabel = null,
     isConnected = false,

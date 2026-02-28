@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback, memo } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import '@material/web/icon/icon.js';
 
 // Componente para cada tarjeta de destino
+// eslint-disable-next-line unused-imports/no-unused-vars
 const DestinoCard = memo(({ destino, index, itemsPerView, onSelect }) => {
   return (
     <div

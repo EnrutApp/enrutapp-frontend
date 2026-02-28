@@ -1,4 +1,3 @@
-import Modal from '../Modal';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
@@ -49,6 +48,7 @@ export default function AddConductorModal({
         fileRef.current.value = '';
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const handleChange = e => {

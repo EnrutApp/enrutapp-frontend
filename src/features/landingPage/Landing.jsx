@@ -1,15 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '@material/web/icon/icon.js';
 
 // Importar componentes
-import Navbar from './components/Navbar';
-import HeroSection from './components/HeroSection';
-import DestinySection from './components/DestinySection';
-import DestinosCarousel from './components/DestinosCarousel';
-import AboutSection from './components/AboutSection';
-import BenefitsSection from './components/BenefitsSection';
-import Footer from './components/Footer';
 import ubicacionesService from '../ubicaciones/api/ubicacionesService';
 
 // Obtener fecha de hoy en formato local correcto (no UTC)
@@ -211,6 +204,7 @@ const LandingPage = () => {
           setUbicacionesItems(mapped);
           setUbicacionesReady(true);
         }
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (_) {
         if (mounted) {
           setUbicacionesItems([]);
@@ -225,6 +219,7 @@ const LandingPage = () => {
     };
   }, []);
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const handleFormChange = useCallback(
     e => {
       const { name, value } = e.target;
@@ -249,6 +244,7 @@ const LandingPage = () => {
         setErrors(prev => ({ ...prev, destino: undefined }));
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [formData.destino, formData.origen, isPastDate, clearError]
   );
 
