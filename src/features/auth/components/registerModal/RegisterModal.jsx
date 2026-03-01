@@ -10,8 +10,6 @@ import apiClient from '../../../../shared/services/apiService';
 import { registerSchema } from '../../../../shared/utils/validationSchemas';
 import catalogService from '../../../../shared/services/catalogService';
 import useApi from '../../../../shared/hooks/useApi';
-import Modal from '../../../../shared/components/modal/Modal';
-import AddressAutocomplete from '../../../../shared/components/addressAutocomplete/AddressAutocomplete';
 
 const ModalRegister = ({ isOpen, onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -74,7 +72,10 @@ const ModalRegister = ({ isOpen, onClose }) => {
           client_id: clientId,
           callback: async response => {
             try {
-              await loginWithGoogle({ idToken: response.credential, remember: false });
+              await loginWithGoogle({
+                idToken: response.credential,
+                remember: false,
+              });
               handleClose();
               navigate('/dashboard', { replace: true });
             } catch {
@@ -446,8 +447,11 @@ const ModalRegister = ({ isOpen, onClose }) => {
                     </button>
 
                     <div
-                      className={`absolute inset-0 z-10 ${isGoogleReady ? 'opacity-0' : 'opacity-0 pointer-events-none'
-                        }`}
+                      className={`absolute inset-0 z-10 ${
+                        isGoogleReady
+                          ? 'opacity-0'
+                          : 'opacity-0 pointer-events-none'
+                      }`}
                     >
                       <div
                         ref={googleButtonRef}

@@ -1,5 +1,3 @@
-import Modal from '../../../../shared/components/modal/Modal';
-import AddressAutocomplete from '../../../../shared/components/addressAutocomplete/AddressAutocomplete';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
@@ -25,6 +23,7 @@ export default function AddConductorModalNew({ isOpen, onClose, onSuccess }) {
     tipoDoc: '',
   });
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [generatedPassword, setGeneratedPassword] = useState(null);
 
   const [licencia, setLicencia] = useState({

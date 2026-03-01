@@ -86,26 +86,31 @@ const CalendarioPage = withLazyLoading(
   lazy(() => import('../../features/calendario/CalendarioPage')),
   'Cargando calendario...'
 );
+// eslint-disable-next-line unused-imports/no-unused-vars
 const AdminHomeWithErrorBoundary = withErrorBoundary(HomeAdmin, {
   title: 'Error en Dashboard',
   message: 'No se pudo cargar el dashboard de administrador',
 });
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ClientesWithErrorBoundary = withErrorBoundary(Clientes, {
   title: 'Error en Gestión de Clientes',
   message: 'No se pudo cargar la gestión de clientes',
 });
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const UsuariosWithErrorBoundary = withErrorBoundary(Usuarios, {
   title: 'Error en Gestión de Usuarios',
   message: 'No se pudo cargar la gestión de usuarios',
 });
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ConductoresWithErrorBoundary = withErrorBoundary(Conductores, {
   title: 'Error en Gestión de Conductores',
   message: 'No se pudo cargar la gestión de conductores',
 });
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const VehiculosWithErrorBoundary = withErrorBoundary(Vehiculos, {
   title: 'Error en Gestión de Vehículos',
   message: 'No se pudo cargar la gestión de vehículos',

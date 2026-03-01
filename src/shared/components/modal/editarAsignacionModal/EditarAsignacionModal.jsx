@@ -1,4 +1,3 @@
-import Modal from '../Modal';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import { useState, useEffect } from 'react';
@@ -8,7 +7,9 @@ import * as Yup from 'yup';
 let conductorService, vehiculoService;
 try {
   conductorService =
+    // eslint-disable-next-line no-undef
     require('../../../services/conductorService').default ||
+    // eslint-disable-next-line no-undef
     require('../../../services/conductorService').conductorService;
 } catch (e) {
   console.warn('Error importando conductorService:', e);
@@ -17,7 +18,9 @@ try {
 
 try {
   vehiculoService =
+    // eslint-disable-next-line no-undef
     require('../../../services/vehiculoService').default ||
+    // eslint-disable-next-line no-undef
     require('../../../services/vehiculoService').vehiculoService;
 } catch (e) {
   console.warn('Error importando vehiculoService:', e);

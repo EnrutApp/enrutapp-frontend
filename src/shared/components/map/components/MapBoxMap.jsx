@@ -6,9 +6,7 @@ import { useMarkers } from '../hooks/useMarkers';
 import { useRouteCalculation } from '../hooks/useRouteCalculation';
 import { useGeocodingOptimized } from '../hooks/useGeocodingOptimized';
 
-const MAPBOX_TOKEN =
-  import.meta.env.VITE_MAPBOX_TOKEN ||
-  'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 const MapBoxMap = memo(
   ({
@@ -95,11 +93,13 @@ const MapBoxMap = memo(
         destino: { lat: destinoLat, lng: destinoLng },
         paradas: paradasCoords,
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       origen?.latitud,
       origen?.longitud,
       destino?.latitud,
       destino?.longitud,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(
         paradas?.map(p => ({ lat: p?.latitud, lng: p?.longitud }))
       ),
@@ -116,7 +116,8 @@ const MapBoxMap = memo(
         if (clickHandlerRef.current && map && !isUnmountedRef.current) {
           try {
             map.off('click', clickHandlerRef.current);
-          } catch (e) {}
+            // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
+          } catch (e) { }
           clickHandlerRef.current = null;
         }
         if (map && !isUnmountedRef.current) {
@@ -125,7 +126,8 @@ const MapBoxMap = memo(
             if (canvas) {
               canvas.style.cursor = '';
             }
-          } catch (e) {}
+            // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
+          } catch (e) { }
         }
         return;
       }
@@ -148,6 +150,7 @@ const MapBoxMap = memo(
           if (!isUnmountedRef.current) {
             onMapClick({ lat, lng, address });
           }
+          // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
           if (!isUnmountedRef.current) {
             onMapClick({ lat, lng, address: '' });
@@ -163,13 +166,15 @@ const MapBoxMap = memo(
         if (canvas) {
           canvas.style.cursor = 'crosshair';
         }
-      } catch (e) {}
+        // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
+      } catch (e) { }
 
       return () => {
         if (map && clickHandlerRef.current && !isUnmountedRef.current) {
           try {
             map.off('click', clickHandlerRef.current);
-          } catch (e) {}
+            // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
+          } catch (e) { }
           clickHandlerRef.current = null;
         }
         if (map && !isUnmountedRef.current) {
@@ -178,7 +183,8 @@ const MapBoxMap = memo(
             if (canvas) {
               canvas.style.cursor = '';
             }
-          } catch (e) {}
+            // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
+          } catch (e) { }
         }
       };
     }, [
@@ -261,6 +267,7 @@ const MapBoxMap = memo(
           onRouteCalculated
         );
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       map,
       isLoaded,

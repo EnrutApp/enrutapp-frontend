@@ -2,15 +2,8 @@ import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
 import '@material/web/checkbox/checkbox.js';
-import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
-import AddTurnoModal from './components/addTurnoModal/AddTurnoModal';
-import EditTurnoModal from './components/editTurnoModal/EditTurnoModal';
-import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
-import TurnosProfile from './pages/TurnosProfile';
 import { useState, useEffect } from 'react';
-import Avvvatars from 'avvvatars-react';
-import resolveAssetUrl from '../../shared/utils/url';
 import { turnoService } from './api/turnoService';
 
 const styles = `
@@ -442,20 +435,22 @@ const TurnosPage = () => {
                 <div className="flex gap-1 bg-fill border border-border rounded-full p-1">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`px-2 py-1 rounded-full transition-all ${viewMode === 'list'
-                      ? 'bg-primary text-on-primary'
-                      : 'text-secondary hover:text-primary'
-                      }`}
+                    className={`px-2 py-1 rounded-full transition-all ${
+                      viewMode === 'list'
+                        ? 'bg-primary text-on-primary'
+                        : 'text-secondary hover:text-primary'
+                    }`}
                     title="Vista de lista"
                   >
                     <md-icon className="text-sm">view_list</md-icon>
                   </button>
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`px-2 py-1 rounded-full transition-all ${viewMode === 'grid'
-                      ? 'bg-primary text-on-primary'
-                      : 'text-secondary hover:text-primary'
-                      }`}
+                    className={`px-2 py-1 rounded-full transition-all ${
+                      viewMode === 'grid'
+                        ? 'bg-primary text-on-primary'
+                        : 'text-secondary hover:text-primary'
+                    }`}
                     title="Vista de tarjetas"
                   >
                     <md-icon className="text-sm">grid_view</md-icon>
@@ -469,11 +464,12 @@ const TurnosPage = () => {
                   ) : (
                     !loading && (
                       <span className="text-sm text-secondary">
-                        {`Mostrando ${totalItems > 0 ? startIndex + 1 : 0
-                          }-${Math.min(
-                            startIndex + (viewMode === 'grid' ? 8 : 4),
-                            totalItems
-                          )} de ${totalItems} turnos`}
+                        {`Mostrando ${
+                          totalItems > 0 ? startIndex + 1 : 0
+                        }-${Math.min(
+                          startIndex + (viewMode === 'grid' ? 8 : 4),
+                          totalItems
+                        )} de ${totalItems} turnos`}
                       </span>
                     )
                   )}
@@ -510,9 +506,7 @@ const TurnosPage = () => {
                     className="flex flex-col items-center justify-center"
                     style={{ width: '340px' }}
                   >
-                    <md-icon className="text-secondary mb-4">
-                      schedule
-                    </md-icon>
+                    <md-icon className="text-secondary mb-4">schedule</md-icon>
                     <p className="text-secondary">
                       {searchQuery
                         ? 'No se encontraron turnos que coincidan con la búsqueda'
@@ -531,8 +525,9 @@ const TurnosPage = () => {
                   {currentTurnos.map((turno, index) => (
                     <div
                       key={index}
-                      className={`content-box-outline-4-small cursor-pointer relative ${selectedTurnos.includes(turno.id) ? 'card-selected' : ''
-                        }`}
+                      className={`content-box-outline-4-small cursor-pointer relative ${
+                        selectedTurnos.includes(turno.id) ? 'card-selected' : ''
+                      }`}
                       onClick={() => handleOpenProfile(turno)}
                     >
                       {isSelectionMode && (
@@ -669,7 +664,11 @@ const TurnosPage = () => {
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-3 flex-1 min-w-0">
                             <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-surface shrink-0 flex items-center justify-center">
-                              <Avvvatars value={turno.conductor} size={56} radius={10} />
+                              <Avvvatars
+                                value={turno.conductor}
+                                size={56}
+                                radius={10}
+                              />
                             </div>
 
                             <div className="flex-1 min-w-0">
@@ -684,29 +683,42 @@ const TurnosPage = () => {
 
                               <div className="flex items-center gap-2 mt-1">
                                 <span
-                                  className={`btn font-medium btn-sm flex items-center ${String(turno.estado || '').toLowerCase().includes('complet')
-                                    ? 'btn-green'
-                                    : String(turno.estado || '').toLowerCase().includes('cancel')
-                                      ? 'btn-red'
-                                      : 'btn-outline'
-                                    }`}
+                                  className={`btn font-medium btn-sm flex items-center ${
+                                    String(turno.estado || '')
+                                      .toLowerCase()
+                                      .includes('complet')
+                                      ? 'btn-green'
+                                      : String(turno.estado || '')
+                                            .toLowerCase()
+                                            .includes('cancel')
+                                        ? 'btn-red'
+                                        : 'btn-outline'
+                                  }`}
                                 >
                                   {turno.estado || 'Programado'}
                                 </span>
 
                                 <div className="flex items-center gap-1 text-xs text-secondary bg-fill px-2 py-1 rounded-md">
-                                  <md-icon className="text-sm">calendar_today</md-icon>
+                                  <md-icon className="text-sm">
+                                    calendar_today
+                                  </md-icon>
                                   <span>{turno.fecha}</span>
                                 </div>
 
                                 <div className="flex items-center gap-1 text-xs text-secondary bg-fill px-2 py-1 rounded-md">
-                                  <md-icon className="text-sm">schedule</md-icon>
+                                  <md-icon className="text-sm">
+                                    schedule
+                                  </md-icon>
                                   <span>{turno.hora}</span>
                                 </div>
 
                                 <div className="hidden md:flex items-center gap-1 text-xs text-secondary bg-fill px-2 py-1 rounded-md min-w-0">
-                                  <md-icon className="text-sm">alt_route</md-icon>
-                                  <span className="truncate max-w-[260px]">{turno.ruta}</span>
+                                  <md-icon className="text-sm">
+                                    alt_route
+                                  </md-icon>
+                                  <span className="truncate max-w-[260px]">
+                                    {turno.ruta}
+                                  </span>
                                 </div>
                               </div>
                             </div>

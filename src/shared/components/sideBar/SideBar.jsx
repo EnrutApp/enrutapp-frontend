@@ -1,11 +1,7 @@
-import Avvvatars from 'avvvatars-react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import LogoutModal from '../../../features/auth/components/logoutModal/LogoutModal';
-import SettingsModal from '../../../features/auth/components/settingsModal/SettingsModal';
-import ProfileModal from '../../../features/auth/components/profileModal/ProfileModal';
 import '@material/web/icon/icon.js';
 import '@material/web/menu/menu.js';
 import '@material/web/menu/menu-item.js';
@@ -26,12 +22,12 @@ const SideBar = () => {
     return saved
       ? JSON.parse(saved)
       : {
-        0: false,
-        1: true,
-        2: true,
-        3: true,
-        4: true,
-      };
+          0: false,
+          1: true,
+          2: true,
+          3: true,
+          4: true,
+        };
   });
 
   const isActive = path => {
@@ -420,10 +416,11 @@ const SideBar = () => {
               </div>
             )}
             <ul
-              className={`space-y-1 transition-all duration-500 ease-in-out overflow-hidden ${section.title && collapsedSections[sectionIndex]
+              className={`space-y-1 transition-all duration-500 ease-in-out overflow-hidden ${
+                section.title && collapsedSections[sectionIndex]
                   ? 'max-h-0 blur-md opacity-0'
                   : 'max-h-[1000px] blur-0 opacity-100'
-                }`}
+              }`}
             >
               {section.items.map(({ path, label, icon }) => (
                 <li key={path}>
@@ -431,9 +428,10 @@ const SideBar = () => {
                     to={path}
                     className={`
                       sidebar-link group flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ml-2
-                      ${isActive(path)
-                        ? 'bg-blue bg-opacity-10 text-blue  scale-105'
-                        : 'text-secondary hover:bg-blue hover:bg-opacity-5 hover:scale-[1.02] hover:text-primary'
+                      ${
+                        isActive(path)
+                          ? 'bg-blue bg-opacity-10 text-blue  scale-105'
+                          : 'text-secondary hover:bg-blue hover:bg-opacity-5 hover:scale-[1.02] hover:text-primary'
                       }
                     `}
                     style={{ transformOrigin: 'left' }}

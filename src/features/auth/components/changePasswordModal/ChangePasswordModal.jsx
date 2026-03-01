@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuth } from '../../../../shared/context/AuthContext';
 import { changePasswordSchema } from '../../../../shared/utils/validationSchemas';
-import Modal from '../../../../shared/components/modal/Modal';
 
 const ChangePasswordModal = ({ isOpen, onClose }) => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -41,6 +40,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         setSuccessMessage('');
         onClose();
       }, 2000);
+    // eslint-disable-next-line no-empty
     } catch {}
   };
 

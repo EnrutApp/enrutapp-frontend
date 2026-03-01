@@ -3,9 +3,9 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import api from '../../../../shared/services/apiService';
-import Modal from '../../../../shared/components/modal/Modal';
 import '@material/web/icon/icon.js';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const resetPasswordSchema = yup.object().shape({
   newPassword: yup
     .string()
@@ -27,9 +27,11 @@ const ResetPasswordModal = ({ isOpen, onClose }) => {
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [step, setStep] = useState(1);
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [mostrarCodigo, setMostrarCodigo] = useState(false);
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const codeRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [codigoValidado, setCodigoValidado] = useState(false);
   const [restablecido, setRestablecido] = useState(false);
   const [errorCodigo, setErrorCodigo] = useState('');

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import apiClient from '../../../../shared/services/apiService';
-import GoogleMapComponent from '../../../../shared/components/map/components/GoogleMapComponent';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
@@ -43,6 +42,7 @@ const EditRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
           estado: true,
         }));
         setUbicaciones(ubicacionesValidas);
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (error) {
         setError('No se pudieron cargar las ubicaciones');
       }
@@ -127,6 +127,7 @@ const EditRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
         estado: formData.estado,
         observaciones: formData.observaciones || '',
         paradas:
+          // eslint-disable-next-line unused-imports/no-unused-vars
           ruta.paradas?.map((p, index) => ({
             idUbicacion: p.idUbicacion,
             descripcion: p.descripcion || null,
@@ -142,8 +143,8 @@ const EditRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-        err.message ||
-        'Error al actualizar la ruta'
+          err.message ||
+          'Error al actualizar la ruta'
       );
     } finally {
       setLoading(false);

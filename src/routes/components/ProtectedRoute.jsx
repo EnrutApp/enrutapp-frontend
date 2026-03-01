@@ -1,10 +1,10 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../shared/context/AuthContext';
 import { ROUTES } from '../constants/routeConstants';
-import { useEffect } from 'react';
 import '@material/web/icon/icon.js';
 import '@material/web/progress/linear-progress.js';
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const UnauthorizedAccess = ({
   userRole,
   requiredRoles,

@@ -72,6 +72,7 @@ const chunk = (arr, size) => {
 };
 
 const FinanzasPage = () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const now = new Date();
   const [selectedMonthIndex, setSelectedMonthIndex] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
@@ -103,6 +104,7 @@ const FinanzasPage = () => {
         const data = Array.isArray(response) ? response : response?.data || [];
         if (!mounted) return;
         setTurnos(Array.isArray(data) ? data : []);
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (e) {
         if (!mounted) return;
         setError('No se pudieron cargar los datos de finanzas.');
@@ -153,7 +155,10 @@ const FinanzasPage = () => {
 
       // Cargar detalle sólo para turnos con movimiento.
       const idsConMovimiento = turnosFiltrados
-        .filter(t => (t?._count?.pasajes ?? 0) > 0 || (t?._count?.encomiendas ?? 0) > 0)
+        .filter(
+          t =>
+            (t?._count?.pasajes ?? 0) > 0 || (t?._count?.encomiendas ?? 0) > 0
+        )
         .map(t => t?.idTurno)
         .filter(Boolean);
 
@@ -195,7 +200,7 @@ const FinanzasPage = () => {
               } catch {
                 return null;
               }
-            }),
+            })
           );
 
           if (cancelled) return;
@@ -208,11 +213,11 @@ const FinanzasPage = () => {
 
             const sumaPasajes = (turnoDetalle?.pasajes ?? []).reduce(
               (acc, p) => acc + toNumber(p?.precio),
-              0,
+              0
             );
             const sumaEncomiendas = (turnoDetalle?.encomiendas ?? []).reduce(
               (acc, e) => acc + toNumber(e?.precio),
-              0,
+              0
             );
 
             // Fallback: si no vienen pasajes detallados, usamos count * precioBase
@@ -226,7 +231,7 @@ const FinanzasPage = () => {
             totalEncomiendasReal += sumaEncomiendas;
             mapDia.set(
               key,
-              (mapDia.get(key) ?? 0) + pasajesFinalTurno + sumaEncomiendas,
+              (mapDia.get(key) ?? 0) + pasajesFinalTurno + sumaEncomiendas
             );
           }
         }
@@ -259,15 +264,16 @@ const FinanzasPage = () => {
   const actividad = useMemo(() => {
     const totalPasajes = turnosFiltrados.reduce(
       (acc, t) => acc + toNumber(t?._count?.pasajes),
-      0,
+      0
     );
     const totalEncomiendas = turnosFiltrados.reduce(
       (acc, t) => acc + toNumber(t?._count?.encomiendas),
-      0,
+      0
     );
     const turnosConMovimiento = turnosFiltrados.reduce((acc, t) => {
       const has =
-        toNumber(t?._count?.pasajes) > 0 || toNumber(t?._count?.encomiendas) > 0;
+        toNumber(t?._count?.pasajes) > 0 ||
+        toNumber(t?._count?.encomiendas) > 0;
       return acc + (has ? 1 : 0);
     }, 0);
 
@@ -284,7 +290,9 @@ const FinanzasPage = () => {
     return d.getDate();
   }, [selectedYear, selectedMonthIndex]);
 
-  const promedioDia = daysInSelectedMonth ? ingresosTotal / daysInSelectedMonth : 0;
+  const promedioDia = daysInSelectedMonth
+    ? ingresosTotal / daysInSelectedMonth
+    : 0;
   const promedioSemana = daysInSelectedMonth
     ? ingresosTotal / (daysInSelectedMonth / 7)
     : 0;
@@ -458,7 +466,7 @@ const FinanzasPage = () => {
                             {
                               day: '2-digit',
                               month: 'short',
-                            },
+                            }
                           )}
                         </span>
                         <span className="text-secondary">

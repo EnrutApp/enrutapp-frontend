@@ -3,6 +3,7 @@ import authService from '../../features/auth/api/authService';
 
 const AuthContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -52,6 +53,7 @@ export const AuthProvider = ({ children }) => {
         if (profileData.success && profileData.data) {
           const updatedUser = profileData.data;
           setUser(updatedUser);
+          // eslint-disable-next-line unused-imports/no-unused-vars
           const token = authService.getToken();
           const storage = localStorage.getItem('access_token')
             ? localStorage
@@ -209,6 +211,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateProfile = async () => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const profileData = await authService.getMe();
       if (profileData.success && profileData.data) {

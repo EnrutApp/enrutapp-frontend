@@ -1,8 +1,6 @@
 import { useRef, useCallback } from 'react';
 
-const MAPBOX_TOKEN =
-  import.meta.env.VITE_MAPBOX_TOKEN ||
-  'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 const geocodingCache = new Map();
 
@@ -48,6 +46,7 @@ export const useGeocodingOptimized = () => {
         pendingRequestsRef.current.delete(cacheKey);
 
         return address;
+        // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (error) {
         pendingRequestsRef.current.delete(cacheKey);
         return '';

@@ -8,6 +8,7 @@ const Pagination = ({
   showPagination = true,
   className = '',
 }) => {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const handleKeyDown = (event, page) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();

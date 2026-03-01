@@ -1,12 +1,6 @@
-import Modal from '../../../../shared/components/modal/Modal';
 import userService from '../../../usuarios/api/userService';
-import EditUserModal from '../../../usuarios/components/editUserModal/EditUserModal';
 import catalogService from '../../../../shared/services/catalogService';
-import EditPhotoModal from '../editPhotoModal/EditPhotoModal';
-import Avvvatars from 'avvvatars-react';
 import photoService from '../../api/photoService';
-import LogoutModal from '../logoutModal/LogoutModal';
-import ChangePasswordModal from '../changePasswordModal/ChangePasswordModal';
 import '@material/web/menu/menu.js';
 import '@material/web/menu/menu-item.js';
 import '@material/web/icon/icon.js';
@@ -41,6 +35,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
       await userService.updateUser(data);
       await refreshAuth();
       setIsEditUserModalOpen(false);
+    // eslint-disable-next-line no-empty
     } catch {
     } finally {
       setEditUserLoading(false);
@@ -66,6 +61,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
       await photoService.deleteProfilePhoto();
       await refreshAuth();
       setIsEditPhotoModalOpen(false);
+    // eslint-disable-next-line no-empty
     } catch {}
   };
 
@@ -77,6 +73,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
       await photoService.uploadProfilePhoto(file);
       await refreshAuth();
       setIsEditPhotoModalOpen(false);
+    // eslint-disable-next-line no-empty
     } catch {
     } finally {
       setUploading(false);

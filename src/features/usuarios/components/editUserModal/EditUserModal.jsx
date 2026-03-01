@@ -1,9 +1,6 @@
-import Modal from '../../../../shared/components/modal/Modal';
 import apiClient from '../../../../shared/services/apiService';
 import catalogService from '../../../../shared/services/catalogService';
 import { conductorService } from '../../../conductores/api/conductorService';
-import EditConductorModal from '../../../conductores/components/editConductorModal/EditConductorModal';
-import AddressAutocomplete from '../../../../shared/components/addressAutocomplete/AddressAutocomplete';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
@@ -105,19 +102,52 @@ const EditUserModal = ({
     }
   }, [isOpen]);
 
+  const validateField = (name, value) => {
+    let error = null;
+    switch (name) {
+      case 'nombre':
+        if (!value?.trim()) error = 'El nombre es obligatorio';
+        else if (value.trim().length < 2)
+          error = 'El nombre debe tener al menos 2 caracteres';
+        break;
+      case 'direccion':
+        if (!value?.trim()) error = 'La dirección es obligatoria';
+        else if (value.trim().length < 2)
+          error = 'La dirección debe tener al menos 2 caracteres';
+        break;
+      case 'telefono':
+        if (!value?.toString().trim()) error = 'El teléfono es obligatorio';
+        else if (!/^3\d{9}$/.test(value))
+          error = 'El teléfono debe tener 10 dígitos y empezar por 3';
+        break;
+      case 'tipoDoc':
+        if (!value) error = 'Selecciona un tipo de documento';
+        break;
+      case 'idCiudad':
+        if (!value) error = 'Selecciona una ciudad';
+        break;
+      case 'idRol':
+        if (!isProfileEdit && !value) error = 'Selecciona un rol';
+        break;
+    }
+    return error;
+  };
+
   const handleChange = e => {
     const { name, value } = e.target;
+    let newValue = value;
 
     if (name === 'telefono') {
-      const numericValue = value.replace(/\D/g, '');
-      if (numericValue.length > 10) return;
-      setForm({ ...form, [name]: numericValue });
-    } else {
-      setForm({ ...form, [name]: value });
+      newValue = value.replace(/\D/g, '');
+      if (newValue.length > 10) return;
+    } else if (name === 'nombre') {
+      newValue = value.replace(/[0-9]/g, '');
     }
 
+    setForm({ ...form, [name]: newValue });
+
     if (name === 'idRol' && data?.idUsuario) {
-      const selectedRole = roles.find(r => r.idRol === value);
+      const selectedRole = roles.find(r => r.idRol === newValue);
       const isConductor =
         selectedRole?.nombreRol?.toLowerCase() === 'conductor';
 
@@ -128,51 +158,48 @@ const EditUserModal = ({
       }
     }
 
-    if (fieldErrors[name]) {
-      setFieldErrors({ ...fieldErrors, [name]: null });
-    }
+    const fieldError = validateField(name, newValue);
+    setFieldErrors(prev => ({ ...prev, [name]: fieldError }));
     setError(null);
+  };
+
+  const handleBlur = e => {
+    const { name, value } = e.target;
+    const fieldError = validateField(name, value);
+    if (fieldError) {
+      setFieldErrors(prev => ({ ...prev, [name]: fieldError }));
+    }
   };
 
   const handleAddressSelect = addressData => {
     if (addressData) {
       setForm(prev => ({ ...prev, direccion: addressData.address }));
-      if (fieldErrors.direccion) {
-        setFieldErrors(prev => ({ ...prev, direccion: null }));
-      }
+      const fieldError = validateField('direccion', addressData.address);
+      setFieldErrors(prev => ({ ...prev, direccion: fieldError }));
     }
   };
 
   const handleAddressChange = newAddress => {
     setForm(prev => ({ ...prev, direccion: newAddress }));
-    if (fieldErrors.direccion) {
-      setFieldErrors(prev => ({ ...prev, direccion: null }));
-    }
+    const fieldError = validateField('direccion', newAddress);
+    setFieldErrors(prev => ({ ...prev, direccion: fieldError }));
   };
 
   const validateForm = () => {
     const errors = {};
+    const fieldsToValidate = [
+      'nombre',
+      'telefono',
+      'direccion',
+      'idCiudad',
+      'tipoDoc',
+    ];
+    if (!isProfileEdit) fieldsToValidate.push('idRol');
 
-    if (!form.nombre?.trim()) {
-      errors.nombre = 'El nombre es obligatorio';
-    }
-    if (!form.telefono?.trim()) {
-      errors.telefono = 'El teléfono es obligatorio';
-    } else if (!/^3\d{9}$/.test(form.telefono)) {
-      errors.telefono = 'El teléfono debe tener 10 dígitos y empezar por 3';
-    }
-    if (!form.direccion?.trim()) {
-      errors.direccion = 'La dirección es obligatoria';
-    }
-    if (!form.idCiudad) {
-      errors.idCiudad = 'Selecciona una ciudad';
-    }
-    if (!form.tipoDoc) {
-      errors.tipoDoc = 'Selecciona un tipo de documento';
-    }
-    if (!isProfileEdit && !form.idRol) {
-      errors.idRol = 'Selecciona un rol';
-    }
+    fieldsToValidate.forEach(field => {
+      const err = validateField(field, form[field]);
+      if (err) errors[field] = err;
+    });
 
     return errors;
   };
@@ -311,6 +338,7 @@ const EditUserModal = ({
                     placeholder="Escribe el nombre completo"
                     value={form.nombre || ''}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
                       fieldErrors.nombre
                         ? 'border-red focus:ring-red/20 focus:border-red'
@@ -342,6 +370,7 @@ const EditUserModal = ({
                           required
                           value={form.tipoDoc || ''}
                           onChange={handleChange}
+                          onBlur={handleBlur}
                           className={`select-filter w-full px-4 input bg-fill border rounded-lg text-primary focus:outline-none focus:border-primary transition-colors ${fieldErrors.tipoDoc ? 'border-red-500' : 'border-border'}`}
                           disabled={loading}
                         >
@@ -412,6 +441,7 @@ const EditUserModal = ({
                         required
                         value={form.idCiudad || ''}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         className={`select-filter w-full px-4 input bg-fill border rounded-lg text-primary focus:outline-none focus:border-primary transition-colors ${fieldErrors.idCiudad ? 'border-red-500' : 'border-border'}`}
                         disabled={loading}
                       >
@@ -446,6 +476,7 @@ const EditUserModal = ({
                     placeholder="Número de teléfono"
                     value={form.telefono || ''}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 transition-all ${
                       fieldErrors.telefono
                         ? 'border-red focus:ring-red/20 focus:border-red'
@@ -515,6 +546,7 @@ const EditUserModal = ({
                           required
                           value={form.idRol || ''}
                           onChange={handleChange}
+                          onBlur={handleBlur}
                           disabled={isAdminUser || loading}
                           className={`select-filter w-full px-4 input bg-fill border rounded-lg text-primary focus:outline-none focus:border-primary transition-colors ${
                             isAdminUser

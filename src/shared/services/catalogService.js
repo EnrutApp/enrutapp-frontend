@@ -2,6 +2,7 @@ import apiClient from './apiService';
 
 export const catalogService = {
   getRoles: async () => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiClient.get('/roles');
       return response;
@@ -11,6 +12,7 @@ export const catalogService = {
   },
 
   getDocumentTypes: async () => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiClient.get('/tipos-documento');
       return response;
@@ -20,6 +22,7 @@ export const catalogService = {
   },
 
   getCities: async () => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiClient.get('/ciudades');
       return response;
@@ -29,6 +32,7 @@ export const catalogService = {
   },
 
   getTiposVehiculo: async () => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiClient.get('/tipos-vehiculo');
       return response;
@@ -38,6 +42,7 @@ export const catalogService = {
   },
 
   getMarcasVehiculo: async () => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiClient.get('/marcas-vehiculos');
       return response;
@@ -47,6 +52,7 @@ export const catalogService = {
   },
 
   getConductores: async () => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiClient.get('/conductores');
       return response;

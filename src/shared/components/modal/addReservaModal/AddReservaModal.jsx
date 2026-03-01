@@ -1,5 +1,3 @@
-import Modal from '../Modal';
-import AsignarConductorModal from '../asignarConductorModal/AsignarConductorModal';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import { useState, useEffect } from 'react';
@@ -7,7 +5,6 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { userService } from '../../../services/userService';
 import ubicacionesService from '../../../services/ubicacionesService';
-import conductorService from '../../../services/conductorService';
 
 const MOCK_CLIENTES = [
   {
@@ -60,6 +57,7 @@ const AddReservaModal = ({ isOpen, onClose, onConfirm }) => {
   const [clientes, setClientes] = useState([]);
   const [ubicaciones, setUbicaciones] = useState([]);
   const [conductores, setConductores] = useState([]);
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [vehiculos, setVehiculos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
@@ -79,6 +77,7 @@ const AddReservaModal = ({ isOpen, onClose, onConfirm }) => {
       setNuevoTelefonoPasajero('');
       setConductorAsignado(null);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const extraerDatos = respuesta => {

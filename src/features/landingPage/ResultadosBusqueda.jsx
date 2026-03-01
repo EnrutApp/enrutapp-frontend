@@ -1,10 +1,8 @@
-import React, { useState, useCallback, useEffect } from "react";
-import "@material/web/icon/icon.js";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import CityAutocomplete from "./components/CityAutocomplete";
-import SeatsModal from "./components/SeatsModal";
-import viajeService from "../../shared/services/viajeService";
-import ubicacionesService from "../ubicaciones/api/ubicacionesService";
+import React, { useState, useCallback, useEffect } from 'react';
+import '@material/web/icon/icon.js';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import viajeService from '../../shared/services/viajeService';
+import ubicacionesService from '../ubicaciones/api/ubicacionesService';
 
 // Obtener fecha de hoy en formato local correcto (no UTC)
 const getTodayDate = () => {
@@ -15,12 +13,14 @@ const getTodayDate = () => {
   return `${year}-${month}-${day}`;
 };
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const [scrolled, setScrolled] = useState(false);
-  const [filtroHorario, setFiltroHorario] = useState("todos");
+  const [filtroHorario, setFiltroHorario] = useState('todos');
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [seatsModalOpen, setSeatsModalOpen] = useState(false);
@@ -33,46 +33,49 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
 
   // Estado temporal para el formulario (no se aplica hasta buscar)
   const [formTemporal, setFormTemporal] = useState({
-    origenId: searchParams.get("origenId") || datosIniciales?.origenId || "",
-    destinoId: searchParams.get("destinoId") || datosIniciales?.destinoId || "",
-    origen: searchParams.get("origen") || datosIniciales?.origen || "",
-    destino: searchParams.get("destino") || datosIniciales?.destino || "",
-    fecha: searchParams.get("fecha") || datosIniciales?.fecha || getTodayDate(),
-    fechaRegreso: searchParams.get("fechaRegreso") || null
+    origenId: searchParams.get('origenId') || datosIniciales?.origenId || '',
+    destinoId: searchParams.get('destinoId') || datosIniciales?.destinoId || '',
+    origen: searchParams.get('origen') || datosIniciales?.origen || '',
+    destino: searchParams.get('destino') || datosIniciales?.destino || '',
+    fecha: searchParams.get('fecha') || datosIniciales?.fecha || getTodayDate(),
+    fechaRegreso: searchParams.get('fechaRegreso') || null,
   });
 
   // Estado actual de búsqueda (lo que se muestra)
   const [busqueda, setBusqueda] = useState(formTemporal);
 
   // Obtener viajes desde la API
-  const obtenerViajes = useCallback(async (origen, destino, origenId, destinoId, fecha, fechaRegreso) => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  const obtenerViajes = useCallback(
+    async (origen, destino, origenId, destinoId, fecha, fechaRegreso) => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      const viajesCargados = await viajeService.buscarViajes({
-        origen,
-        destino,
-        origenId,
-        destinoId,
-        fecha,
-        fechaRegreso
-      });
+        const viajesCargados = await viajeService.buscarViajes({
+          origen,
+          destino,
+          origenId,
+          destinoId,
+          fecha,
+          fechaRegreso,
+        });
 
-      setViajes(viajesCargados || []);
-    } catch (err) {
-      console.error("Error al obtener viajes:", err);
-      setError("Error al cargar los viajes disponibles");
-      setViajes([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+        setViajes(viajesCargados || []);
+      } catch (err) {
+        console.error('Error al obtener viajes:', err);
+        setError('Error al cargar los viajes disponibles');
+        setViajes([]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
 
   React.useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Cargar viajes cuando se monta el componente o cuando cambia la búsqueda
@@ -104,19 +107,20 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
         const data = Array.isArray(res) ? res : res?.data || [];
 
         const mapped = data
-          .map((u) => ({
+          .map(u => ({
             idUbicacion: u.idUbicacion || u.id,
             city: u.nombreUbicacion || u.nombre,
             department: u.direccion || '',
             estado: u.estado !== undefined ? u.estado : u.activo,
           }))
-          .filter((u) => u.idUbicacion && u.city)
-          .filter((u) => u.estado !== false);
+          .filter(u => u.idUbicacion && u.city)
+          .filter(u => u.estado !== false);
 
         if (mounted) {
           setUbicacionesItems(mapped);
           setUbicacionesReady(true);
         }
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (_) {
         if (mounted) {
           setUbicacionesItems([]);
@@ -135,14 +139,18 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
   useEffect(() => {
     if (!ubicacionesReady || ubicacionesItems.length === 0) return;
 
-    setFormTemporal((prev) => {
+    setFormTemporal(prev => {
       const next = { ...prev };
       if (prev.origenId && !prev.origen) {
-        const found = ubicacionesItems.find((u) => String(u.idUbicacion) === String(prev.origenId));
+        const found = ubicacionesItems.find(
+          u => String(u.idUbicacion) === String(prev.origenId)
+        );
         if (found) next.origen = found.city;
       }
       if (prev.destinoId && !prev.destino) {
-        const found = ubicacionesItems.find((u) => String(u.idUbicacion) === String(prev.destinoId));
+        const found = ubicacionesItems.find(
+          u => String(u.idUbicacion) === String(prev.destinoId)
+        );
         if (found) next.destino = found.city;
       }
       return next;
@@ -155,7 +163,7 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formTemporal.origenId, formTemporal.destinoId]);
 
-  const parseHoraTo24 = (hora) => {
+  const parseHoraTo24 = hora => {
     const raw = String(hora || '').trim();
     if (!raw) return null;
 
@@ -185,17 +193,30 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
   };
 
   // Formatear fecha para mostrar
-  const formatearFecha = (fechaISO) => {
+  const formatearFecha = fechaISO => {
     const fecha = new Date(fechaISO + 'T00:00:00');
-    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const meses = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
     return `${fecha.getDate()}-${meses[fecha.getMonth()]}-${fecha.getFullYear().toString().slice(2)}`;
   };
 
-  const formatearPrecio = (precio) => {
+  const formatearPrecio = precio => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(precio);
   };
 
@@ -204,52 +225,55 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
     const origenResolvedId =
       ubicacionesItems.length > 0
         ? formTemporal.origenId ||
-        (formTemporal.origen
-          ? ubicacionesItems.find(
-            u => u.city.toLowerCase() === formTemporal.origen.toLowerCase()
-          )?.idUbicacion
-          : "")
+          (formTemporal.origen
+            ? ubicacionesItems.find(
+                u => u.city.toLowerCase() === formTemporal.origen.toLowerCase()
+              )?.idUbicacion
+            : '')
         : formTemporal.origenId;
 
     const destinoResolvedId =
       ubicacionesItems.length > 0
         ? formTemporal.destinoId ||
-        (formTemporal.destino
-          ? ubicacionesItems.find(
-            u => u.city.toLowerCase() === formTemporal.destino.toLowerCase()
-          )?.idUbicacion
-          : "")
+          (formTemporal.destino
+            ? ubicacionesItems.find(
+                u => u.city.toLowerCase() === formTemporal.destino.toLowerCase()
+              )?.idUbicacion
+            : '')
         : formTemporal.destinoId;
 
     if (ubicacionesItems.length > 0) {
       if (!origenResolvedId) {
-        alert("Selecciona un origen válido");
+        alert('Selecciona un origen válido');
         return;
       }
       if (!destinoResolvedId) {
-        alert("Selecciona un destino válido");
+        alert('Selecciona un destino válido');
         return;
       }
     }
 
     const busquedaToApply = {
       ...formTemporal,
-      origenId: origenResolvedId || "",
-      destinoId: destinoResolvedId || "",
+      origenId: origenResolvedId || '',
+      destinoId: destinoResolvedId || '',
     };
 
     // Validar que origen y destino sean diferentes
     if (busquedaToApply.origenId && busquedaToApply.destinoId) {
-      if (String(busquedaToApply.origenId) === String(busquedaToApply.destinoId)) {
-        alert("El origen y destino no pueden ser iguales");
+      if (
+        String(busquedaToApply.origenId) === String(busquedaToApply.destinoId)
+      ) {
+        alert('El origen y destino no pueden ser iguales');
         return;
       }
     } else if (
       busquedaToApply.origen &&
       busquedaToApply.destino &&
-      busquedaToApply.origen.toLowerCase() === busquedaToApply.destino.toLowerCase()
+      busquedaToApply.origen.toLowerCase() ===
+        busquedaToApply.destino.toLowerCase()
     ) {
-      alert("El origen y destino no pueden ser iguales");
+      alert('El origen y destino no pueden ser iguales');
       return;
     }
 
@@ -278,37 +302,48 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
   }, []);
 
   const viajesFiltrados = viajes.filter(viaje => {
-    if (filtroHorario === "todos") return true;
+    if (filtroHorario === 'todos') return true;
     const periodo = parseHoraTo24(viaje.horaSalida);
     if (periodo === null) return true;
 
-    if (filtroHorario === "manana") return periodo >= 6 && periodo < 12;
-    if (filtroHorario === "tarde") return periodo >= 12 && periodo < 18;
-    if (filtroHorario === "noche") return periodo >= 18 && periodo < 24;
-    if (filtroHorario === "madrugada") return periodo >= 0 && periodo < 6;
+    if (filtroHorario === 'manana') return periodo >= 6 && periodo < 12;
+    if (filtroHorario === 'tarde') return periodo >= 12 && periodo < 18;
+    if (filtroHorario === 'noche') return periodo >= 18 && periodo < 24;
+    if (filtroHorario === 'madrugada') return periodo >= 0 && periodo < 6;
     return true;
   });
 
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Navegación */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-lg" : "bg-blue-700"
-        }`}>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled ? 'bg-white shadow-lg' : 'bg-blue-700'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md cursor-pointer" onClick={() => navigate('/')}>
+              <div
+                className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md cursor-pointer"
+                onClick={() => navigate('/')}
+              >
                 <span className="text-white font-bold text-lg">LT</span>
               </div>
               <span
                 onClick={() => navigate('/')}
-                className={`font-bold text-xl transition-colors cursor-pointer ${scrolled ? "text-gray-900" : "text-white"
-                  }`}>
+                className={`font-bold text-xl transition-colors cursor-pointer ${
+                  scrolled ? 'text-gray-900' : 'text-white'
+                }`}
+              >
                 La Tribu
               </span>
             </div>
 
-            <button onClick={() => navigate('/login')} className="flex items-center gap-2 bg-white text-blue-700 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <button
+              onClick={() => navigate('/login')}
+              className="flex items-center gap-2 bg-white text-blue-700 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
               <md-icon className="text-xl">person</md-icon>
               <span className="text-sm font-semibold">Iniciar sesión</span>
             </button>
@@ -320,21 +355,36 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
       <div className="bg-blue-700 pt-20 pb-6">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <p className="text-white/90 text-sm mb-4">
-            ¡Bienvenido a La Tribu! Recuerda: los precios online son exclusivos de nuestra web y pueden cambiar en otros puntos de venta
+            ¡Bienvenido a La Tribu! Recuerda: los precios online son exclusivos
+            de nuestra web y pueden cambiar en otros puntos de venta
           </p>
 
           <div className="bg-white rounded-xl shadow-xl p-4">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
               <div className="md:col-span-3">
-                <label className="text-xs font-semibold text-gray-700 mb-2 block">Origen</label>
+                <label className="text-xs font-semibold text-gray-700 mb-2 block">
+                  Origen
+                </label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600 pointer-events-none z-20">
                     <md-icon>location_on</md-icon>
                   </div>
                   <CityAutocomplete
                     value={formTemporal.origen}
-                    onChange={(value) => setFormTemporal(prev => ({ ...prev, origen: value, origenId: "" }))}
-                    onSelect={(city) => setFormTemporal(prev => ({ ...prev, origen: city.city, origenId: city.idUbicacion || city.id || "" }))}
+                    onChange={value =>
+                      setFormTemporal(prev => ({
+                        ...prev,
+                        origen: value,
+                        origenId: '',
+                      }))
+                    }
+                    onSelect={city =>
+                      setFormTemporal(prev => ({
+                        ...prev,
+                        origen: city.city,
+                        origenId: city.idUbicacion || city.id || '',
+                      }))
+                    }
                     placeholder="Ciudad de origen"
                     items={ubicacionesItems}
                     inputClassName="w-full pl-10 pr-3 py-2.5 bg-white border-2 border-blue-300 rounded-lg text-sm font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"
@@ -345,21 +395,36 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
               <div className="md:col-span-1 flex justify-center">
                 <button
                   onClick={handleIntercambiar}
-                  className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
+                  className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+                >
                   <md-icon className="text-blue-600">swap_horiz</md-icon>
                 </button>
               </div>
 
               <div className="md:col-span-3">
-                <label className="text-xs font-semibold text-gray-700 mb-2 block">Destino</label>
+                <label className="text-xs font-semibold text-gray-700 mb-2 block">
+                  Destino
+                </label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600 pointer-events-none z-20">
                     <md-icon>flag</md-icon>
                   </div>
                   <CityAutocomplete
                     value={formTemporal.destino}
-                    onChange={(value) => setFormTemporal(prev => ({ ...prev, destino: value, destinoId: "" }))}
-                    onSelect={(city) => setFormTemporal(prev => ({ ...prev, destino: city.city, destinoId: city.idUbicacion || city.id || "" }))}
+                    onChange={value =>
+                      setFormTemporal(prev => ({
+                        ...prev,
+                        destino: value,
+                        destinoId: '',
+                      }))
+                    }
+                    onSelect={city =>
+                      setFormTemporal(prev => ({
+                        ...prev,
+                        destino: city.city,
+                        destinoId: city.idUbicacion || city.id || '',
+                      }))
+                    }
                     placeholder="Ciudad de destino"
                     items={ubicacionesItems}
                     inputClassName="w-full pl-10 pr-3 py-2.5 bg-white border-2 border-blue-300 rounded-lg text-sm font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"
@@ -368,28 +433,46 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
               </div>
 
               <div className="md:col-span-2">
-                <label className="text-xs font-semibold text-gray-700 mb-1 block">Fecha de Ida</label>
+                <label className="text-xs font-semibold text-gray-700 mb-1 block">
+                  Fecha de Ida
+                </label>
                 <div className="relative">
-                  <md-icon className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600">event</md-icon>
+                  <md-icon className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600">
+                    event
+                  </md-icon>
                   <input
                     type="date"
                     value={formTemporal.fecha}
                     min={getTodayDate()}
-                    onChange={(e) => setFormTemporal(prev => ({ ...prev, fecha: e.target.value }))}
+                    onChange={e =>
+                      setFormTemporal(prev => ({
+                        ...prev,
+                        fecha: e.target.value,
+                      }))
+                    }
                     className="w-full pl-10 pr-3 py-2.5 bg-white border-2 border-blue-300 rounded-lg text-sm font-semibold text-gray-900 focus:outline-none focus:border-blue-600 transition-colors"
                   />
                 </div>
               </div>
 
               <div className="md:col-span-2">
-                <label className="text-xs font-semibold text-gray-700 mb-1 block">Fecha de Regreso (Opcional)</label>
+                <label className="text-xs font-semibold text-gray-700 mb-1 block">
+                  Fecha de Regreso (Opcional)
+                </label>
                 <div className="relative">
-                  <md-icon className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600">event</md-icon>
+                  <md-icon className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600">
+                    event
+                  </md-icon>
                   <input
                     type="date"
                     value={formTemporal.fechaRegreso || ''}
                     min={getTodayDate()}
-                    onChange={(e) => setFormTemporal(prev => ({ ...prev, fechaRegreso: e.target.value }))}
+                    onChange={e =>
+                      setFormTemporal(prev => ({
+                        ...prev,
+                        fechaRegreso: e.target.value,
+                      }))
+                    }
                     className="w-full pl-10 pr-3 py-2.5 bg-white border-2 border-blue-300 rounded-lg text-sm font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-600 transition-colors"
                   />
                 </div>
@@ -399,7 +482,8 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
                 <button
                   onClick={handleNuevaBusqueda}
                   disabled={isLoading}
-                  className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+                  className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
                   {isLoading ? (
                     <>
                       <md-icon className="animate-spin">refresh</md-icon>
@@ -423,7 +507,10 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
         {/* Encabezado de resultados */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
-            Seleccionar horario de ida <span className="text-gray-600 font-normal text-lg">{formatearFecha(busqueda.fecha)}</span>
+            Seleccionar horario de ida{' '}
+            <span className="text-gray-600 font-normal text-lg">
+              {formatearFecha(busqueda.fecha)}
+            </span>
           </h2>
         </div>
 
@@ -431,19 +518,20 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
           <div className="flex flex-wrap gap-3">
             {[
-              { id: "todos", label: "Todos", icon: "schedule" },
-              { id: "manana", label: "Mañana", icon: "wb_sunny" },
-              { id: "tarde", label: "Tarde", icon: "wb_twilight" },
-              { id: "noche", label: "Noche", icon: "nights_stay" },
-              { id: "madrugada", label: "Madrugada", icon: "bedtime" }
+              { id: 'todos', label: 'Todos', icon: 'schedule' },
+              { id: 'manana', label: 'Mañana', icon: 'wb_sunny' },
+              { id: 'tarde', label: 'Tarde', icon: 'wb_twilight' },
+              { id: 'noche', label: 'Noche', icon: 'nights_stay' },
+              { id: 'madrugada', label: 'Madrugada', icon: 'bedtime' },
             ].map(filtro => (
               <button
                 key={filtro.id}
                 onClick={() => setFiltroHorario(filtro.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${filtroHorario === filtro.id
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                  filtroHorario === filtro.id
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
               >
                 <md-icon className="text-lg">{filtro.icon}</md-icon>
                 {filtro.label}
@@ -454,7 +542,9 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
 
         {/* Etiqueta de viajes recomendados */}
         <div className="flex items-center gap-2 mb-4">
-          <h3 className="text-lg font-bold text-gray-900">Viajes recomendados</h3>
+          <h3 className="text-lg font-bold text-gray-900">
+            Viajes recomendados
+          </h3>
           <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
             PARA TI
           </span>
@@ -474,8 +564,12 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
         {isLoading && (
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-3">
-              <md-icon className="text-blue-600 text-4xl animate-spin">refresh</md-icon>
-              <p className="text-gray-600 font-semibold">Cargando viajes disponibles...</p>
+              <md-icon className="text-blue-600 text-4xl animate-spin">
+                refresh
+              </md-icon>
+              <p className="text-gray-600 font-semibold">
+                Cargando viajes disponibles...
+              </p>
             </div>
           </div>
         )}
@@ -483,9 +577,15 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
         {/* Mostrar mensaje si no hay viajes */}
         {!isLoading && viajes.length === 0 && !error && (
           <div className="bg-blue-50 border-2 border-blue-300 rounded-xl p-8 text-center">
-            <md-icon className="text-blue-600 text-4xl mb-3 block">info</md-icon>
-            <p className="text-gray-700 font-semibold">No hay viajes disponibles para esta ruta</p>
-            <p className="text-gray-500 text-sm mt-1">Intenta con otras fechas u otra ruta</p>
+            <md-icon className="text-blue-600 text-4xl mb-3 block">
+              info
+            </md-icon>
+            <p className="text-gray-700 font-semibold">
+              No hay viajes disponibles para esta ruta
+            </p>
+            <p className="text-gray-500 text-sm mt-1">
+              Intenta con otras fechas u otra ruta
+            </p>
           </div>
         )}
 
@@ -502,11 +602,17 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
                   <div className="md:col-span-2">
                     <div className="flex flex-col items-center gap-2">
                       <div className="w-16 h-16 rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                        <span className="text-white font-black text-xl">LT</span>
+                        <span className="text-white font-black text-xl">
+                          LT
+                        </span>
                       </div>
                       <div className="text-center">
-                        <h4 className="text-blue-600 font-bold text-sm">{viaje.categoria}</h4>
-                        <p className="text-gray-500 text-xs">{viaje.categoriaDesc}</p>
+                        <h4 className="text-blue-600 font-bold text-sm">
+                          {viaje.categoria}
+                        </h4>
+                        <p className="text-gray-500 text-xs">
+                          {viaje.categoriaDesc}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -517,18 +623,28 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
                       {/* Salida */}
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <md-icon className="text-2xl text-gray-700">{viaje.icono}</md-icon>
-                          <span className="text-3xl font-black text-gray-900">{viaje.horaSalida}</span>
+                          <md-icon className="text-2xl text-gray-700">
+                            {viaje.icono}
+                          </md-icon>
+                          <span className="text-3xl font-black text-gray-900">
+                            {viaje.horaSalida}
+                          </span>
                         </div>
-                        <p className="text-xs text-gray-600 font-medium">{viaje.origenTerminal}</p>
+                        <p className="text-xs text-gray-600 font-medium">
+                          {viaje.origenTerminal}
+                        </p>
                       </div>
 
                       {/* Ruta */}
                       <div className="flex flex-col items-center gap-1 px-4">
-                        <span className="text-xs text-gray-500 font-medium">{viaje.rutas} ruta</span>
+                        <span className="text-xs text-gray-500 font-medium">
+                          {viaje.rutas} ruta
+                        </span>
                         <div className="flex items-center gap-2">
                           <div className="h-0.5 w-12 bg-gray-300"></div>
-                          <md-icon className="text-blue-600 text-xl">arrow_forward</md-icon>
+                          <md-icon className="text-blue-600 text-xl">
+                            arrow_forward
+                          </md-icon>
                           <div className="h-0.5 w-12 bg-gray-300"></div>
                         </div>
                       </div>
@@ -536,9 +652,13 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
                       {/* Llegada */}
                       <div className="flex-1 text-right">
                         <div className="flex items-center justify-end gap-2 mb-1">
-                          <span className="text-3xl font-black text-gray-900">{viaje.horaLlegada}</span>
+                          <span className="text-3xl font-black text-gray-900">
+                            {viaje.horaLlegada}
+                          </span>
                         </div>
-                        <p className="text-xs text-gray-600 font-medium">{viaje.destinoTerminal}</p>
+                        <p className="text-xs text-gray-600 font-medium">
+                          {viaje.destinoTerminal}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -548,8 +668,12 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
                     <div className="text-right">
                       {index === 0 && (
                         <div className="flex items-center justify-end gap-2 mb-2">
-                          <md-icon className="text-purple-600 text-sm">bolt</md-icon>
-                          <span className="text-purple-600 text-xs font-bold">{viaje.etiqueta}</span>
+                          <md-icon className="text-purple-600 text-sm">
+                            bolt
+                          </md-icon>
+                          <span className="text-purple-600 text-xs font-bold">
+                            {viaje.etiqueta}
+                          </span>
                         </div>
                       )}
                       <div className="flex items-center justify-end gap-2 mb-1">
@@ -567,7 +691,8 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
                         setSelectedViaje(viaje);
                         setSeatsModalOpen(true);
                       }}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-all hover:scale-105 shadow-lg whitespace-nowrap">
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-all hover:scale-105 shadow-lg whitespace-nowrap"
+                    >
                       Ver sillas
                     </button>
                   </div>
@@ -583,7 +708,9 @@ const ResultadosBusqueda = ({ datosIniciales, onVolverInicio }) => {
         {/* Sin resultados */}
         {viajesFiltrados.length === 0 && (
           <div className="bg-white rounded-2xl shadow-md p-12 text-center">
-            <md-icon className="text-6xl text-gray-300 mb-4">search_off</md-icon>
+            <md-icon className="text-6xl text-gray-300 mb-4">
+              search_off
+            </md-icon>
             <h3 className="text-2xl font-bold text-gray-900 mb-2">
               No hay viajes disponibles
             </h3>

@@ -1,4 +1,3 @@
-import Modal from '../Modal';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import { useState, useEffect } from 'react';

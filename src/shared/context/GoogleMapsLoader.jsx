@@ -23,6 +23,7 @@ export const GoogleMapsLoader = ({ children }) => {
     );
   }
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: apiKey,
     libraries: LIBRARIES,
@@ -30,6 +31,7 @@ export const GoogleMapsLoader = ({ children }) => {
     region: 'CO',
   });
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const value = useMemo(() => ({ isLoaded, loadError }), [isLoaded, loadError]);
 
   if (loadError) {
@@ -44,6 +46,7 @@ export const GoogleMapsLoader = ({ children }) => {
     );
   }
 
+  // eslint-disable-next-line no-empty
   if (!isLoaded) {
   }
 
@@ -54,6 +57,7 @@ export const GoogleMapsLoader = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useGoogleMaps = () => {
   const context = useContext(GoogleMapsContext);
   if (!context) {

@@ -10,10 +10,8 @@ import '@material/web/button/filled-tonal-button.js';
 import '@material/web/button/outlined-button.js';
 import '@material/web/textfield/outlined-text-field.js';
 import '@material/web/progress/circular-progress.js';
-import DriverTrackingMap from './components/DriverTrackingMap';
 import useDriverTracking from '../../shared/hooks/useDriverTracking';
 import conductorService from '../conductores/api/conductorService';
-import Avvvatars from 'avvvatars-react';
 import { resolveAssetUrl } from '../../shared/utils/url';
 
 const TrackingPage = () => {
@@ -109,8 +107,9 @@ const TrackingPage = () => {
         </div>
 
         <div
-          className={`px-4 py-2 rounded-full border flex items-center gap-2 ${isConnected ? 'btn-green' : 'btn-red'
-            }`}
+          className={`px-4 py-2 rounded-full border flex items-center gap-2 ${
+            isConnected ? 'btn-green' : 'btn-red'
+          }`}
         >
           <span className="text-sm font-medium">
             {isConnected ? 'Conectado al servidor' : 'Desconectado'}
@@ -198,9 +197,10 @@ const TrackingPage = () => {
                       onClick={() => handleDriverSelect(driverId)}
                       className={`
                         flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border
-                        ${isSelected
-                          ? 'bg-transparent border-border border-2 shadow-sm'
-                          : 'bg-transparent border-border hover:bg-secondary/5 hover:border-border'
+                        ${
+                          isSelected
+                            ? 'bg-transparent border-border border-2 shadow-sm'
+                            : 'bg-transparent border-border hover:bg-secondary/5 hover:border-border'
                         }
                       `}
                     >

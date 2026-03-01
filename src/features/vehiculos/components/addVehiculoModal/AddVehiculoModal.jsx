@@ -1,4 +1,3 @@
-import Modal from '../../../../shared/components/modal/Modal';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/progress/linear-progress.js';
@@ -48,8 +47,19 @@ export default function AddVehiculoModal({
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({
+    linea: '',
+    modelo: '',
+    color: '',
+    capacidadCarga: '',
+    capacidadPasajeros: '',
+    soatVencimiento: '',
+    tecnomecanicaVencimiento: '',
+    seguroVencimiento: '',
+  });
   const fileRef = useRef(null);
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const totalSteps = 5;
 
   useEffect(() => {
@@ -67,6 +77,7 @@ export default function AddVehiculoModal({
         setTipos(Array.isArray(t?.data) ? t.data : t);
         setMarcas(Array.isArray(m?.data) ? m.data : m);
         setConductores(Array.isArray(c?.data) ? c.data : c);
+      // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
       } catch (e) {
       } finally {
         if (mounted) setLoadingCatalogs(false);
@@ -89,12 +100,164 @@ export default function AddVehiculoModal({
       setLoadingImage(false);
       setSuccess(false);
       setShowConfirmation(false);
+      setFieldErrors({
+        linea: '',
+        modelo: '',
+        color: '',
+        capacidadCarga: '',
+        capacidadPasajeros: '',
+        soatVencimiento: '',
+        tecnomecanicaVencimiento: '',
+        seguroVencimiento: '',
+      });
     }
   }, [isOpen]);
 
+  const validateField = (name, value, currentForm = form) => {
+    let error = null;
+    switch (name) {
+      case 'file':
+        if (!value) error = 'La foto del vehículo es obligatoria';
+        else if (value.size > 5 * 1024 * 1024)
+          error = 'El archivo no debe superar 5MB';
+        else if (
+          !['image/jpeg', 'image/png', 'image/webp'].includes(value.type)
+        )
+          error = 'Formato no válido (JPG, PNG, WEBP)';
+        break;
+      case 'idTipoVehiculo':
+        if (!value) error = 'Selecciona un tipo de vehículo';
+        break;
+      case 'idMarcaVehiculo':
+        if (!value) error = 'Selecciona una marca';
+        break;
+      case 'placa':
+        if (!value?.trim()) error = 'La placa es obligatoria';
+        else if (value.trim().length < 5) error = 'Mínimo 5 caracteres';
+        break;
+      case 'tipoPlaca':
+        if (!value) error = 'Selecciona el tipo de placa';
+        break;
+      case 'vin':
+        if (value && value.trim().length < 17)
+          error = 'El VIN debe tener 17 caracteres';
+        break;
+      case 'propietarioExternoNombre':
+        if (currentForm.isExternalOwner && !value?.trim())
+          error = 'El nombre es obligatorio';
+        else if (currentForm.isExternalOwner && value.trim().length < 2)
+          error = 'Mínimo 2 caracteres';
+        break;
+      case 'propietarioExternoDocumento':
+        if (currentForm.isExternalOwner && !value?.trim())
+          error = 'El documento es obligatorio';
+        else if (currentForm.isExternalOwner && value.trim().length < 5)
+          error = 'Mínimo 5 dígitos';
+        break;
+      case 'propietarioExternoTelefono':
+        if (currentForm.isExternalOwner && !value?.trim())
+          error = 'El teléfono es obligatorio';
+        else if (currentForm.isExternalOwner && value.trim().length < 10)
+          error = 'Mínimo 10 dígitos';
+        break;
+      case 'idPropietario':
+        if (!currentForm.isExternalOwner && !value)
+          error = 'Selecciona un conductor';
+        break;
+      case 'linea':
+        if (!value?.trim()) error = 'La línea es obligatoria';
+        else if (value.trim().length < 2) error = 'Mínimo 2 caracteres';
+        break;
+      case 'modelo':
+        if (!value?.toString().trim()) error = 'El modelo es obligatorio';
+        else {
+          const year = parseInt(value, 10);
+          if (year < 1900 || year > 2100) error = 'Rango válido: 1900-2100';
+          else if (value.toString().length < 4) error = 'Debe tener 4 dígitos';
+        }
+        break;
+      case 'color':
+        if (!value?.trim()) error = 'El color es obligatorio';
+        else if (value.trim().length < 3) error = 'Mínimo 3 caracteres';
+        break;
+      case 'capacidadPasajeros':
+        if (!value?.toString().trim()) error = 'Obligatorio';
+        else {
+          const num = parseInt(value, 10);
+          if (num < 1 || num > 100) error = 'Máx 100 pasajeros';
+        }
+        break;
+      case 'capacidadCarga':
+        if (value?.toString().trim()) {
+          const num = parseInt(value, 10);
+          if (num < 1 || num > 50000) error = 'Máx 50000 kg';
+        }
+        break;
+      case 'soatVencimiento':
+      case 'tecnomecanicaVencimiento':
+      case 'seguroVencimiento':
+        if (value) {
+          const selectedDate = new Date(value);
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          tomorrow.setHours(0, 0, 0, 0);
+          const nextYear = new Date(tomorrow);
+          nextYear.setFullYear(nextYear.getFullYear() + 1);
+
+          if (selectedDate < tomorrow)
+            error = 'Debe ser una fecha futura (desde mañana en adelante)';
+          else if (selectedDate > nextYear)
+            error = 'La fecha no puede superar un año desde hoy';
+        }
+        break;
+    }
+    return error;
+  };
+
   const handleChange = e => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    let newValue = value;
+
+    if (name === 'placa' || name === 'vin') {
+      newValue = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    } else if (
+      name === 'linea' ||
+      name === 'propietarioExternoNombre' ||
+      name === 'color'
+    ) {
+      newValue = value.replace(/[0-9]/g, '');
+    } else if (
+      name === 'modelo' ||
+      name === 'capacidadPasajeros' ||
+      name === 'capacidadCarga' ||
+      name === 'propietarioExternoDocumento' ||
+      name === 'propietarioExternoTelefono'
+    ) {
+      newValue = value.replace(/\D/g, '');
+    }
+
+    if (name === 'propietarioExternoTelefono' && newValue.length > 10) return;
+    if (name === 'propietarioExternoDocumento' && newValue.length > 15) return;
+    if (name === 'modelo' && newValue.length > 4) return;
+    if (name === 'capacidadPasajeros' && newValue.length > 3) return;
+    if (name === 'capacidadCarga' && newValue.length > 5) return;
+    if (name === 'placa' && newValue.length > 6) return;
+    if (name === 'vin' && newValue.length > 17) return;
+
+    setForm(prev => ({ ...prev, [name]: newValue }));
+
+    const fieldError = validateField(name, newValue, form);
+    if (fieldError !== null || fieldErrors[name]) {
+      setFieldErrors(prev => ({ ...prev, [name]: fieldError }));
+    }
+  };
+
+  const handleBlur = e => {
+    const { name, value } = e.target;
+    const fieldError = validateField(name, value, form);
+    if (fieldError) {
+      setFieldErrors(prev => ({ ...prev, [name]: fieldError }));
+    }
   };
 
   const handleSwitchChange = e => {
@@ -124,6 +287,14 @@ export default function AddVehiculoModal({
   const handleFileChange = e => {
     const f = e.target.files?.[0];
     if (f) {
+      const fileError = validateField('file', f, form);
+      if (fileError) {
+        setError(fileError);
+        if (fileRef.current) fileRef.current.value = '';
+        return;
+      }
+
+      setError(null);
       setLoadingImage(true);
       setFile(f);
 
@@ -147,37 +318,56 @@ export default function AddVehiculoModal({
     }
   };
 
-  const validateStep1 = () => {
-    if (!file) return 'La foto del vehículo es obligatoria';
-    return null;
-  };
+  const validateStep1 = () => validateField('file', file, form);
 
   const validateStep2 = () => {
-    if (!form.idTipoVehiculo) return 'Selecciona un tipo de vehículo';
-    if (!form.idMarcaVehiculo) return 'Selecciona una marca';
-    if (!form.placa) return 'La placa es obligatoria';
-    if (!form.tipoPlaca) return 'Selecciona el tipo de placa';
+    const fields = [
+      'idTipoVehiculo',
+      'idMarcaVehiculo',
+      'placa',
+      'tipoPlaca',
+      'vin',
+      ...(form.isExternalOwner
+        ? [
+            'propietarioExternoNombre',
+            'propietarioExternoDocumento',
+            'propietarioExternoTelefono',
+          ]
+        : ['idPropietario']),
+    ];
 
-    if (form.isExternalOwner) {
-      if (!form.propietarioExternoNombre)
-        return 'El nombre del propietario es obligatorio';
-      if (!form.propietarioExternoDocumento)
-        return 'El documento del propietario es obligatorio';
-      if (!form.propietarioExternoTelefono)
-        return 'El teléfono del propietario es obligatorio';
-    } else {
-      if (!form.idPropietario) return 'Selecciona un propietario (Conductor)';
+    for (let f of fields) {
+      const err = validateField(f, form[f], form);
+      if (err) return err;
     }
-
     return null;
   };
 
   const validateStep3 = () => {
-    if (!form.linea) return 'La línea es obligatoria';
-    if (!form.modelo) return 'El modelo es obligatorio';
-    if (!form.color) return 'El color es obligatorio';
-    if (!form.capacidadPasajeros)
-      return 'La capacidad de pasajeros es obligatoria';
+    const fields = [
+      'linea',
+      'modelo',
+      'color',
+      'capacidadPasajeros',
+      'capacidadCarga',
+    ];
+    for (let f of fields) {
+      const err = validateField(f, form[f], form);
+      if (err) return err;
+    }
+    return null;
+  };
+
+  const validateStep4 = () => {
+    const fields = [
+      'soatVencimiento',
+      'tecnomecanicaVencimiento',
+      'seguroVencimiento',
+    ];
+    for (let f of fields) {
+      const err = validateField(f, form[f], form);
+      if (err) return err;
+    }
     return null;
   };
 
@@ -205,6 +395,11 @@ export default function AddVehiculoModal({
       }
       setCurrentStep(4);
     } else if (currentStep === 4) {
+      const msg = validateStep4();
+      if (msg) {
+        setError(msg);
+        return;
+      }
       setShowConfirmation(true);
       setCurrentStep(5);
     }
@@ -224,6 +419,8 @@ export default function AddVehiculoModal({
     if (msg2) return msg2;
     const msg3 = validateStep3();
     if (msg3) return msg3;
+    const msg4 = validateStep4();
+    if (msg4) return msg4;
     return null;
   };
 
@@ -306,10 +503,11 @@ export default function AddVehiculoModal({
                 <div
                   className={`
                                     flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 transform
-                                    ${currentStep >= step
-                      ? 'bg-primary text-on-primary shadow-md scale-110 ring-4 ring-primary/20'
-                      : 'bg-fill text-secondary scale-100'
-                    }
+                                    ${
+                                      currentStep >= step
+                                        ? 'bg-primary text-on-primary shadow-md scale-110 ring-4 ring-primary/20'
+                                        : 'bg-fill text-secondary scale-100'
+                                    }
                                     ${currentStep === step ? 'animate-pulse' : ''}
                                     font-semibold
                                 `}
@@ -554,57 +752,57 @@ export default function AddVehiculoModal({
                   {(form.soatVencimiento ||
                     form.tecnomecanicaVencimiento ||
                     form.seguroVencimiento) && (
-                      <div className="flex items-start gap-3 pt-4 border-t border-border">
-                        <md-icon className="text-primary mt-1">
-                          event_note
-                        </md-icon>
-                        <div className="flex-1">
-                          <p className="text-xs text-secondary font-medium mb-2">
-                            Fechas de vencimiento
-                          </p>
-                          <div className="space-y-1">
-                            {form.soatVencimiento && (
-                              <p className="text-primary text-sm">
-                                <span className="text-secondary">SOAT:</span>{' '}
-                                {new Date(
-                                  form.soatVencimiento
-                                ).toLocaleDateString('es-ES', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                })}
-                              </p>
-                            )}
-                            {form.tecnomecanicaVencimiento && (
-                              <p className="text-primary text-sm">
-                                <span className="text-secondary">
-                                  Tecnomecánica:
-                                </span>{' '}
-                                {new Date(
-                                  form.tecnomecanicaVencimiento
-                                ).toLocaleDateString('es-ES', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                })}
-                              </p>
-                            )}
-                            {form.seguroVencimiento && (
-                              <p className="text-primary text-sm">
-                                <span className="text-secondary">Seguro:</span>{' '}
-                                {new Date(
-                                  form.seguroVencimiento
-                                ).toLocaleDateString('es-ES', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                })}
-                              </p>
-                            )}
-                          </div>
+                    <div className="flex items-start gap-3 pt-4 border-t border-border">
+                      <md-icon className="text-primary mt-1">
+                        event_note
+                      </md-icon>
+                      <div className="flex-1">
+                        <p className="text-xs text-secondary font-medium mb-2">
+                          Fechas de vencimiento
+                        </p>
+                        <div className="space-y-1">
+                          {form.soatVencimiento && (
+                            <p className="text-primary text-sm">
+                              <span className="text-secondary">SOAT:</span>{' '}
+                              {new Date(
+                                form.soatVencimiento
+                              ).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                            </p>
+                          )}
+                          {form.tecnomecanicaVencimiento && (
+                            <p className="text-primary text-sm">
+                              <span className="text-secondary">
+                                Tecnomecánica:
+                              </span>{' '}
+                              {new Date(
+                                form.tecnomecanicaVencimiento
+                              ).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                            </p>
+                          )}
+                          {form.seguroVencimiento && (
+                            <p className="text-primary text-sm">
+                              <span className="text-secondary">Seguro:</span>{' '}
+                              {new Date(
+                                form.seguroVencimiento
+                              ).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                            </p>
+                          )}
                         </div>
                       </div>
-                    )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="rounded-lg content-box-outline-4-small p-4 flex items-start gap-3">
@@ -774,7 +972,8 @@ export default function AddVehiculoModal({
                               name="idTipoVehiculo"
                               value={form.idTipoVehiculo}
                               onChange={handleChange}
-                              className="select-filter w-full px-4 input bg-surface border rounded-lg"
+                              onBlur={handleBlur}
+                              className={`select-filter w-full px-4 input bg-surface border rounded-lg ${fieldErrors.idTipoVehiculo ? 'border-red-500' : 'border-border'}`}
                             >
                               <option value="">Selecciona un tipo</option>
                               {tipos?.map(t => (
@@ -801,7 +1000,8 @@ export default function AddVehiculoModal({
                               name="idMarcaVehiculo"
                               value={form.idMarcaVehiculo}
                               onChange={handleChange}
-                              className="select-filter w-full px-4 input bg-surface border rounded-lg"
+                              onBlur={handleBlur}
+                              className={`select-filter w-full px-4 input bg-surface border rounded-lg ${fieldErrors.idMarcaVehiculo ? 'border-red-500' : 'border-border'}`}
                             >
                               <option value="">Selecciona una marca</option>
                               {marcas?.map(m => (
@@ -824,10 +1024,16 @@ export default function AddVehiculoModal({
                             name="placa"
                             value={form.placa}
                             onChange={handleChange}
-                            className="w-full px-4 input bg-surface border rounded-lg text-primary uppercase"
+                            onBlur={handleBlur}
+                            className={`w-full px-4 input bg-surface border rounded-lg text-primary uppercase ${fieldErrors.placa ? 'border-red-500' : 'border-border'}`}
                             placeholder="ABC123"
-                            maxLength={10}
+                            maxLength={6}
                           />
+                          {fieldErrors.placa && (
+                            <span className="text-xs text-red-500">
+                              {fieldErrors.placa}
+                            </span>
+                          )}
                         </div>
 
                         <div className="flex flex-col gap-1">
@@ -835,12 +1041,15 @@ export default function AddVehiculoModal({
                             Tipo de placa <span className="text-red">*</span>
                           </label>
                           <div className="select-wrapper w-full">
-                            <md-icon className="text-sm">arrow_drop_down</md-icon>
+                            <md-icon className="text-sm">
+                              arrow_drop_down
+                            </md-icon>
                             <select
                               name="tipoPlaca"
                               value={form.tipoPlaca}
                               onChange={handleChange}
-                              className="select-filter w-full px-4 input bg-surface border rounded-lg"
+                              onBlur={handleBlur}
+                              className={`select-filter w-full px-4 input bg-surface border rounded-lg ${fieldErrors.tipoPlaca ? 'border-red-500' : 'border-border'}`}
                             >
                               <option value="BLANCA">Placa blanca</option>
                               <option value="AMARILLA">Placa amarilla</option>
@@ -856,10 +1065,16 @@ export default function AddVehiculoModal({
                             name="vin"
                             value={form.vin}
                             onChange={handleChange}
-                            className="w-full px-4 input bg-surface border rounded-lg text-primary"
+                            onBlur={handleBlur}
+                            className={`w-full px-4 input bg-surface border rounded-lg text-primary uppercase ${fieldErrors.vin ? 'border-red-500' : 'border-border'}`}
                             placeholder="Número de identificación vehicular"
                             maxLength={17}
                           />
+                          {fieldErrors.vin && (
+                            <span className="text-xs text-red-500">
+                              {fieldErrors.vin}
+                            </span>
+                          )}
                         </div>
 
                         <div className="pt-4 border-t border-border mt-2">
@@ -881,6 +1096,7 @@ export default function AddVehiculoModal({
                               <md-switch
                                 selected={!form.isExternalOwner}
                                 onClick={e => {
+                                  // eslint-disable-next-line unused-imports/no-unused-vars
                                   const isInternal = !e.target.selected;
 
                                   handleSwitchChange({
@@ -911,7 +1127,8 @@ export default function AddVehiculoModal({
                                   name="idPropietario"
                                   value={form.idPropietario}
                                   onChange={handleChange}
-                                  className="select-filter w-full px-4 input bg-surface border rounded-lg"
+                                  onBlur={handleBlur}
+                                  className={`select-filter w-full px-4 input bg-surface border rounded-lg ${fieldErrors.idPropietario ? 'border-red-500' : 'border-border'}`}
                                 >
                                   <option value="">
                                     Selecciona un conductor
@@ -941,9 +1158,15 @@ export default function AddVehiculoModal({
                                   name="propietarioExternoNombre"
                                   value={form.propietarioExternoNombre}
                                   onChange={handleChange}
-                                  className="w-full px-4 input bg-surface border rounded-lg text-primary"
+                                  onBlur={handleBlur}
+                                  className={`w-full px-4 input bg-surface border rounded-lg text-primary ${fieldErrors.propietarioExternoNombre ? 'border-red-500' : 'border-border'}`}
                                   placeholder="Nombre completo"
                                 />
+                                {fieldErrors.propietarioExternoNombre && (
+                                  <span className="text-xs text-red-500">
+                                    {fieldErrors.propietarioExternoNombre}
+                                  </span>
+                                )}
                               </div>
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1">
@@ -955,9 +1178,15 @@ export default function AddVehiculoModal({
                                     name="propietarioExternoDocumento"
                                     value={form.propietarioExternoDocumento}
                                     onChange={handleChange}
-                                    className="w-full px-4 input bg-surface border rounded-lg text-primary"
+                                    onBlur={handleBlur}
+                                    className={`w-full px-4 input bg-surface border rounded-lg text-primary ${fieldErrors.propietarioExternoDocumento ? 'border-red-500' : 'border-border'}`}
                                     placeholder="CC / NIT"
                                   />
+                                  {fieldErrors.propietarioExternoDocumento && (
+                                    <span className="text-xs text-red-500">
+                                      {fieldErrors.propietarioExternoDocumento}
+                                    </span>
+                                  )}
                                 </div>
                                 <div className="flex flex-col gap-1">
                                   <label className="subtitle1 text-primary font-medium">
@@ -967,9 +1196,15 @@ export default function AddVehiculoModal({
                                     name="propietarioExternoTelefono"
                                     value={form.propietarioExternoTelefono}
                                     onChange={handleChange}
-                                    className="w-full px-4 input bg-surface border rounded-lg text-primary"
+                                    onBlur={handleBlur}
+                                    className={`w-full px-4 input bg-surface border rounded-lg text-primary ${fieldErrors.propietarioExternoTelefono ? 'border-red-500' : 'border-border'}`}
                                     placeholder="Número de contacto"
                                   />
+                                  {fieldErrors.propietarioExternoTelefono && (
+                                    <span className="text-xs text-red-500">
+                                      {fieldErrors.propietarioExternoTelefono}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -1004,9 +1239,19 @@ export default function AddVehiculoModal({
                         name="linea"
                         value={form.linea}
                         onChange={handleChange}
-                        className="w-full px-4 input bg-surface border rounded-lg text-primary"
+                        onBlur={handleBlur}
+                        className={`w-full px-4 input bg-surface border rounded-lg text-primary transition-colors ${
+                          fieldErrors.linea
+                            ? 'border-red-500 focus:border-red-500'
+                            : 'border-border focus:border-primary'
+                        }`}
                         placeholder="Aqui la linea del vehiculo"
                       />
+                      {fieldErrors.linea && (
+                        <span className="text-xs text-red-500">
+                          {fieldErrors.linea}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-1">
@@ -1014,15 +1259,24 @@ export default function AddVehiculoModal({
                         Modelo <span className="text-red">*</span>
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         name="modelo"
                         value={form.modelo}
                         onChange={handleChange}
-                        className="w-full px-4 input bg-surface border rounded-lg text-primary"
+                        onBlur={handleBlur}
+                        className={`w-full px-4 input bg-surface border rounded-lg text-primary transition-colors ${
+                          fieldErrors.modelo
+                            ? 'border-red-500 focus:border-red-500'
+                            : 'border-border focus:border-primary'
+                        }`}
                         placeholder="2024"
-                        min="1900"
-                        max="2100"
+                        maxLength="4"
                       />
+                      {fieldErrors.modelo && (
+                        <span className="text-xs text-red-500">
+                          {fieldErrors.modelo}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-1">
@@ -1033,9 +1287,19 @@ export default function AddVehiculoModal({
                         name="color"
                         value={form.color}
                         onChange={handleChange}
-                        className="w-full px-4 input bg-surface border rounded-lg text-primary"
+                        onBlur={handleBlur}
+                        className={`w-full px-4 input bg-surface border rounded-lg text-primary transition-colors ${
+                          fieldErrors.color
+                            ? 'border-red-500 focus:border-red-500'
+                            : 'border-border focus:border-primary'
+                        }`}
                         placeholder="Aqui el color del vehiculo"
                       />
+                      {fieldErrors.color && (
+                        <span className="text-xs text-red-500">
+                          {fieldErrors.color}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-1">
@@ -1054,11 +1318,12 @@ export default function AddVehiculoModal({
                               },
                             })
                           }
-                          className={`px-4 py-3 rounded-lg font-medium transition-all ${form.capacidadPasajeros === '4' ||
-                              form.capacidadPasajeros === 4
+                          className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                            form.capacidadPasajeros === '4' ||
+                            form.capacidadPasajeros === 4
                               ? 'bg-primary text-on-primary'
                               : 'bg-fill border border-border text-secondary hover:bg-border'
-                            }`}
+                          }`}
                         >
                           4
                         </button>
@@ -1072,11 +1337,12 @@ export default function AddVehiculoModal({
                               },
                             })
                           }
-                          className={`px-4 py-3 rounded-lg font-medium transition-all ${form.capacidadPasajeros === '5' ||
-                              form.capacidadPasajeros === 5
+                          className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                            form.capacidadPasajeros === '5' ||
+                            form.capacidadPasajeros === 5
                               ? 'bg-primary text-on-primary'
                               : 'bg-fill border border-border text-secondary hover:bg-border'
-                            }`}
+                          }`}
                         >
                           5
                         </button>
@@ -1089,15 +1355,28 @@ export default function AddVehiculoModal({
                               : ''
                           }
                           onChange={e => {
-                            const value = e.target.value.replace(/[^\d]/g, '');
+                            const val = e.target.value.replace(/[^\d]/g, '');
                             handleChange({
-                              target: { name: 'capacidadPasajeros', value },
+                              target: {
+                                name: 'capacidadPasajeros',
+                                value: val,
+                              },
                             });
                           }}
-                          className="flex-1 px-4 py-3 input bg-fill border border-border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                          onBlur={handleBlur}
+                          className={`flex-1 px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none transition-colors ${
+                            fieldErrors.capacidadPasajeros
+                              ? 'border-red-500 focus:ring-2 focus:ring-red-500/20 focus:border-red-500'
+                              : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'
+                          }`}
                           placeholder="Otra cantidad"
                         />
                       </div>
+                      {fieldErrors.capacidadPasajeros && (
+                        <span className="text-xs text-red-500">
+                          {fieldErrors.capacidadPasajeros}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-1">
@@ -1114,18 +1393,28 @@ export default function AddVehiculoModal({
                               : ''
                           }
                           onChange={e => {
-                            const value = e.target.value.replace(/[^\d.]/g, '');
+                            const val = e.target.value.replace(/[^\d]/g, '');
                             handleChange({
-                              target: { name: 'capacidadCarga', value },
+                              target: { name: 'capacidadCarga', value: val },
                             });
                           }}
-                          className="w-full px-4 py-3 pr-12 input bg-fill border border-border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                          onBlur={handleBlur}
+                          className={`w-full px-4 py-3 pr-12 input bg-fill border rounded-lg text-primary placeholder-text-secondary transition-colors ${
+                            fieldErrors.capacidadCarga
+                              ? 'border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500'
+                              : 'border-border focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary'
+                          }`}
                           placeholder="Aquí la capacidad de carga del vehículo"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary subtitle2">
                           kg
                         </span>
                       </div>
+                      {fieldErrors.capacidadCarga && (
+                        <span className="text-xs text-red-500">
+                          {fieldErrors.capacidadCarga}
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1149,8 +1438,18 @@ export default function AddVehiculoModal({
                         name="soatVencimiento"
                         value={form.soatVencimiento}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary"
+                        onBlur={handleBlur}
+                        className={`w-full px-4 py-3 input bg-fill border rounded-lg text-secondary focus:outline-none transition-colors ${
+                          fieldErrors.soatVencimiento
+                            ? 'border-red-500 focus:ring-2 focus:ring-red-500/20 focus:border-red-500'
+                            : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'
+                        } date-secondary`}
                       />
+                      {fieldErrors.soatVencimiento && (
+                        <span className="text-xs text-red-500">
+                          {fieldErrors.soatVencimiento}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-1">
@@ -1162,8 +1461,18 @@ export default function AddVehiculoModal({
                         name="tecnomecanicaVencimiento"
                         value={form.tecnomecanicaVencimiento}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary"
+                        onBlur={handleBlur}
+                        className={`w-full px-4 py-3 input bg-fill border rounded-lg text-secondary focus:outline-none transition-colors ${
+                          fieldErrors.tecnomecanicaVencimiento
+                            ? 'border-red-500 focus:ring-2 focus:ring-red-500/20 focus:border-red-500'
+                            : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'
+                        } date-secondary`}
                       />
+                      {fieldErrors.tecnomecanicaVencimiento && (
+                        <span className="text-xs text-red-500">
+                          {fieldErrors.tecnomecanicaVencimiento}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-1">
@@ -1175,8 +1484,18 @@ export default function AddVehiculoModal({
                         name="seguroVencimiento"
                         value={form.seguroVencimiento}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary"
+                        onBlur={handleBlur}
+                        className={`w-full px-4 py-3 input bg-fill border rounded-lg text-secondary focus:outline-none transition-colors ${
+                          fieldErrors.seguroVencimiento
+                            ? 'border-red-500 focus:ring-2 focus:ring-red-500/20 focus:border-red-500'
+                            : 'border-border focus:ring-2 focus:ring-primary/20 focus:border-primary'
+                        } date-secondary`}
                       />
+                      {fieldErrors.seguroVencimiento && (
+                        <span className="text-xs text-red-500">
+                          {fieldErrors.seguroVencimiento}
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}

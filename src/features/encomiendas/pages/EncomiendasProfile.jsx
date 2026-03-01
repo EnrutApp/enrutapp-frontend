@@ -8,11 +8,13 @@ import '@material/web/switch/switch.js';
 import { useState } from 'react';
 
 const EncomiendaProfile = ({ encomienda, isOpen, onClose }) => {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [activeTab, setActiveTab] = useState('general');
   const [isClosing, setIsClosing] = useState(false);
 
   if (!isOpen || !encomienda) return null;
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const handleTabChange = tabId => {
     setActiveTab(tabId);
   };

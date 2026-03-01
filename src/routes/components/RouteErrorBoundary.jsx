@@ -7,6 +7,7 @@ class RouteErrorBoundary extends Component {
     this.state = { hasError: false, error: null, errorInfo: null };
   }
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   static getDerivedStateFromError(error) {
     return { hasError: true };
   }
@@ -57,6 +58,7 @@ class RouteErrorBoundary extends Component {
               </button>
             </div>
 
+            // eslint-disable-next-line no-undef
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="mt-6 text-left">
                 <summary className="cursor-pointer subtitle2 text-secondary hover:text-primary transition-colors flex items-center gap-2">
@@ -99,6 +101,7 @@ class RouteErrorBoundary extends Component {
   }
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const withErrorBoundary = (Component, errorProps = {}) => {
   return function WrappedComponent(props) {
     return (

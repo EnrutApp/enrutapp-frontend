@@ -9,6 +9,7 @@ const HomeUsuario = withLazyLoading(
   'Cargando dashboard del usuario...'
 );
 
+// eslint-disable-next-line react-refresh/only-export-components, unused-imports/no-unused-vars
 const UserPendingPage = ({ title, description }) => (
   <div className="min-h-screen flex items-center justify-center bg-background p-4">
     <div className="text-center p-8 content-box-outline-4-small rounded-xl max-w-md animate-fade-in">
@@ -56,6 +57,7 @@ const UserPendingPage = ({ title, description }) => (
   </div>
 );
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const UsuarioHomeWithErrorBoundary = withErrorBoundary(HomeUsuario, {
   title: 'Error en Dashboard del Usuario',
   message: 'No se pudo cargar el dashboard del usuario',

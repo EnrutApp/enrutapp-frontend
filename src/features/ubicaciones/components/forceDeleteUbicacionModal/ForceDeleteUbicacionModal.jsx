@@ -1,4 +1,3 @@
-import Modal from '../../../../shared/components/modal/Modal';
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 
@@ -6,6 +5,7 @@ const ForceDeleteUbicacionModal = ({
   isOpen,
   onClose,
   onConfirm,
+  // eslint-disable-next-line unused-imports/no-unused-vars
   ubicacionNombre,
   rutasInfo,
 }) => {

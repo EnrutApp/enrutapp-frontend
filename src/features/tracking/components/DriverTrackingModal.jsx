@@ -9,8 +9,6 @@ import '@material/web/button/filled-button.js';
 import '@material/web/button/filled-tonal-button.js';
 import '@material/web/button/text-button.js';
 import '@material/web/progress/circular-progress.js';
-import Modal from '../../../shared/components/modal/Modal';
-import DriverTrackingMap from './DriverTrackingMap';
 import useDriverTracking from '../../../shared/hooks/useDriverTracking';
 
 const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
@@ -21,7 +19,9 @@ const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
     location,
     isConnected,
     isLoading,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     error,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     disconnect,
     isDriverOnline,
   } = useDriverTracking(resolvedDriverId);
@@ -42,7 +42,7 @@ const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
 
   const driverName = conductor
     ? `${conductor.usuario?.nombre || ''} ${conductor.usuario?.apellido || ''}`.trim() ||
-    `Conductor #${resolvedDriverId}`
+      `Conductor #${resolvedDriverId}`
     : `Conductor #${resolvedDriverId}`;
 
   const driverLabel = conductor
@@ -76,10 +76,11 @@ const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
           </div>
 
           <div
-            className={`px-3 py-1.5 rounded-full border flex items-center gap-2 ${isOnline
-              ? 'bg-green border-green text-green'
-              : 'bg-red border-red text-red'
-              }`}
+            className={`px-3 py-1.5 rounded-full border flex items-center gap-2 ${
+              isOnline
+                ? 'bg-green border-green text-green'
+                : 'bg-red border-red text-red'
+            }`}
           >
             <span className="text-xs font-medium">
               {isOnline ? 'En línea' : 'Desconectado'}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import '@material/web/icon/icon.js';
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -58,7 +59,9 @@ const Calendar = () => {
   return (
     <div className="bg-background content-box-outline-small h-full flex flex-col p-0.5">
       <div className="flex items-center justify-between mb-0.25">
-        <h2 className="text-sm font-semibold text-primary capitalize">{monthName}</h2>
+        <h2 className="text-sm font-semibold text-primary capitalize">
+          {monthName}
+        </h2>
         <div className="flex gap-0.5">
           <button
             onClick={handlePrevMonth}
@@ -78,8 +81,11 @@ const Calendar = () => {
       </div>
 
       <div className="grid grid-cols-7 gap-0.5 mb-0.25">
-        {weekDays.map((day) => (
-          <div key={day} className="text-center text-secondary text-[9px] font-medium">
+        {weekDays.map(day => (
+          <div
+            key={day}
+            className="text-center text-secondary text-[9px] font-medium"
+          >
             {day}
           </div>
         ))}
@@ -89,12 +95,13 @@ const Calendar = () => {
         {calendarDays.map((dayObj, index) => {
           const todayDate = new Date();
           todayDate.setHours(0, 0, 0, 0);
-          
+
           const cellDate = new Date(year, month, dayObj.day);
           cellDate.setHours(0, 0, 0, 0);
-          
+
           const isDatePassed = dayObj.currentMonth && cellDate < todayDate;
-          const hasEvent = dayObj.currentMonth && (dayObj.day === 20 || dayObj.day === 25);
+          const hasEvent =
+            dayObj.currentMonth && (dayObj.day === 20 || dayObj.day === 25);
 
           return (
             <div
@@ -132,21 +139,27 @@ const CalendarioPage = () => {
         <div className="grid grid-cols-3 gap-1.5 flex-shrink-0 px-2 pt-0.5">
           {/* Viajes programados */}
           <div className="bg-primary text-on-primary content-box-small py-1.5 px-2">
-            <span className="opacity-08 text-[10px] font-light block">Viajes</span>
+            <span className="opacity-08 text-[10px] font-light block">
+              Viajes
+            </span>
             <span className="text-base font-bold">8</span>
             <p className="text-[8px] opacity-80 mt-0.5">Este mes</p>
           </div>
 
           {/* Próximo turno */}
           <div className="content-box-outline-small py-1.5 px-2">
-            <span className="text-[10px] font-light text-secondary block">Próximo</span>
+            <span className="text-[10px] font-light text-secondary block">
+              Próximo
+            </span>
             <span className="text-base text-primary font-bold">12 Dic</span>
             <p className="text-[8px] text-secondary mt-0.5">4:00 AM</p>
           </div>
 
           {/* Viajes completados */}
           <div className="content-box-outline-small py-1.5 px-2">
-            <span className="text-[10px] font-light text-secondary block">Completados</span>
+            <span className="text-[10px] font-light text-secondary block">
+              Completados
+            </span>
             <span className="text-base text-primary font-bold">5</span>
             <p className="text-[8px] text-secondary mt-0.5">95%</p>
           </div>

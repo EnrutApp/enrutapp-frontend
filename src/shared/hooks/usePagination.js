@@ -34,6 +34,7 @@ const usePagination = (data, itemsPerPage = 10) => {
 
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, totalPages, showPagination]);
 
   return {

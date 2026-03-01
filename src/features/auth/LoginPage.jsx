@@ -7,8 +7,6 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuth } from '../../shared/context/AuthContext';
 import { loginSchema } from '../../shared/utils/validationSchemas';
-import ModalRegister from './components/registerModal/RegisterModal';
-import ResetPasswordModal from './components/resetPasswordModal/ResetPasswordModal';
 
 const Login = () => {
   const handleKeyDown = e => {
@@ -125,7 +123,8 @@ const Login = () => {
   const onSubmit = async data => {
     try {
       await login({ ...data, remember: data.remember || false });
-    } catch { }
+    // eslint-disable-next-line no-empty
+    } catch {}
   };
 
   const togglePasswordVisibility = () => {
@@ -270,10 +269,16 @@ const Login = () => {
                 </button>
 
                 <div
-                  className={`absolute inset-0 z-10 ${isGoogleReady ? 'opacity-0' : 'opacity-0 pointer-events-none'
-                    }`}
+                  className={`absolute inset-0 z-10 ${
+                    isGoogleReady
+                      ? 'opacity-0'
+                      : 'opacity-0 pointer-events-none'
+                  }`}
                 >
-                  <div ref={googleButtonRef} className="w-full flex justify-center" />
+                  <div
+                    ref={googleButtonRef}
+                    className="w-full flex justify-center"
+                  />
                 </div>
               </div>
             </div>

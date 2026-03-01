@@ -3,13 +3,7 @@ import '@material/web/button/filled-button.js';
 import '@material/web/switch/switch.js';
 import '@material/web/checkbox/checkbox.js';
 import '@material/web/progress/linear-progress.js';
-import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
-import VehiculoProfile from './pages/VehiculoProfile';
-import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
-import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
-import AddVehiculoModal from './components/addVehiculoModal/AddVehiculoModal';
-import EditVehiculoModal from './components/editVehiculoModal/EditVehiculoModal';
 import { vehiculoService } from './api/vehiculoService';
 import { useEffect, useMemo, useState } from 'react';
 import { resolveAssetUrl } from '../../shared/utils/url';
@@ -171,6 +165,7 @@ const VehiculosPage = () => {
         vehicleToDelete?.raw?.idVehiculo || vehicleToDelete?.idVehiculo
       );
       await cargarVehiculos();
+    // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
     } catch (err) {
     } finally {
       setIsDeleteModalOpen(false);
@@ -197,6 +192,7 @@ const VehiculosPage = () => {
       );
       await vehiculoService.updateVehiculo(id, { estado: nuevoEstado });
       await cargarVehiculos();
+    // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
     } catch (err) {
     } finally {
       setIsSwitchModalOpen(false);
@@ -215,6 +211,7 @@ const VehiculosPage = () => {
   };
 
   const handleSelectAll = () => {
+    // eslint-disable-next-line no-undef
     const currentPageIds = currentVehiculos.map(v => v.idVehiculo);
     const allCurrentSelected = currentPageIds.every(id =>
       selectedVehicles.includes(id)

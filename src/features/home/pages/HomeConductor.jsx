@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import '@material/web/icon/icon.js';
-import Calendar from '../../../shared/components/calendar/Calendar';
 
 const HomeConductor = () => {
   const today = new Date();
@@ -15,7 +14,7 @@ const HomeConductor = () => {
       cupos: '3 Cupos disponibles',
       origen: 'Medellín',
       destino: 'Quibdó',
-      estado: 'Completar'
+      estado: 'Completar',
     },
     {
       id: 2,
@@ -23,8 +22,8 @@ const HomeConductor = () => {
       cupos: '3 Cupos disponibles',
       origen: 'Medellín',
       destino: 'Quibdó',
-      estado: 'Completar'
-    }
+      estado: 'Completar',
+    },
   ];
 
   const filtros = ['Pendientes', 'Completado'];
@@ -46,7 +45,9 @@ const HomeConductor = () => {
           <div className="col-span-2">
             {/* Tarjeta de servicios para hoy */}
             <div className="bg-primary text-on-primary content-box-small mb-4">
-              <span className="opacity-08 h5 font-light">Servicios para hoy</span>
+              <span className="opacity-08 h5 font-light">
+                Servicios para hoy
+              </span>
               <span className="h3 font-bold">2 Servicios</span>
             </div>
 
@@ -60,14 +61,12 @@ const HomeConductor = () => {
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  {filtros.map((filtro) => (
+                  {filtros.map(filtro => (
                     <button
                       key={filtro}
                       onClick={() => setFiltroActivo(filtro)}
                       className={`btn btn-sm font-medium ${
-                        filtroActivo === filtro
-                          ? 'btn-primary'
-                          : 'btn-outline'
+                        filtroActivo === filtro ? 'btn-primary' : 'btn-outline'
                       }`}
                     >
                       {filtro}
@@ -78,8 +77,11 @@ const HomeConductor = () => {
 
               {/* Lista de servicios */}
               <div className="flex flex-col gap-2">
-                {servicios.map((servicio) => (
-                  <div key={servicio.id} className="content-box-outline-2-small">
+                {servicios.map(servicio => (
+                  <div
+                    key={servicio.id}
+                    className="content-box-outline-2-small"
+                  >
                     <div className="flex flex-col gap-2">
                       <div className="flex flex-col">
                         <span className="subtitle2">

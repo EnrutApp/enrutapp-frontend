@@ -3,19 +3,11 @@ import '@material/web/button/filled-button.js';
 import '@material/web/switch/switch.js';
 import '@material/web/checkbox/checkbox.js';
 import '@material/web/progress/linear-progress.js';
-import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
-import UserProfile from './pages/UsuarioProfilePage';
-import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
-import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
-import AddUserModal from './components/addUserModal/AddUserModal';
-import EditUserModal from './components/editUserModal/EditUserModal';
-import EditConductorModal from '../conductores/components/editConductorModal/EditConductorModal';
 import { useState, useEffect } from 'react';
 import userService from './api/userService';
 import { conductorService } from '../conductores/api/conductorService';
 import useApi from '../../shared/hooks/useApi';
-import Avvvatars from 'avvvatars-react';
 import resolveAssetUrl from '../../shared/utils/url';
 
 const styles = `
@@ -199,6 +191,7 @@ const UsuariosPage = () => {
       }
       fetchUsers();
       setIsSwitchModalOpen(false);
+      // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       alert('Error al cambiar el estado del usuario');
       setIsSwitchModalOpen(false);
@@ -370,8 +363,6 @@ const UsuariosPage = () => {
     const diferencia = fechaVenc - hoy;
     return diferencia > 0 && diferencia <= treintaDias;
   };
-
-
 
   const itemsPerPage = viewMode === 'grid' ? 8 : 4;
   const {
@@ -844,7 +835,7 @@ const UsuariosPage = () => {
                   </>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pb-[17px]">
-                    {currentUsers.map((user, index) => {
+                    {currentUsers.map((user) => {
                       const isConductor =
                         user.rol?.nombreRol?.toLowerCase() === 'conductor';
                       const conductor = isConductor
@@ -1010,15 +1001,14 @@ const UsuariosPage = () => {
                                       Incompleto
                                     </span>
                                   )}
-                                  {informacionCompleta &&
-                                    licenciaVencida && (
-                                      <span className="btn btn-sm font-medium flex items-center bg-red-100 text-red-700 border border-red-300 text-xs px-2 py-1">
-                                        <md-icon className="text-xs">
-                                          error
-                                        </md-icon>
-                                        Vencida
-                                      </span>
-                                    )}
+                                  {informacionCompleta && licenciaVencida && (
+                                    <span className="btn btn-sm font-medium flex items-center bg-red-100 text-red-700 border border-red-300 text-xs px-2 py-1">
+                                      <md-icon className="text-xs">
+                                        error
+                                      </md-icon>
+                                      Vencida
+                                    </span>
+                                  )}
                                   {informacionCompleta &&
                                     licenciaProximaAVencer && (
                                       <span className="btn btn-sm font-medium flex items-center btn-yellow text-xs px-2 py-1">

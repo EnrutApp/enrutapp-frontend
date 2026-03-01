@@ -2,14 +2,7 @@ import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/checkbox/checkbox.js';
 import '@material/web/progress/linear-progress.js';
-import UbicacionProfile from './pages/UbicacionProfile';
-import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
-import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
-import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
-import ForceDeleteUbicacionModal from './components/forceDeleteUbicacionModal/ForceDeleteUbicacionModal';
-import InfoRutasActivasModal from './components/infoRutasActivasModal/InfoRutasActivasModal';
-import UbicacionAdd from './components/ubicacionAddModal/UbicacionAdd';
 import ubicacionesService from './api/ubicacionesService';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -41,6 +34,7 @@ const styles = `
 `;
 
 const UbicacionesPage = () => {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [ubicaciones, setUbicaciones] = useState([]);
   const [allUbicaciones, setAllUbicaciones] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -203,6 +197,7 @@ const UbicacionesPage = () => {
       } else {
         setIsDeleteModalOpen(true);
       }
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (err) {
       setIsDeleteModalOpen(true);
     }
@@ -300,6 +295,7 @@ const UbicacionesPage = () => {
           setIsInfoRutasModalOpen(true);
           return;
         }
+      // eslint-disable-next-line unused-imports/no-unused-vars, no-empty
       } catch (err) {}
     }
     setIsSwitchModalOpen(true);

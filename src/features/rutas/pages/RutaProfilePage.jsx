@@ -1,12 +1,9 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
-import DeleteModal from '../../../shared/components/modal/deleteModal/DeleteModal';
 import apiClient from '../../../shared/services/apiService';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import GoogleMapComponent from '../../../shared/components/map/components/GoogleMapComponent';
 import { formatTiempoEstimado } from '../utils/formatTiempoEstimado';
-import ContratoQuickCreateModal from '../components/ContratoQuickCreateModal';
 
 const RutaProfilePage = ({
   ruta,
@@ -44,6 +41,7 @@ const RutaProfilePage = ({
       setIsDeleteModalOpen(false);
       handleClose();
       if (onDeleted) onDeleted();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       alert('Error al eliminar la ruta');
     }

@@ -6,9 +6,6 @@ import '@material/web/button/text-button.js';
 import '@material/web/iconbutton/filled-tonal-icon-button.js';
 import '@material/web/switch/switch.js';
 import { useState, useEffect } from 'react';
-import DeleteModal from '../../../shared/components/modal/deleteModal/DeleteModal';
-import ForceDeleteUbicacionModal from '../components/forceDeleteUbicacionModal/ForceDeleteUbicacionModal';
-import GoogleMapComponent from '../../../shared/components/map/components/GoogleMapComponent';
 import ubicacionesService from '../api/ubicacionesService';
 
 const UbicacionProfile = ({
@@ -37,6 +34,7 @@ const UbicacionProfile = ({
           const response = await ubicacionesService.getRutas(ubicacionId);
           const rutas = response?.data?.rutas || response?.rutas || [];
           setRutasAsociadas(Array.isArray(rutas) ? rutas : []);
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (err) {
           setRutasAsociadas([]);
         } finally {
@@ -75,6 +73,7 @@ const UbicacionProfile = ({
       } else {
         setIsDeleteModalOpen(true);
       }
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (err) {
       setIsDeleteModalOpen(true);
     }

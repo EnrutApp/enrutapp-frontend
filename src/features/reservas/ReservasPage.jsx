@@ -1,14 +1,8 @@
 import '@material/web/icon/icon.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/switch/switch.js';
-import DeleteModal from '../../shared/components/modal/deleteModal/DeleteModal';
-import SwitchModal from '../../shared/components/modal/switchModal/SwitchModal';
-import ReservasProfile from './pages/ReservasProfile';
-import Pagination from '../../shared/components/pagination/Pagination';
 import usePagination from '../../shared/hooks/usePagination';
 import { useState } from 'react';
-import Avvvatars from 'avvvatars-react';
-import resolveAssetUrl from '../../shared/utils/url';
 
 const ReservasPage = () => {
   const [viewMode, setViewMode] = useState('list');

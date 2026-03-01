@@ -1,10 +1,11 @@
-import { Suspense } from 'react';
 import '@material/web/progress/linear-progress.js';
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const LazyLoadingFallback = ({ message = 'Cargando...' }) => {
   return <div style={{ display: 'none' }}></div>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const withLazyLoading = (LazyComponent, fallbackMessage) => {
   return function LazyWrapper(props) {
     return (
