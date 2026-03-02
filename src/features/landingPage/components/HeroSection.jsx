@@ -1,6 +1,7 @@
 import React, { memo } from "react";
 import "@material/web/icon/icon.js";
 import CityAutocomplete from "./CityAutocomplete";
+import useInView from "../hooks/useInView";
 
 /**
  * Validar que una ciudad no esté vacía
@@ -18,6 +19,9 @@ const validateCity = (city) => {
 };
 
 const HeroSection = memo(({ formData, setFormData, errors, setErrors, clearError, handleBuscar, handleTipoViaje, today, ubicacionesItems = [], ubicacionesReady = false, scrollToSection }) => {
+  const formRef = useInView({ threshold: 0.15 });
+  const contentRef = useInView({ threshold: 0.12 });
+
   // Manejador para el campo origen
   const handleOrigenChange = (value) => {
     setFormData((prev) => ({ ...prev, origen: value, origenId: "" }));
@@ -87,20 +91,21 @@ const HeroSection = memo(({ formData, setFormData, errors, setErrors, clearError
           src="https://i.pinimg.com/originals/ec/cc/f7/ecccf7cc87338d7f8ea12a8e80f56418.jpg"
           alt="Niños"
           loading="lazy"
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover object-center scale-105 transition-transform duration-[8000ms] ease-out"
         />
-        {/* Usamos style inline para asegurar el gradiente independientemente de la config de Tailwind */}
         <div
-          className="absolute inset-0 bg-linear-to-r from-gray-950/90 via-gray-950/60 to-gray-950/30"
-          style={{ background: 'linear-gradient(to right, rgba(3, 7, 18, 0.9), rgba(3, 7, 18, 0.6), rgba(3, 7, 18, 0.3))' }}
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(to right, rgba(3, 7, 18, 0.92), rgba(3, 7, 18, 0.65), rgba(3, 7, 18, 0.25))' }}
         />
+        {/* Sutil degradado inferior para transición de sección */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-white/5" />
       </div>
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto">
+      <div className="relative z-10 w-full max-w-7xl mx-auto py-16">
         <div className="grid lg:grid-cols-12 gap-12 items-center">
 
           {/* Formulario de búsqueda */}
-          <div className="lg:col-span-5">
+          <div ref={formRef} className="lg:col-span-5 lp-fade-up">
             <div className="w-full max-w-md p-8 content-box-outline-auth-small bg-background rounded-2xl shadow-2xl">
               <div className="mb-3">
                 <h2 className="h2 font-medium text-primary">Reserva tu viaje</h2>
@@ -124,7 +129,7 @@ const HeroSection = memo(({ formData, setFormData, errors, setErrors, clearError
                         }}
                         items={ubicacionesItems}
                         placeholder="Ciudad de origen"
-                        inputClassName={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:border-primary transition-colors ${errors.origen ? "border-red-500" : "border-border"}`}
+                        inputClassName={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:border-primary transition-colors duration-200 ${errors.origen ? "border-red-500" : "border-border"}`}
                       />
                     </div>
                     {errors.origen && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><md-icon className="text-sm">error</md-icon>{errors.origen}</p>}
@@ -137,7 +142,7 @@ const HeroSection = memo(({ formData, setFormData, errors, setErrors, clearError
                       const temp = formData.origen;
                       setFormData(prev => ({ ...prev, origen: prev.destino, destino: temp, origenId: prev.destinoId, destinoId: prev.origenId }));
                     }}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 p-2 rounded-full bg-background border border-border text-primary shadow-md hover:shadow-lg hover:scale-110 transition-all cursor-pointer flex items-center justify-center"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 p-2 rounded-full bg-background border border-border text-primary shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer flex items-center justify-center"
                     title="Intercambiar origen y destino"
                     style={{ right: '2rem' }}
                   >
@@ -156,7 +161,7 @@ const HeroSection = memo(({ formData, setFormData, errors, setErrors, clearError
                         onSelect={handleDestinoSelect}
                         items={ubicacionesItems}
                         placeholder="Ciudad de destino"
-                        inputClassName={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:border-primary transition-colors ${errors.destino ? "border-red-500" : "border-border"}`}
+                        inputClassName={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary focus:outline-none focus:border-primary transition-colors duration-200 ${errors.destino ? "border-red-500" : "border-border"}`}
                       />
                     </div>
                     {errors.destino && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><md-icon className="text-sm">error</md-icon>{errors.destino}</p>}
@@ -175,7 +180,7 @@ const HeroSection = memo(({ formData, setFormData, errors, setErrors, clearError
                           key={tipo}
                           type="button"
                           onClick={() => handleTipoViaje(tipo)}
-                          className={`px-3 py-1 rounded-md text-caption font-bold transition-all ${formData.tipoViaje === tipo
+                          className={`px-3 py-1 rounded-md text-caption font-bold transition-all duration-200 ${formData.tipoViaje === tipo
                               ? "bg-background text-primary shadow-sm border border-border"
                               : "text-secondary hover:text-primary"
                             }`}
@@ -193,7 +198,7 @@ const HeroSection = memo(({ formData, setFormData, errors, setErrors, clearError
                       value={formData.fecha}
                       min={today}
                       onChange={handleDateChange}
-                      className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary date-secondary focus:outline-none focus:border-primary transition-colors ${errors.fecha ? "border-red-500" : "border-border"
+                      className={`w-full px-4 py-3 input bg-fill border rounded-lg text-primary placeholder-text-secondary date-secondary focus:outline-none focus:border-primary transition-colors duration-200 ${errors.fecha ? "border-red-500" : "border-border"
                         }`}
                     />
                   </div>
@@ -204,7 +209,7 @@ const HeroSection = memo(({ formData, setFormData, errors, setErrors, clearError
                 <div className="flex flex-col">
                   <button
                     type="submit"
-                    className="w-full btn btn-primary font-medium text-subtitle1 flex items-center justify-center gap-2"
+                    className="w-full btn btn-primary font-medium text-subtitle1 flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   >
                     Buscar viajes
                   </button>
@@ -214,37 +219,40 @@ const HeroSection = memo(({ formData, setFormData, errors, setErrors, clearError
           </div>
 
           {/* Contenido derecho */}
-          <div className="lg:col-span-7 text-primary space-y-8 lg:pl-16">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fill border border-border text-primary text-caption font-bold uppercase tracking-widest">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+          <div ref={contentRef} className="lg:col-span-7 text-primary space-y-8 lg:pl-16 lp-fade-up lp-delay-200">
+            <div className="space-y-5">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-white text-caption font-bold uppercase tracking-widest">
+                <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
                 La forma más simple de viajar
               </div>
-              <h1 className="text-h1 font-bold leading-tight tracking-tight text-primary">
+              <h1 className="text-h1 font-bold leading-tight tracking-tight text-white drop-shadow-sm">
                 Viajar está a un<br />
-                <span className="text-primary">
+                <span className="text-white">
                   Clic de distancia
                 </span>
               </h1>
 
-              <p className="text-h5 text-secondary font-regular max-w-xl leading-relaxed">
+              <p className="text-h5 text-white/75 font-regular max-w-xl leading-relaxed">
                 Compra tus tiquetes de forma rápida, segura y sin complicaciones
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
               {[
                 { icon: "verified_user", title: "Seguro", desc: "Viajes verificados" },
                 { icon: "schedule", title: "Puntual", desc: "Sin retrasos" },
                 { icon: "headset_mic", title: "Soporte", desc: "24/7 en vivo" }
               ].map((feature, i) => (
-                <div key={i} className="group flex flex-col items-start gap-2 bg-fill p-5 rounded-2xl border border-border transition-all duration-300 hover:border-primary">
-                  <div className="p-2 rounded-lg bg-background text-primary transition-colors">
+                <div
+                  key={i}
+                  className="group flex flex-col items-start gap-3 bg-white/10 p-5 rounded-2xl border border-white/15 backdrop-blur-sm transition-all duration-300 hover:bg-white/15 hover:border-white/30 hover:-translate-y-1"
+                >
+                  <div className="p-2.5 rounded-xl bg-white/15 border border-white/25 text-white transition-colors duration-300 group-hover:bg-white/25">
                     <md-icon>{feature.icon}</md-icon>
                   </div>
                   <div>
-                    <h4 className="font-bold text-primary text-body1">{feature.title}</h4>
-                    <p className="text-caption text-secondary">{feature.desc}</p>
+                    <h4 className="font-bold text-white text-body1">{feature.title}</h4>
+                    <p className="text-caption text-white/60">{feature.desc}</p>
                   </div>
                 </div>
               ))}
