@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
 import "@material/web/icon/icon.js";
+import useInView from "../hooks/useInView";
 
 // Componente para cada tarjeta de destino
 const DestinoCard = memo(({ destino, index, itemsPerView, onSelect }) => {
   return (
     <div
       onClick={() => onSelect(destino.nombre)}
-      className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer flex-shrink-0"
+      className="group relative bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 ease-out cursor-pointer flex-shrink-0 hover:-translate-y-1"
       style={{ width: `calc(${100 / itemsPerView}% - ${(6 * (itemsPerView - 1)) / itemsPerView}px)` }}
     >
       <div className="relative h-72 overflow-hidden">
@@ -15,23 +16,23 @@ const DestinoCard = memo(({ destino, index, itemsPerView, onSelect }) => {
           src={destino.imagen}
           alt={destino.nombre}
           loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent transition-opacity duration-300 group-hover:from-black/80" />
 
         {/* Badge de rutas */}
-        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
-          <div className="flex items-center gap-2">
-            <md-icon className="text-blue-600 text-lg">route</md-icon>
-            <span className="text-sm font-bold text-gray-900">{destino.rutas}</span>
+        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg transition-all duration-300 group-hover:bg-gray-900 group-hover:text-white">
+          <div className="flex items-center gap-1.5">
+            <md-icon className="text-gray-800 text-base group-hover:text-white transition-colors">route</md-icon>
+            <span className="text-sm font-bold text-gray-900 group-hover:text-white transition-colors">{destino.rutas}</span>
           </div>
         </div>
 
         {/* Información en la base */}
-        <div className="absolute bottom-0 left-0 right-0 p-6">
-          <h4 className="text-3xl font-bold text-white mb-2">{destino.nombre}</h4>
-          <p className="text-white/90 text-sm flex items-center gap-2">
-            <md-icon className="text-lg">location_on</md-icon>
+        <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-400 ease-out">
+          <h4 className="text-2xl font-bold text-white mb-1.5">{destino.nombre}</h4>
+          <p className="text-white/80 text-sm flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <md-icon className="text-base">location_on</md-icon>
             {destino.descripcion}
           </p>
         </div>
@@ -46,6 +47,7 @@ DestinoCard.displayName = "DestinoCard";
 const DestinosCarousel = memo(({ setFormData, scrollToSection }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [autoplayEnabled, setAutoplayEnabled] = useState(true);
+  const carouselRef = useInView({ threshold: 0.06 });
 
   const destinos = [
     {
@@ -160,31 +162,31 @@ const DestinosCarousel = memo(({ setFormData, scrollToSection }) => {
   }, [autoplayEnabled]);
 
   return (
-    <div className="relative">
+    <div ref={carouselRef} className="relative lp-fade-up">
       {/* Botón anterior */}
       <button
         onClick={prev}
         onMouseEnter={() => setAutoplayEnabled(false)}
-        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white hover:bg-gray-100 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 z-10 bg-white hover:bg-gray-900 p-3 rounded-full shadow-lg border border-gray-200 hover:border-gray-900 transition-all duration-300 hover:scale-110 active:scale-95 group/btn"
         aria-label="Anterior"
       >
-        <md-icon className="text-blue-600">chevron_left</md-icon>
+        <md-icon className="text-gray-800 group-hover/btn:text-white transition-colors">chevron_left</md-icon>
       </button>
 
       {/* Botón siguiente */}
       <button
         onClick={next}
         onMouseEnter={() => setAutoplayEnabled(false)}
-        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white hover:bg-gray-100 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-5 z-10 bg-white hover:bg-gray-900 p-3 rounded-full shadow-lg border border-gray-200 hover:border-gray-900 transition-all duration-300 hover:scale-110 active:scale-95 group/btn"
         aria-label="Siguiente"
       >
-        <md-icon className="text-blue-600">chevron_right</md-icon>
+        <md-icon className="text-gray-800 group-hover/btn:text-white transition-colors">chevron_right</md-icon>
       </button>
 
       {/* Contenedor del carrusel */}
-      <div className="overflow-hidden">
+      <div className="overflow-hidden rounded-xl">
         <div
-          className="flex gap-6 transition-transform duration-500 ease-out"
+          className="flex gap-6 transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
           style={{ transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)` }}
         >
           {destinos.map((destino, idx) => (
@@ -209,7 +211,7 @@ const DestinosCarousel = memo(({ setFormData, scrollToSection }) => {
               setAutoplayEnabled(false);
             }}
             className={`h-2 rounded-full transition-all duration-300 ${
-              idx === currentIndex ? "w-8 bg-blue-600" : "w-2 bg-gray-300 hover:bg-gray-400"
+              idx === currentIndex ? "w-8 bg-gray-900" : "w-2 bg-gray-300 hover:bg-gray-500"
             }`}
             aria-label={`Ir a destino ${idx + 1}`}
           />

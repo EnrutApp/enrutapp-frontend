@@ -59,10 +59,10 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 p-6 flex items-center justify-between">
+        <div className="sticky top-0 bg-gradient-to-r from-gray-900 to-gray-700 p-6 flex items-center justify-between">
           <div>
             <h2 className="text-white text-2xl font-bold">Selecciona tus sillas</h2>
-            <p className="text-blue-100 text-sm mt-1">
+            <p className="text-gray-300 text-sm mt-1">
               {viaje.horaSalida} - {viaje.origenTerminal} a {viaje.destinoTerminal}
             </p>
           </div>
@@ -87,8 +87,8 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
             {/* Contenedor de sillas - Simulando un auto */}
             <div className="bg-gradient-to-b from-gray-100 to-gray-50 rounded-xl p-8 max-w-sm mx-auto border-2 border-gray-300">
               {/* Parabrisas */}
-              <div className="h-8 bg-blue-200 rounded-t-full mx-auto mb-6 flex items-center justify-center border-2 border-gray-400">
-                <div className="w-4 h-4 bg-blue-400 rounded-full mx-1"></div>
+              <div className="h-8 bg-gray-200 rounded-t-full mx-auto mb-6 flex items-center justify-center border-2 border-gray-400">
+                <div className="w-4 h-4 bg-gray-400 rounded-full mx-1"></div>
               </div>
 
               {/* Sillas del auto */}
@@ -109,7 +109,7 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
                             ? "bg-gray-400 border-gray-600 text-gray-600 cursor-not-allowed"
                             : selectedSeats.includes(seat.id)
                             ? "bg-green-500 border-green-700 text-white shadow-lg scale-105"
-                            : "bg-blue-200 border-blue-400 text-gray-800 hover:border-blue-600"
+                            : "bg-gray-100 border-gray-300 text-gray-800 hover:border-gray-900"
                         }`}
                         title={seat.isDriver ? "Conductor" : seat.occupied ? "Ocupado" : `Asiento ${seat.id}`}
                       >
@@ -138,7 +138,7 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
                             ? "bg-gray-400 border-gray-600 text-gray-600 cursor-not-allowed"
                             : selectedSeats.includes(seat.id)
                             ? "bg-green-500 border-green-700 text-white shadow-lg scale-105"
-                            : "bg-blue-200 border-blue-400 text-gray-800 hover:border-blue-600"
+                            : "bg-gray-100 border-gray-300 text-gray-800 hover:border-gray-900"
                         }`}
                         title={seat.isDriver ? "Conductor" : seat.occupied ? "Ocupado" : `Asiento ${seat.id}`}
                       >
@@ -160,7 +160,7 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
               {/* Leyenda */}
               <div className="mt-8 space-y-2 px-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-200 border-2 border-blue-400 rounded"></div>
+                  <div className="w-8 h-8 bg-gray-100 border-2 border-gray-300 rounded"></div>
                   <span className="text-sm text-gray-600">Disponible</span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -181,7 +181,7 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
             </div>
 
             {/* Información de sillas */}
-            <div className="mt-8 bg-blue-50 rounded-lg p-4">
+            <div className="mt-8 bg-gray-50 rounded-lg p-4">
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <p className="text-2xl font-bold text-gray-900">
@@ -212,7 +212,7 @@ const SeatsModal = memo(({ isOpen, onClose, viaje }) => {
                 <span className="text-gray-700 font-semibold">
                   {selectedSeats.length} {selectedSeats.length === 1 ? "Silla" : "Sillas"}
                 </span>
-                <span className="text-2xl font-bold text-blue-600">
+                <span className="text-2xl font-bold text-gray-900">
                   {new Intl.NumberFormat("es-CO", {
                     style: "currency",
                     currency: "COP",

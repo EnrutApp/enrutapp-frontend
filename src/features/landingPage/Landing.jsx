@@ -240,7 +240,7 @@ const LandingPage = () => {
   const today = getTodayDate();
 
   return (
-    <div className="bg-white text-gray-900 font-sans overflow-x-hidden">
+    <div className="text-gray-900 font-sans overflow-x-hidden scroll-smooth">
       <Navbar scrolled={scrolled} scrollToSection={scrollToSection} handleNavigateLogin={handleNavigateLogin} />
 
       <HeroSection
