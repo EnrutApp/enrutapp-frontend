@@ -64,7 +64,9 @@ const Calendar = () => {
     <div className="bg-background content-box-outline-small overflow-hidden p-3">
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
-        <h2 className="h4 font-semibold text-primary capitalize">{monthName}</h2>
+        <h2 className="h4 font-semibold text-primary capitalize">
+          {monthName}
+        </h2>
         <div className="flex gap-1">
           <button
             onClick={handlePrevMonth}
@@ -85,8 +87,11 @@ const Calendar = () => {
 
       {/* Días de la semana */}
       <div className="grid grid-cols-7 gap-1 mb-1">
-        {weekDays.map((day) => (
-          <div key={day} className="text-center text-secondary text-[10px] font-medium">
+        {weekDays.map(day => (
+          <div
+            key={day}
+            className="text-center text-secondary text-[10px] font-medium"
+          >
             {day}
           </div>
         ))}
@@ -97,10 +102,10 @@ const Calendar = () => {
         {calendarDays.map((dayObj, index) => {
           const todayDate = new Date();
           todayDate.setHours(0, 0, 0, 0);
-          
+
           const cellDate = new Date(year, month, dayObj.day);
           cellDate.setHours(0, 0, 0, 0);
-          
+
           const isDatePassed = dayObj.currentMonth && cellDate < todayDate;
 
           return (

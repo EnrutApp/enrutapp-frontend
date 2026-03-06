@@ -1,99 +1,99 @@
-import React, { useState, useRef, useEffect, memo, useCallback } from "react";
-import "@material/web/icon/icon.js";
+import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
+import '@material/web/icon/icon.js';
 
 // Lista de ciudades principales de Colombia por departamento
 const COLOMBIAN_CITIES = {
   ATLANTICO: [
-    { city: "Barranquilla", department: "Barranquilla" },
-    { city: "Sabana Larga", department: "Sabana Larga" },
-    { city: "Baranoa", department: "Baranoa" },
-    { city: "Luruaco", department: "Luruaco" },
-    { city: "Ponedera", department: "Ponedera" },
-    { city: "Campeche", department: "Campeche" },
+    { city: 'Barranquilla', department: 'Barranquilla' },
+    { city: 'Sabana Larga', department: 'Sabana Larga' },
+    { city: 'Baranoa', department: 'Baranoa' },
+    { city: 'Luruaco', department: 'Luruaco' },
+    { city: 'Ponedera', department: 'Ponedera' },
+    { city: 'Campeche', department: 'Campeche' },
   ],
   BOLIVAR: [
-    { city: "Cartagena", department: "Cartagena" },
-    { city: "Turbaco", department: "Turbaco" },
-    { city: "Magangue", department: "Magangue" },
-    { city: "Arjona", department: "Arjona" },
+    { city: 'Cartagena', department: 'Cartagena' },
+    { city: 'Turbaco', department: 'Turbaco' },
+    { city: 'Magangue', department: 'Magangue' },
+    { city: 'Arjona', department: 'Arjona' },
   ],
   CHOCO: [
-    { city: "Quibdo", department: "Quibdo" },
-    { city: "Istmina", department: "Istmina" },
-    { city: "Tado", department: "Tado" },
-    { city: "Condoto", department: "Condoto" },
-    { city: "Lloro", department: "Lloro" },
-    { city: "Raspadura", department: "Raspadura" },
-    { city: "Bagado", department: "Bagado" },
-    { city: "Yuto", department: "Yuto" },
+    { city: 'Quibdo', department: 'Quibdo' },
+    { city: 'Istmina', department: 'Istmina' },
+    { city: 'Tado', department: 'Tado' },
+    { city: 'Condoto', department: 'Condoto' },
+    { city: 'Lloro', department: 'Lloro' },
+    { city: 'Raspadura', department: 'Raspadura' },
+    { city: 'Bagado', department: 'Bagado' },
+    { city: 'Yuto', department: 'Yuto' },
   ],
   CORDOBA: [
-    { city: "Monteria", department: "Monteria" },
-    { city: "Cerete", department: "Cerete" },
-    { city: "Lorica", department: "Lorica" },
+    { city: 'Monteria', department: 'Monteria' },
+    { city: 'Cerete', department: 'Cerete' },
+    { city: 'Lorica', department: 'Lorica' },
   ],
   SUCRE: [
-    { city: "Sincelejo", department: "Sincelejo" },
-    { city: "Corozal", department: "Corozal" },
-    { city: "Tolu", department: "Tolu" },
+    { city: 'Sincelejo', department: 'Sincelejo' },
+    { city: 'Corozal', department: 'Corozal' },
+    { city: 'Tolu', department: 'Tolu' },
   ],
   ANTIOQUIA: [
-    { city: "Medellin", department: "Medellin" },
-    { city: "Envigado", department: "Envigado" },
-    { city: "Sabaneta", department: "Sabaneta" },
-    { city: "La Ceja", department: "La Ceja" },
-    { city: "Rionegro", department: "Rionegro" },
-    { city: "Itagui", department: "Itagui" },
-    { city: "Bello", department: "Bello" },
-    { city: "Copacabana", department: "Copacabana" },
-    { city: "Girardota", department: "Girardota" },
-    { city: "Marinilla", department: "Marinilla" },
-    { city: "Carepa", department: "Carepa" }
+    { city: 'Medellin', department: 'Medellin' },
+    { city: 'Envigado', department: 'Envigado' },
+    { city: 'Sabaneta', department: 'Sabaneta' },
+    { city: 'La Ceja', department: 'La Ceja' },
+    { city: 'Rionegro', department: 'Rionegro' },
+    { city: 'Itagui', department: 'Itagui' },
+    { city: 'Bello', department: 'Bello' },
+    { city: 'Copacabana', department: 'Copacabana' },
+    { city: 'Girardota', department: 'Girardota' },
+    { city: 'Marinilla', department: 'Marinilla' },
+    { city: 'Carepa', department: 'Carepa' },
   ],
   CAUCA: [
-    { city: "Popayan", department: "Popayan" },
-    { city: "Santander de Quilichao", department: "Santander de Quilichao" },
+    { city: 'Popayan', department: 'Popayan' },
+    { city: 'Santander de Quilichao', department: 'Santander de Quilichao' },
   ],
   HUILA: [
-    { city: "Neiva", department: "Neiva" },
-    { city: "Pitalito", department: "Pitalito" },
+    { city: 'Neiva', department: 'Neiva' },
+    { city: 'Pitalito', department: 'Pitalito' },
   ],
   MAGDALENA: [
-    { city: "Santa Marta", department: "Santa Marta" },
-    { city: "Cienaga", department: "Cienaga" },
+    { city: 'Santa Marta', department: 'Santa Marta' },
+    { city: 'Cienaga', department: 'Cienaga' },
   ],
   NARINO: [
-    { city: "Pasto", department: "Pasto" },
-    { city: "Ipiales", department: "Ipiales" },
+    { city: 'Pasto', department: 'Pasto' },
+    { city: 'Ipiales', department: 'Ipiales' },
   ],
   QUINDIO: [
-    { city: "Armenia", department: "Armenia" },
-    { city: "Pereira", department: "Pereira" },
+    { city: 'Armenia', department: 'Armenia' },
+    { city: 'Pereira', department: 'Pereira' },
   ],
   RISARALDA: [
-    { city: "Pereira", department: "Pereira" },
-    { city: "Dosquebradas", department: "Dosquebradas" },
+    { city: 'Pereira', department: 'Pereira' },
+    { city: 'Dosquebradas', department: 'Dosquebradas' },
   ],
   TOLIMA: [
-    { city: "Ibague", department: "Ibague" },
-    { city: "Espinal", department: "Espinal" },
+    { city: 'Ibague', department: 'Ibague' },
+    { city: 'Espinal', department: 'Espinal' },
   ],
   VALLE: [
-    { city: "Cali", department: "Cali" },
-    { city: "Palmira", department: "Palmira" },
-    { city: "Buenaventura", department: "Buenaventura" },
-    { city: "Cartago", department: "Cartago" },
+    { city: 'Cali', department: 'Cali' },
+    { city: 'Palmira', department: 'Palmira' },
+    { city: 'Buenaventura', department: 'Buenaventura' },
+    { city: 'Cartago', department: 'Cartago' },
   ],
   CUNDINAMARCA: [
-    { city: "Bogota", department: "Bogota" },
-    { city: "Soacha", department: "Soacha" },
-    { city: "Zipaquira", department: "Zipaquira" },
+    { city: 'Bogota', department: 'Bogota' },
+    { city: 'Soacha', department: 'Soacha' },
+    { city: 'Zipaquira', department: 'Zipaquira' },
   ],
 };
 
 // Aplanar todas las ciudades en un solo array
 const ALL_CITIES = Object.entries(COLOMBIAN_CITIES).flatMap(([dept, cities]) =>
-  cities.map((city) => ({
+  cities.map(city => ({
     ...city,
     departamento: dept,
   }))
@@ -101,13 +101,13 @@ const ALL_CITIES = Object.entries(COLOMBIAN_CITIES).flatMap(([dept, cities]) =>
 
 const CityAutocomplete = memo(
   ({
-    value = "",
-    onChange = () => { },
-    onSelect = () => { },
+    value = '',
+    onChange = () => {},
+    onSelect = () => {},
     items = null,
-    placeholder = "Buscar ciudad",
-    className = "",
-    inputClassName = "",
+    placeholder = 'Buscar ciudad',
+    className = '',
+    inputClassName = '',
     disabled = false,
   }) => {
     const [suggestions, setSuggestions] = useState([]);
@@ -129,16 +129,16 @@ const CityAutocomplete = memo(
     const sourceItems = React.useMemo(() => {
       if (Array.isArray(items) && items.length > 0) {
         return items
-          .map((item) => {
+          .map(item => {
             const city =
               item?.city ||
               item?.nombreUbicacion ||
               item?.nombre ||
               item?.label ||
-              "";
+              '';
 
             const department =
-              item?.department || item?.direccion || item?.subtitle || "";
+              item?.department || item?.direccion || item?.subtitle || '';
 
             const id = item?.idUbicacion || item?.id || item?.value;
 
@@ -148,38 +148,43 @@ const CityAutocomplete = memo(
               idUbicacion: id,
               city,
               department,
-              departamento: item?.departamento || item?.group || "UBICACIONES",
+              departamento: item?.departamento || item?.group || 'UBICACIONES',
             };
           })
-          .filter((x) => x.city);
+          .filter(x => x.city);
       }
 
       return ALL_CITIES;
     }, [items]);
 
     // Buscar ciudades
-    const searchCities = useCallback((query) => {
-      if (!query.trim() || query.length < 1) {
-        setSuggestions([]);
-        setShowSuggestions(false);
-        return;
-      }
+    const searchCities = useCallback(
+      query => {
+        if (!query.trim() || query.length < 1) {
+          setSuggestions([]);
+          setShowSuggestions(false);
+          return;
+        }
 
-      const queryLower = query.toLowerCase();
-      const filtered = sourceItems.filter(
-        (item) =>
-          item.city.toLowerCase().includes(queryLower) ||
-          item.department.toLowerCase().includes(queryLower)
-      ).slice(0, 8); // Limitar a 8 resultados
+        const queryLower = query.toLowerCase();
+        const filtered = sourceItems
+          .filter(
+            item =>
+              item.city.toLowerCase().includes(queryLower) ||
+              item.department.toLowerCase().includes(queryLower)
+          )
+          .slice(0, 8); // Limitar a 8 resultados
 
-      setSuggestions(filtered);
-      setShowSuggestions(filtered.length > 0);
-      setSelectedIndex(-1);
-    }, [sourceItems]);
+        setSuggestions(filtered);
+        setShowSuggestions(filtered.length > 0);
+        setSelectedIndex(-1);
+      },
+      [sourceItems]
+    );
 
     // Manejar cambio en input
     const handleInputChange = useCallback(
-      (e) => {
+      e => {
         const newValue = e.target.value;
         onChange(newValue);
 
@@ -196,7 +201,7 @@ const CityAutocomplete = memo(
 
     // Manejar selección
     const handleSelect = useCallback(
-      (suggestion) => {
+      suggestion => {
         onChange(suggestion.city);
         setShowSuggestions(false);
         setSuggestions([]);
@@ -207,27 +212,27 @@ const CityAutocomplete = memo(
 
     // Manejar navegación con teclado
     const handleKeyDown = useCallback(
-      (e) => {
+      e => {
         if (!showSuggestions || suggestions.length === 0) return;
 
         switch (e.key) {
-          case "ArrowDown":
+          case 'ArrowDown':
             e.preventDefault();
-            setSelectedIndex((prev) =>
+            setSelectedIndex(prev =>
               prev < suggestions.length - 1 ? prev + 1 : prev
             );
             break;
-          case "ArrowUp":
+          case 'ArrowUp':
             e.preventDefault();
-            setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+            setSelectedIndex(prev => (prev > 0 ? prev - 1 : -1));
             break;
-          case "Enter":
+          case 'Enter':
             e.preventDefault();
             if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
               handleSelect(suggestions[selectedIndex]);
             }
             break;
-          case "Escape":
+          case 'Escape':
             setShowSuggestions(false);
             setSelectedIndex(-1);
             break;
@@ -268,7 +273,10 @@ const CityAutocomplete = memo(
             placeholder={placeholder}
             disabled={disabled}
             autoComplete="off"
-            className={inputClassName || "input w-full pl-10 text-primary placeholder-secondary bg-fill border-border"}
+            className={
+              inputClassName ||
+              'input w-full pl-10 text-primary placeholder-secondary bg-fill border-border'
+            }
           />
         </div>
 
@@ -277,7 +285,7 @@ const CityAutocomplete = memo(
           <div
             ref={suggestionsRef}
             className="absolute z-50 w-full mt-2 bg-fill border border-border rounded-xl shadow-xl overflow-hidden"
-            style={{ maxHeight: "300px", overflowY: "auto" }}
+            style={{ maxHeight: '300px', overflowY: 'auto' }}
           >
             {/* Agrupar por departamento */}
             {Object.entries(
@@ -304,17 +312,26 @@ const CityAutocomplete = memo(
                       key={`${dept}-${suggestion.city}`}
                       type="button"
                       onClick={() => handleSelect(suggestion)}
-                      className={`w-full text-left px-4 py-3 transition-colors border-b border-border last:border-b-0 flex items-start gap-3 ${isSelected ? "bg-primary text-on-primary" : "hover:bg-background text-primary"
-                        }`}
+                      className={`w-full text-left px-4 py-3 transition-colors border-b border-border last:border-b-0 flex items-start gap-3 ${
+                        isSelected
+                          ? 'bg-primary text-on-primary'
+                          : 'hover:bg-background text-primary'
+                      }`}
                     >
-                      <md-icon className={`text-lg shrink-0 mt-0.5 ${isSelected ? "text-on-primary" : "text-secondary"}`}>
+                      <md-icon
+                        className={`text-lg shrink-0 mt-0.5 ${isSelected ? 'text-on-primary' : 'text-secondary'}`}
+                      >
                         location_on
                       </md-icon>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-body2 font-medium ${isSelected ? "text-on-primary" : "text-primary"}`}>
+                        <p
+                          className={`text-body2 font-medium ${isSelected ? 'text-on-primary' : 'text-primary'}`}
+                        >
                           {suggestion.city}
                         </p>
-                        <p className={`text-caption mt-0.5 ${isSelected ? "text-on-primary opacity-80" : "text-secondary"}`}>
+                        <p
+                          className={`text-caption mt-0.5 ${isSelected ? 'text-on-primary opacity-80' : 'text-secondary'}`}
+                        >
                           {suggestion.department}
                         </p>
                       </div>
@@ -341,6 +358,6 @@ const CityAutocomplete = memo(
   }
 );
 
-CityAutocomplete.displayName = "CityAutocomplete";
+CityAutocomplete.displayName = 'CityAutocomplete';
 
 export default CityAutocomplete;

@@ -38,6 +38,28 @@ export default function AddConductorModalNew({ isOpen, onClose, onSuccess }) {
   const [categorias, setCategorias] = useState([]);
   const [ciudades, setCiudades] = useState([]);
   const [tiposDocumento, setTiposDocumento] = useState([]);
+  const [dateError, setDateError] = useState(null);
+
+  const validateDate = dateString => {
+    if (!dateString) return null;
+    const year = parseInt(dateString.split('-')[0], 10);
+    const currentYear = new Date().getFullYear();
+    if (year < 1900) return 'Este año no está disponible';
+    if (year >= 1900 && year <= 2000)
+      return 'Los años entre 1900 y 2000 no están permitidos';
+    if (year > currentYear + 10)
+      return 'No se permiten fechas con más de 10 años en el futuro';
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    if (dateString < todayStr) return 'La fecha no puede estar en el pasado';
+
+    return null;
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -68,6 +90,7 @@ export default function AddConductorModalNew({ isOpen, onClose, onSuccess }) {
     });
     setUsuarioSeleccionado(null);
     setGeneratedPassword(null);
+    setDateError(null);
   };
 
   const handleAddressSelect = addressData => {
@@ -981,18 +1004,24 @@ export default function AddConductorModalNew({ isOpen, onClose, onSuccess }) {
           <input
             type="date"
             value={licencia.fechaVencimientoLicencia}
-            onChange={e =>
+            onChange={e => {
+              const val = e.target.value;
+              setDateError(validateDate(val));
               setLicencia({
                 ...licencia,
-                fechaVencimientoLicencia: e.target.value,
-              })
-            }
-            className="w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary"
+                fechaVencimientoLicencia: val,
+              });
+            }}
+            className={`w-full px-4 py-3 input bg-fill border rounded-lg focus:outline-none focus:ring-2 transition-all date-secondary ${
+              dateError
+                ? 'border-red-500 text-red-500 focus:ring-red-500/20 focus:border-red-500'
+                : 'border-border text-secondary focus:ring-primary/20 focus:border-primary'
+            }`}
             disabled={loading}
           />
-          <span className="text-xs text-secondary mt-1">
-            La fecha debe ser futura
-          </span>
+          {dateError && (
+            <span className="text-red-500 text-xs mt-1">{dateError}</span>
+          )}
         </div>
 
         <div className="flex flex-col gap-1">
@@ -1042,7 +1071,8 @@ export default function AddConductorModalNew({ isOpen, onClose, onSuccess }) {
             disabled={
               loading ||
               !licencia.idCategoriaLicencia ||
-              !licencia.fechaVencimientoLicencia
+              !licencia.fechaVencimientoLicencia ||
+              !!dateError
             }
           >
             {loading && (

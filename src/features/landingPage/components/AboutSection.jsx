@@ -1,5 +1,5 @@
-import React, { memo } from "react";
-import "@material/web/icon/icon.js";
+import React, { memo } from 'react';
+import '@material/web/icon/icon.js';
 
 const AboutSection = memo(({ scrollToSection }) => {
   return (
@@ -15,19 +15,23 @@ const AboutSection = memo(({ scrollToSection }) => {
               Nuestra historia
             </span>
             <h3 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight">
-              Más de 5 años<br />conectando destinos
+              Más de 5 años
+              <br />
+              conectando destinos
             </h3>
             <p className="text-gray-500 text-lg leading-relaxed">
-              En <span className="font-bold text-gray-900">La Tribu</span>, somos más que una empresa de transporte.
-              Somos tu compañero de viaje, comprometidos con llevar a cada pasajero de manera segura, cómoda y puntual.
+              En <span className="font-bold text-gray-900">La Tribu</span>,
+              somos más que una empresa de transporte. Somos tu compañero de
+              viaje, comprometidos con llevar a cada pasajero de manera segura,
+              cómoda y puntual.
             </p>
 
             <div className="space-y-3">
               {[
-                { icon: "verified", text: "Flota moderna y tecnológica" },
-                { icon: "badge", text: "Conductores certificados" },
-                { icon: "support_agent", text: "Atención 24/7" },
-                { icon: "paid", text: "Precios transparentes" },
+                { icon: 'verified', text: 'Flota moderna y tecnológica' },
+                { icon: 'badge', text: 'Conductores certificados' },
+                { icon: 'support_agent', text: 'Atención 24/7' },
+                { icon: 'paid', text: 'Precios transparentes' },
               ].map((item, i) => (
                 <div
                   key={i}
@@ -39,20 +43,29 @@ const AboutSection = memo(({ scrollToSection }) => {
                   >
                     <md-icon style={{ color: '#1e304f' }}>{item.icon}</md-icon>
                   </div>
-                  <span className="font-semibold text-gray-800">{item.text}</span>
+                  <span className="font-semibold text-gray-800">
+                    {item.text}
+                  </span>
                 </div>
               ))}
             </div>
 
             <div className="grid grid-cols-3 gap-4 pt-2">
               {[
-                { num: "500K+", label: "Pasajeros" },
-                { num: "50+", label: "Destinos" },
-                { num: "99%", label: "Satisfacción" },
+                { num: '500K+', label: 'Pasajeros' },
+                { num: '50+', label: 'Destinos' },
+                { num: '99%', label: 'Satisfacción' },
               ].map((stat, i) => (
-                <div key={i} className="text-center p-4 bg-white rounded-2xl border border-gray-100 hover:border-gray-300 hover:shadow-md transition-all duration-300">
-                  <div className="text-3xl font-black text-gray-900 mb-1">{stat.num}</div>
-                  <div className="text-sm text-gray-500 font-medium">{stat.label}</div>
+                <div
+                  key={i}
+                  className="text-center p-4 bg-white rounded-2xl border border-gray-100 hover:border-gray-300 hover:shadow-md transition-all duration-300"
+                >
+                  <div className="text-3xl font-black text-gray-900 mb-1">
+                    {stat.num}
+                  </div>
+                  <div className="text-sm text-gray-500 font-medium">
+                    {stat.label}
+                  </div>
                 </div>
               ))}
             </div>
@@ -73,14 +86,25 @@ const AboutSection = memo(({ scrollToSection }) => {
               className="absolute -bottom-5 -left-5 p-6 rounded-2xl shadow-xl"
               style={{ backgroundColor: '#b4c7ed' }}
             >
-              <div className="text-4xl font-black mb-0.5" style={{ color: '#1e304f' }}>5+</div>
-              <div className="text-sm font-semibold" style={{ color: '#1e304f' }}>Años de experiencia</div>
+              <div
+                className="text-4xl font-black mb-0.5"
+                style={{ color: '#1e304f' }}
+              >
+                5+
+              </div>
+              <div
+                className="text-sm font-semibold"
+                style={{ color: '#1e304f' }}
+              >
+                Años de experiencia
+              </div>
             </div>
             {/* Decorative dot grid */}
             <div
               className="absolute -top-4 -right-4 w-24 h-24 opacity-30"
               style={{
-                backgroundImage: 'radial-gradient(circle, #111827 1.5px, transparent 1.5px)',
+                backgroundImage:
+                  'radial-gradient(circle, #111827 1.5px, transparent 1.5px)',
                 backgroundSize: '12px 12px',
               }}
             />
@@ -91,6 +115,6 @@ const AboutSection = memo(({ scrollToSection }) => {
   );
 });
 
-AboutSection.displayName = "AboutSection";
+AboutSection.displayName = 'AboutSection';
 
 export default AboutSection;

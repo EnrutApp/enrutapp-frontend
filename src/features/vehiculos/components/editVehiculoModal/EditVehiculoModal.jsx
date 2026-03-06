@@ -24,7 +24,29 @@ export default function EditVehiculoModal({
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [dateErrors, setDateErrors] = useState({});
   const fileRef = useRef(null);
+
+  const validateDate = dateString => {
+    if (!dateString) return null;
+    const year = parseInt(dateString.split('-')[0], 10);
+    const currentYear = new Date().getFullYear();
+    if (year < 1900) return 'Este año no está disponible';
+    if (year >= 1900 && year <= 2000)
+      return 'Los años entre 1900 y 2000 no están permitidos';
+    if (year > currentYear + 10)
+      return 'No se permiten fechas con más de 10 años en el futuro';
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    if (dateString < todayStr) return 'La fecha no puede estar en el pasado';
+
+    return null;
+  };
 
   const formatDateForInput = dateString => {
     if (!dateString) return '';
@@ -115,11 +137,22 @@ export default function EditVehiculoModal({
       setError(null);
       setSuccess(false);
       setPreviewUrl(null);
+      setDateErrors({});
     }
   }, [isOpen, vehiculo]);
 
   const handleChange = e => {
     const { name, value } = e.target;
+    if (
+      [
+        'soatVencimiento',
+        'tecnomecanicaVencimiento',
+        'seguroVencimiento',
+      ].includes(name)
+    ) {
+      const err = validateDate(value);
+      setDateErrors(prev => ({ ...prev, [name]: err }));
+    }
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
@@ -594,11 +627,12 @@ export default function EditVehiculoModal({
                           target: { name: 'capacidadPasajeros', value: '4' },
                         })
                       }
-                      className={`px-4 py-3 rounded-lg font-medium transition-all ${form.capacidadPasajeros === '4' ||
-                          form.capacidadPasajeros === 4
+                      className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                        form.capacidadPasajeros === '4' ||
+                        form.capacidadPasajeros === 4
                           ? 'bg-primary text-on-primary'
                           : 'bg-fill border border-border text-secondary hover:bg-border'
-                        }`}
+                      }`}
                     >
                       4
                     </button>
@@ -609,11 +643,12 @@ export default function EditVehiculoModal({
                           target: { name: 'capacidadPasajeros', value: '5' },
                         })
                       }
-                      className={`px-4 py-3 rounded-lg font-medium transition-all ${form.capacidadPasajeros === '5' ||
-                          form.capacidadPasajeros === 5
+                      className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                        form.capacidadPasajeros === '5' ||
+                        form.capacidadPasajeros === 5
                           ? 'bg-primary text-on-primary'
                           : 'bg-fill border border-border text-secondary hover:bg-border'
-                        }`}
+                      }`}
                     >
                       5
                     </button>
@@ -672,8 +707,17 @@ export default function EditVehiculoModal({
                     name="soatVencimiento"
                     value={form.soatVencimiento || ''}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary"
+                    className={`w-full px-4 py-3 input bg-fill border rounded-lg focus:outline-none focus:ring-2 transition-all date-secondary ${
+                      dateErrors.soatVencimiento
+                        ? 'border-red-500 text-red-500 focus:ring-red-500/20 focus:border-red-500'
+                        : 'border-border text-secondary focus:ring-primary/20 focus:border-primary'
+                    }`}
                   />
+                  {dateErrors.soatVencimiento && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {dateErrors.soatVencimiento}
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -685,8 +729,17 @@ export default function EditVehiculoModal({
                     name="tecnomecanicaVencimiento"
                     value={form.tecnomecanicaVencimiento || ''}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary"
+                    className={`w-full px-4 py-3 input bg-fill border rounded-lg focus:outline-none focus:ring-2 transition-all date-secondary ${
+                      dateErrors.tecnomecanicaVencimiento
+                        ? 'border-red-500 text-red-500 focus:ring-red-500/20 focus:border-red-500'
+                        : 'border-border text-secondary focus:ring-primary/20 focus:border-primary'
+                    }`}
                   />
+                  {dateErrors.tecnomecanicaVencimiento && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {dateErrors.tecnomecanicaVencimiento}
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -698,8 +751,17 @@ export default function EditVehiculoModal({
                     name="seguroVencimiento"
                     value={form.seguroVencimiento || ''}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary"
+                    className={`w-full px-4 py-3 input bg-fill border rounded-lg focus:outline-none focus:ring-2 transition-all date-secondary ${
+                      dateErrors.seguroVencimiento
+                        ? 'border-red-500 text-red-500 focus:ring-red-500/20 focus:border-red-500'
+                        : 'border-border text-secondary focus:ring-primary/20 focus:border-primary'
+                    }`}
                   />
+                  {dateErrors.seguroVencimiento && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {dateErrors.seguroVencimiento}
+                    </p>
+                  )}
                 </div>
               </div>
             )}

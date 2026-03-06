@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 /**
  * Hook que añade la clase "in-view" al elemento referenciado
@@ -17,11 +17,11 @@ const useInView = (options = {}) => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          el.classList.add("in-view");
+          el.classList.add('in-view');
           observer.unobserve(el);
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px", ...options }
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px', ...options }
     );
 
     observer.observe(el);

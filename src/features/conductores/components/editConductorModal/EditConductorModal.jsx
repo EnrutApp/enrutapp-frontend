@@ -23,6 +23,27 @@ export default function EditConductorModal({
   const [tiposDoc, setTiposDoc] = useState([]);
   const [activeTab, setActiveTab] = useState('basic');
 
+  const validateDate = dateString => {
+    if (!dateString) return null;
+    const year = parseInt(dateString.split('-')[0], 10);
+    const currentYear = new Date().getFullYear();
+    if (year < 1900) return 'Este año no está disponible';
+    if (year >= 1900 && year <= 2000)
+      return 'Los años entre 1900 y 2000 no están permitidos';
+    if (year > currentYear + 10)
+      return 'No se permiten fechas con más de 10 años en el futuro';
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    if (dateString < todayStr) return 'La fecha no puede estar en el pasado';
+
+    return null;
+  };
+
   useEffect(() => {
     if (isOpen && conductor) {
       setForm({
@@ -102,17 +123,29 @@ export default function EditConductorModal({
   const handleChange = e => {
     const { name, value } = e.target;
 
+    if (name === 'fechaVencimientoLicencia') {
+      const err = validateDate(value);
+      if (err) {
+        setFieldErrors(prev => ({ ...prev, [name]: err }));
+      } else {
+        setFieldErrors(prev => ({ ...prev, [name]: null }));
+      }
+    }
+
     if (name === 'telefono') {
       const numericValue = value.replace(/\D/g, '');
       if (numericValue.length > 10) return;
       setForm({ ...form, [name]: numericValue });
+      if (fieldErrors[name])
+        setFieldErrors(prev => ({ ...prev, [name]: null }));
     } else {
       setForm({ ...form, [name]: value });
+      // Clear errors only if it's not the date field (handled above)
+      if (name !== 'fechaVencimientoLicencia' && fieldErrors[name]) {
+        setFieldErrors(prev => ({ ...prev, [name]: null }));
+      }
     }
 
-    if (fieldErrors[name]) {
-      setFieldErrors({ ...fieldErrors, [name]: null });
-    }
     setError(null);
   };
 
@@ -675,7 +708,7 @@ export default function EditConductorModal({
                 <button
                   type="submit"
                   className="btn btn-primary py-3 font-medium text-subtitle1 w-1/2 flex items-center justify-center gap-2"
-                  disabled={loading}
+                  disabled={loading || !!fieldErrors.fechaVencimientoLicencia}
                 >
                   {loading && (
                     <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>

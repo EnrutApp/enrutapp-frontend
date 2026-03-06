@@ -104,18 +104,18 @@ const UsuariosPage = () => {
 
   const filteredUsers = users
     ? users.filter(user => {
-      const matchesSearch =
-        user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.numDocumento.includes(searchTerm);
+        const matchesSearch =
+          user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.numDocumento.includes(searchTerm);
 
-      const matchesStatus =
-        statusFilter === 'Todos' ||
-        (statusFilter === 'Activos' && user.estado) ||
-        (statusFilter === 'Inactivos' && !user.estado);
+        const matchesStatus =
+          statusFilter === 'Todos' ||
+          (statusFilter === 'Activos' && user.estado) ||
+          (statusFilter === 'Inactivos' && !user.estado);
 
-      return matchesSearch && matchesStatus;
-    })
+        return matchesSearch && matchesStatus;
+      })
     : [];
 
   const sortedUsers = filteredUsers.sort((a, b) => {
@@ -371,8 +371,6 @@ const UsuariosPage = () => {
     return diferencia > 0 && diferencia <= treintaDias;
   };
 
-
-
   const itemsPerPage = viewMode === 'grid' ? 8 : 4;
   const {
     currentPage,
@@ -599,20 +597,22 @@ const UsuariosPage = () => {
                   <div className="flex gap-1 bg-fill border border-border rounded-full p-1">
                     <button
                       onClick={() => setViewMode('list')}
-                      className={`px-2 py-1 rounded-full transition-all ${viewMode === 'list'
+                      className={`px-2 py-1 rounded-full transition-all ${
+                        viewMode === 'list'
                           ? 'bg-primary text-on-primary'
                           : 'text-secondary hover:text-primary'
-                        }`}
+                      }`}
                       title="Vista de lista"
                     >
                       <md-icon className="text-sm">view_list</md-icon>
                     </button>
                     <button
                       onClick={() => setViewMode('grid')}
-                      className={`px-2 py-1 rounded-full transition-all ${viewMode === 'grid'
+                      className={`px-2 py-1 rounded-full transition-all ${
+                        viewMode === 'grid'
                           ? 'bg-primary text-on-primary'
                           : 'text-secondary hover:text-primary'
-                        }`}
+                      }`}
                       title="Vista de tarjetas"
                     >
                       <md-icon className="text-sm">grid_view</md-icon>
@@ -741,16 +741,16 @@ const UsuariosPage = () => {
                                       <>
                                         {conductor?.categoriaLicencia
                                           ?.nombreCategoria && (
-                                            <button className="btn btn-outline btn-lg font-medium flex items-center">
-                                              <md-icon className="text-sm">
-                                                badge
-                                              </md-icon>
-                                              {
-                                                conductor.categoriaLicencia
-                                                  .nombreCategoria
-                                              }
-                                            </button>
-                                          )}
+                                          <button className="btn btn-outline btn-lg font-medium flex items-center">
+                                            <md-icon className="text-sm">
+                                              badge
+                                            </md-icon>
+                                            {
+                                              conductor.categoriaLicencia
+                                                .nombreCategoria
+                                            }
+                                          </button>
+                                        )}
 
                                         {informacionIncompleta && (
                                           <button className="btn btn-lg font-medium flex items-center btn-red">
@@ -788,7 +788,7 @@ const UsuariosPage = () => {
                           </div>
                           <div className="flex gap-2 items-center">
                             {user.rol?.nombreRol?.toLowerCase() ===
-                              'administrador' ? (
+                            'administrador' ? (
                               <div
                                 className="btn btn-secondary btn-lg font-medium flex items-center gap-1 opacity-50 btn-disabled"
                                 title="No se puede deshabilitar un administrador"
@@ -819,7 +819,7 @@ const UsuariosPage = () => {
                             </button>
 
                             {user.rol?.nombreRol?.toLowerCase() ===
-                              'administrador' ? (
+                            'administrador' ? (
                               <div
                                 className="btn btn-secondary btn-lg font-medium flex items-center gap-1 opacity-50 btn-disabled"
                                 title="No se puede eliminar un administrador"
@@ -869,8 +869,9 @@ const UsuariosPage = () => {
                       return (
                         <div
                           key={user.idUsuario}
-                          className={`content-box-outline-4-small relative group ${!user.estado ? 'opacity-60' : ''
-                            } hover:shadow-lg transition-all duration-200 hover:-translate-y-1`}
+                          className={`content-box-outline-4-small relative group ${
+                            !user.estado ? 'opacity-60' : ''
+                          } hover:shadow-lg transition-all duration-200 hover:-translate-y-1`}
                         >
                           {isSelectionMode &&
                             user.rol?.nombreRol !== 'Administrador' && (
@@ -937,8 +938,9 @@ const UsuariosPage = () => {
                                 </div>
                               </div>
                               <span
-                                className={`btn font-medium btn-sm flex items-center shrink-0 ${user.estado ? 'btn-green' : 'btn-red'
-                                  }`}
+                                className={`btn font-medium btn-sm flex items-center shrink-0 ${
+                                  user.estado ? 'btn-green' : 'btn-red'
+                                }`}
                               >
                                 {user.estado ? 'Activo' : 'Inactivo'}
                               </span>
@@ -992,16 +994,16 @@ const UsuariosPage = () => {
                                 <div className="flex flex-wrap gap-1 mt-2">
                                   {conductor?.categoriaLicencia
                                     ?.nombreCategoria && (
-                                      <span className="btn btn-outline btn-sm font-medium flex items-center text-xs px-2 py-1">
-                                        <md-icon className="text-xs">
-                                          drive_eta
-                                        </md-icon>
-                                        {
-                                          conductor.categoriaLicencia
-                                            .nombreCategoria
-                                        }
-                                      </span>
-                                    )}
+                                    <span className="btn btn-outline btn-sm font-medium flex items-center text-xs px-2 py-1">
+                                      <md-icon className="text-xs">
+                                        drive_eta
+                                      </md-icon>
+                                      {
+                                        conductor.categoriaLicencia
+                                          .nombreCategoria
+                                      }
+                                    </span>
+                                  )}
                                   {informacionIncompleta && (
                                     <span className="btn btn-sm font-medium flex items-center btn-red text-xs px-2 py-1">
                                       <md-icon className="text-xs">
@@ -1010,15 +1012,14 @@ const UsuariosPage = () => {
                                       Incompleto
                                     </span>
                                   )}
-                                  {informacionCompleta &&
-                                    licenciaVencida && (
-                                      <span className="btn btn-sm font-medium flex items-center bg-red-100 text-red-700 border border-red-300 text-xs px-2 py-1">
-                                        <md-icon className="text-xs">
-                                          error
-                                        </md-icon>
-                                        Vencida
-                                      </span>
-                                    )}
+                                  {informacionCompleta && licenciaVencida && (
+                                    <span className="btn btn-sm font-medium flex items-center bg-red-100 text-red-700 border border-red-300 text-xs px-2 py-1">
+                                      <md-icon className="text-xs">
+                                        error
+                                      </md-icon>
+                                      Vencida
+                                    </span>
+                                  )}
                                   {informacionCompleta &&
                                     licenciaProximaAVencer && (
                                       <span className="btn btn-sm font-medium flex items-center btn-yellow text-xs px-2 py-1">
@@ -1034,7 +1035,7 @@ const UsuariosPage = () => {
 
                             <div className="flex gap-2 mt-auto action-buttons">
                               {user.rol?.nombreRol?.toLowerCase() ===
-                                'administrador' ? (
+                              'administrador' ? (
                                 <div
                                   className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 flex-1 opacity-50 btn-disabled justify-center"
                                   title="No se puede deshabilitar un administrador"
@@ -1043,10 +1044,11 @@ const UsuariosPage = () => {
                                 </div>
                               ) : (
                                 <button
-                                  className={`btn btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95 ${user.estado
+                                  className={`btn btn-sm-2 font-medium flex items-center gap-1 flex-1 justify-center transition-all hover:scale-105 active:scale-95 ${
+                                    user.estado
                                       ? 'btn-outline'
                                       : 'btn-secondary'
-                                    }`}
+                                  }`}
                                   onClick={e => {
                                     e.stopPropagation();
                                     handleSwitchClick(user);
@@ -1075,7 +1077,7 @@ const UsuariosPage = () => {
                               </button>
 
                               {user.rol?.nombreRol?.toLowerCase() ===
-                                'administrador' ? (
+                              'administrador' ? (
                                 <div
                                   className="btn btn-secondary btn-sm-2 font-medium flex items-center gap-1 flex-1 opacity-50 btn-disabled justify-center"
                                   title="No se puede eliminar un administrador"

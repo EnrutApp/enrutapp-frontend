@@ -24,8 +24,30 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
   const [licenseCompletionMethod, setLicenseCompletionMethod] = useState(null);
   const [categorias, setCategorias] = useState([]);
   const [licenseForm, setLicenseForm] = useState({});
+  const [dateError, setDateError] = useState(null);
 
   const totalSteps = isClientMode ? 3 : 4;
+
+  const validateDate = dateString => {
+    if (!dateString) return null;
+    const year = parseInt(dateString.split('-')[0], 10);
+    const currentYear = new Date().getFullYear();
+    if (year < 1900) return 'Este año no está disponible';
+    if (year >= 1900 && year <= 2000)
+      return 'Los años entre 1900 y 2000 no están permitidos';
+    if (year > currentYear + 10)
+      return 'No se permiten fechas con más de 10 años en el futuro';
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    if (dateString < todayStr) return 'La fecha no puede estar en el pasado';
+
+    return null;
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -40,6 +62,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
       setShowLicenseOptions(false);
       setLicenseCompletionMethod(null);
       setLicenseForm({});
+      setDateError(null);
     }
   }, [isOpen]);
 
@@ -255,9 +278,18 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
 
   const handleLicenseFormChange = e => {
     const { name, value } = e.target;
+    if (name === 'fechaVencimientoLicencia') {
+      const err = validateDate(value);
+      setDateError(err);
+      if (err) {
+        setFieldErrors(prev => ({ ...prev, [name]: err }));
+      } else {
+        setFieldErrors(prev => ({ ...prev, [name]: null }));
+      }
+    }
     setLicenseForm({ ...licenseForm, [name]: value });
 
-    if (fieldErrors[name]) {
+    if (name !== 'fechaVencimientoLicencia' && fieldErrors[name]) {
       setFieldErrors({ ...fieldErrors, [name]: null });
     }
   };
@@ -811,17 +843,21 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
           name="fechaVencimientoLicencia"
           value={licenseForm.fechaVencimientoLicencia || ''}
           onChange={handleLicenseFormChange}
-          className={`w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary ${
-            fieldErrors.fechaVencimientoLicencia
-              ? 'border-red focus:ring-red/20 focus:border-red'
-              : 'border-border focus:ring-primary/20 focus:border-primary'
+          className={`w-full px-4 py-3 input bg-fill border rounded-lg focus:outline-none focus:ring-2 transition-all date-secondary ${
+            dateError
+              ? 'border-red-500 text-red-500 focus:ring-red-500/20 focus:border-red-500'
+              : 'border-border text-secondary focus:ring-primary/20 focus:border-primary'
           }`}
           disabled={loading}
         />
-        <span className="text-xs text-secondary mt-1">
-          La fecha debe ser futura
-        </span>
-        {fieldErrors.fechaVencimientoLicencia && (
+        {dateError ? (
+          <span className="text-red-500 text-xs mt-1">{dateError}</span>
+        ) : (
+          <span className="text-xs text-secondary mt-1">
+            La fecha debe ser futura
+          </span>
+        )}
+        {fieldErrors.fechaVencimientoLicencia && !dateError && (
           <span className="text-red-500 text-sm mt-1">
             {fieldErrors.fechaVencimientoLicencia}
           </span>
@@ -859,7 +895,7 @@ const AddUserModal = ({ isOpen, onClose, onConfirm, isClientMode = false }) => {
           type="button"
           onClick={handleLicenseFormSubmit}
           className="btn btn-primary w-1/2"
-          disabled={loading}
+          disabled={loading || !!dateError}
         >
           Continuar
         </button>
