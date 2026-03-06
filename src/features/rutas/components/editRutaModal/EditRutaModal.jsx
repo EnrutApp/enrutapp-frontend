@@ -142,8 +142,8 @@ const EditRutaModal = ({ isOpen, onClose, onConfirm, itemData }) => {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-        err.message ||
-        'Error al actualizar la ruta'
+          err.message ||
+          'Error al actualizar la ruta'
       );
     } finally {
       setLoading(false);

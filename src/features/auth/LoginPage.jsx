@@ -125,7 +125,7 @@ const Login = () => {
   const onSubmit = async data => {
     try {
       await login({ ...data, remember: data.remember || false });
-    } catch { }
+    } catch {}
   };
 
   const togglePasswordVisibility = () => {
@@ -270,10 +270,16 @@ const Login = () => {
                 </button>
 
                 <div
-                  className={`absolute inset-0 z-10 ${isGoogleReady ? 'opacity-0' : 'opacity-0 pointer-events-none'
-                    }`}
+                  className={`absolute inset-0 z-10 ${
+                    isGoogleReady
+                      ? 'opacity-0'
+                      : 'opacity-0 pointer-events-none'
+                  }`}
                 >
-                  <div ref={googleButtonRef} className="w-full flex justify-center" />
+                  <div
+                    ref={googleButtonRef}
+                    className="w-full flex justify-center"
+                  />
                 </div>
               </div>
             </div>

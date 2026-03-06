@@ -48,7 +48,29 @@ export default function AddVehiculoModal({
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [dateErrors, setDateErrors] = useState({});
   const fileRef = useRef(null);
+
+  const validateDate = dateString => {
+    if (!dateString) return null;
+    const year = parseInt(dateString.split('-')[0], 10);
+    const currentYear = new Date().getFullYear();
+    if (year < 1900) return 'Este año no está disponible';
+    if (year >= 1900 && year <= 2000)
+      return 'Los años entre 1900 y 2000 no están permitidos';
+    if (year > currentYear + 10)
+      return 'No se permiten fechas con más de 10 años en el futuro';
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    if (dateString < todayStr) return 'La fecha no puede estar en el pasado';
+
+    return null;
+  };
 
   const totalSteps = 5;
 
@@ -89,11 +111,22 @@ export default function AddVehiculoModal({
       setLoadingImage(false);
       setSuccess(false);
       setShowConfirmation(false);
+      setDateErrors({});
     }
   }, [isOpen]);
 
   const handleChange = e => {
     const { name, value } = e.target;
+    if (
+      [
+        'soatVencimiento',
+        'tecnomecanicaVencimiento',
+        'seguroVencimiento',
+      ].includes(name)
+    ) {
+      const err = validateDate(value);
+      setDateErrors(prev => ({ ...prev, [name]: err }));
+    }
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
@@ -306,10 +339,11 @@ export default function AddVehiculoModal({
                 <div
                   className={`
                                     flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 transform
-                                    ${currentStep >= step
-                      ? 'bg-primary text-on-primary shadow-md scale-110 ring-4 ring-primary/20'
-                      : 'bg-fill text-secondary scale-100'
-                    }
+                                    ${
+                                      currentStep >= step
+                                        ? 'bg-primary text-on-primary shadow-md scale-110 ring-4 ring-primary/20'
+                                        : 'bg-fill text-secondary scale-100'
+                                    }
                                     ${currentStep === step ? 'animate-pulse' : ''}
                                     font-semibold
                                 `}
@@ -554,57 +588,57 @@ export default function AddVehiculoModal({
                   {(form.soatVencimiento ||
                     form.tecnomecanicaVencimiento ||
                     form.seguroVencimiento) && (
-                      <div className="flex items-start gap-3 pt-4 border-t border-border">
-                        <md-icon className="text-primary mt-1">
-                          event_note
-                        </md-icon>
-                        <div className="flex-1">
-                          <p className="text-xs text-secondary font-medium mb-2">
-                            Fechas de vencimiento
-                          </p>
-                          <div className="space-y-1">
-                            {form.soatVencimiento && (
-                              <p className="text-primary text-sm">
-                                <span className="text-secondary">SOAT:</span>{' '}
-                                {new Date(
-                                  form.soatVencimiento
-                                ).toLocaleDateString('es-ES', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                })}
-                              </p>
-                            )}
-                            {form.tecnomecanicaVencimiento && (
-                              <p className="text-primary text-sm">
-                                <span className="text-secondary">
-                                  Tecnomecánica:
-                                </span>{' '}
-                                {new Date(
-                                  form.tecnomecanicaVencimiento
-                                ).toLocaleDateString('es-ES', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                })}
-                              </p>
-                            )}
-                            {form.seguroVencimiento && (
-                              <p className="text-primary text-sm">
-                                <span className="text-secondary">Seguro:</span>{' '}
-                                {new Date(
-                                  form.seguroVencimiento
-                                ).toLocaleDateString('es-ES', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                })}
-                              </p>
-                            )}
-                          </div>
+                    <div className="flex items-start gap-3 pt-4 border-t border-border">
+                      <md-icon className="text-primary mt-1">
+                        event_note
+                      </md-icon>
+                      <div className="flex-1">
+                        <p className="text-xs text-secondary font-medium mb-2">
+                          Fechas de vencimiento
+                        </p>
+                        <div className="space-y-1">
+                          {form.soatVencimiento && (
+                            <p className="text-primary text-sm">
+                              <span className="text-secondary">SOAT:</span>{' '}
+                              {new Date(
+                                form.soatVencimiento
+                              ).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                            </p>
+                          )}
+                          {form.tecnomecanicaVencimiento && (
+                            <p className="text-primary text-sm">
+                              <span className="text-secondary">
+                                Tecnomecánica:
+                              </span>{' '}
+                              {new Date(
+                                form.tecnomecanicaVencimiento
+                              ).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                            </p>
+                          )}
+                          {form.seguroVencimiento && (
+                            <p className="text-primary text-sm">
+                              <span className="text-secondary">Seguro:</span>{' '}
+                              {new Date(
+                                form.seguroVencimiento
+                              ).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                            </p>
+                          )}
                         </div>
                       </div>
-                    )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="rounded-lg content-box-outline-4-small p-4 flex items-start gap-3">
@@ -835,7 +869,9 @@ export default function AddVehiculoModal({
                             Tipo de placa <span className="text-red">*</span>
                           </label>
                           <div className="select-wrapper w-full">
-                            <md-icon className="text-sm">arrow_drop_down</md-icon>
+                            <md-icon className="text-sm">
+                              arrow_drop_down
+                            </md-icon>
                             <select
                               name="tipoPlaca"
                               value={form.tipoPlaca}
@@ -1054,11 +1090,12 @@ export default function AddVehiculoModal({
                               },
                             })
                           }
-                          className={`px-4 py-3 rounded-lg font-medium transition-all ${form.capacidadPasajeros === '4' ||
-                              form.capacidadPasajeros === 4
+                          className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                            form.capacidadPasajeros === '4' ||
+                            form.capacidadPasajeros === 4
                               ? 'bg-primary text-on-primary'
                               : 'bg-fill border border-border text-secondary hover:bg-border'
-                            }`}
+                          }`}
                         >
                           4
                         </button>
@@ -1072,11 +1109,12 @@ export default function AddVehiculoModal({
                               },
                             })
                           }
-                          className={`px-4 py-3 rounded-lg font-medium transition-all ${form.capacidadPasajeros === '5' ||
-                              form.capacidadPasajeros === 5
+                          className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                            form.capacidadPasajeros === '5' ||
+                            form.capacidadPasajeros === 5
                               ? 'bg-primary text-on-primary'
                               : 'bg-fill border border-border text-secondary hover:bg-border'
-                            }`}
+                          }`}
                         >
                           5
                         </button>
@@ -1149,8 +1187,17 @@ export default function AddVehiculoModal({
                         name="soatVencimiento"
                         value={form.soatVencimiento}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary"
+                        className={`w-full px-4 py-3 input bg-fill border rounded-lg focus:outline-none focus:ring-2 transition-all date-secondary ${
+                          dateErrors.soatVencimiento
+                            ? 'border-red-500 text-red-500 focus:ring-red-500/20 focus:border-red-500'
+                            : 'border-border text-secondary focus:ring-primary/20 focus:border-primary'
+                        }`}
                       />
+                      {dateErrors.soatVencimiento && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {dateErrors.soatVencimiento}
+                        </p>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-1">
@@ -1162,8 +1209,17 @@ export default function AddVehiculoModal({
                         name="tecnomecanicaVencimiento"
                         value={form.tecnomecanicaVencimiento}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary"
+                        className={`w-full px-4 py-3 input bg-fill border rounded-lg focus:outline-none focus:ring-2 transition-all date-secondary ${
+                          dateErrors.tecnomecanicaVencimiento
+                            ? 'border-red-500 text-red-500 focus:ring-red-500/20 focus:border-red-500'
+                            : 'border-border text-secondary focus:ring-primary/20 focus:border-primary'
+                        }`}
                       />
+                      {dateErrors.tecnomecanicaVencimiento && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {dateErrors.tecnomecanicaVencimiento}
+                        </p>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-1">
@@ -1175,8 +1231,17 @@ export default function AddVehiculoModal({
                         name="seguroVencimiento"
                         value={form.seguroVencimiento}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 input bg-fill border border-border rounded-lg text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all date-secondary"
+                        className={`w-full px-4 py-3 input bg-fill border rounded-lg focus:outline-none focus:ring-2 transition-all date-secondary ${
+                          dateErrors.seguroVencimiento
+                            ? 'border-red-500 text-red-500 focus:ring-red-500/20 focus:border-red-500'
+                            : 'border-border text-secondary focus:ring-primary/20 focus:border-primary'
+                        }`}
                       />
+                      {dateErrors.seguroVencimiento && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {dateErrors.seguroVencimiento}
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}

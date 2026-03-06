@@ -80,7 +80,7 @@ const VehiculoProfile = ({ vehicle, isOpen, onClose, onEdit }) => {
     } catch (error) {
       alert(
         'Error al eliminar el vehículo: ' +
-        (error.message || 'Error desconocido')
+          (error.message || 'Error desconocido')
       );
       setIsDeleteModalOpen(false);
     }

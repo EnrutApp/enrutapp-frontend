@@ -1,6 +1,6 @@
-import React, { memo } from "react";
-import "@material/web/icon/icon.js";
-import useInView from "../hooks/useInView";
+import React, { memo } from 'react';
+import '@material/web/icon/icon.js';
+import useInView from '../hooks/useInView';
 
 const DestinySection = memo(({ setFormData, scrollToSection, children }) => {
   const headRef = useInView();
@@ -12,8 +12,12 @@ const DestinySection = memo(({ setFormData, scrollToSection, children }) => {
           <span className="inline-block px-4 py-1.5 rounded-full bg-gray-100 text-gray-900 text-sm font-semibold mb-4 tracking-wide">
             Destinos populares
           </span>
-          <h3 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">Descubre Colombia</h3>
-          <p className="text-gray-500 text-lg max-w-2xl mx-auto">Conectamos los destinos más importantes del país</p>
+          <h3 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
+            Descubre Colombia
+          </h3>
+          <p className="text-gray-500 text-lg max-w-2xl mx-auto">
+            Conectamos los destinos más importantes del país
+          </p>
         </div>
 
         {children}
@@ -22,6 +26,6 @@ const DestinySection = memo(({ setFormData, scrollToSection, children }) => {
   );
 });
 
-DestinySection.displayName = "DestinySection";
+DestinySection.displayName = 'DestinySection';
 
 export default DestinySection;

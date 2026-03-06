@@ -42,7 +42,7 @@ const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
 
   const driverName = conductor
     ? `${conductor.usuario?.nombre || ''} ${conductor.usuario?.apellido || ''}`.trim() ||
-    `Conductor #${resolvedDriverId}`
+      `Conductor #${resolvedDriverId}`
     : `Conductor #${resolvedDriverId}`;
 
   const driverLabel = conductor
@@ -76,10 +76,11 @@ const DriverTrackingModal = ({ isOpen, onClose, conductor, driverId }) => {
           </div>
 
           <div
-            className={`px-3 py-1.5 rounded-full border flex items-center gap-2 ${isOnline
-              ? 'bg-green border-green text-green'
-              : 'bg-red border-red text-red'
-              }`}
+            className={`px-3 py-1.5 rounded-full border flex items-center gap-2 ${
+              isOnline
+                ? 'bg-green border-green text-green'
+                : 'bg-red border-red text-red'
+            }`}
           >
             <span className="text-xs font-medium">
               {isOnline ? 'En línea' : 'Desconectado'}
